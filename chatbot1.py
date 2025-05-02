@@ -1,31 +1,34 @@
+from flask import Flask, request, jsonify
+from dotenv import load_dotenv
 import os
-import requests
 import openai
-import openpyxl
+import requests
 from datetime import datetime
 import locale
-from twilio.rest import Client
-from dotenv import load_dotenv
+import openpyxl
 
-
-# Carregar variáveis de ambiente
+# Configurações
 load_dotenv()
 
-# Definir localidade para datas
-locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
+try:
+    locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
+except:
+    locale.setlocale(locale.LC_TIME, "")  # fallback
 
-# Variáveis de ambiente
+app = Flask(__name__)
+
+# Chaves de API
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+WHATSAPP_ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+WHATSAPP_PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
+VERIFY_TOKEN = os.getenv("WHATSAPP_TOKEN")
 
-# Inicializar APIs
-client_openai = openai.OpenAI(api_key=OPENAI_API_KEY)
-client_twilio = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+client_openai = openai.Client(api_key=OPENAI_API_KEY)
 
-# Data e hora atual formatadas
+WHATSAPP_API_URL = f"https://graph.facebook.com/v19.0/{WHATSAPP_PHONE_NUMBER_ID}/messages"
+
+# Funções auxiliares
 def obter_data_hora():
     agora = datetime.now()
     data = agora.strftime("%d de %B de %Y")
@@ -36,99 +39,66 @@ def obter_data_hora():
     dia_semana = dias_semana.get(agora.strftime("%A"), agora.strftime("%A"))
     return data, dia_semana
 
-# Localização via IP
-def obter_localizacao_via_ip():
-    try:
-        r = requests.get("http://ip-api.com/json/")
-        d = r.json()
-        if d['status'] == 'success':
-            return (
-                f"📍 Sua localização aproximada:\n"
-                f"🌎 País: {d['country']}\n"
-                f"🏙️ Estado: {d['regionName']}\n"
-                f"🏘️ Cidade: {d['city']}\n"
-                f"📡 IP: {d['query']}"
-            )
-        return "Não foi possível determinar sua localização."
-    except Exception as e:
-        return f"Erro ao obter localização: {e}"
-
-# Previsão do tempo atual
-def obter_previsao_tempo():
-    cidade = input("Informe a cidade: ").strip()
-    pais = input("Informe o país (ex: BR): ").strip().upper()
+def obter_previsao_tempo(cidade, pais):
+    if not cidade or not pais:
+        return {"erro": "Cidade e país são obrigatórios."}
     url = f"http://api.openweathermap.org/data/2.5/weather?q={cidade},{pais}&appid={OPENWEATHER_API_KEY}&units=metric&lang=pt"
     try:
         r = requests.get(url)
         d = r.json()
         if r.status_code != 200:
-            return f"Não encontrei previsão para '{cidade}, {pais}'."
-        return (
-            f"🌦️ Previsão para {cidade}:\n"
-            f"📌 {d['weather'][0]['description'].capitalize()}\n"
-            f"🌡️ Temp: {d['main']['temp']}°C | Sensação: {d['main']['feels_like']}°C\n"
-            f"💧 Umidade: {d['main']['humidity']}%\n"
-            f"🌬️ Vento: {d['wind']['speed']} m/s"
-        )
+            return {"erro": f"Não encontrei previsão para '{cidade}, {pais}'."}
+        return {
+            "cidade": cidade,
+            "descricao": d['weather'][0]['description'],
+            "temperatura": d['main']['temp'],
+            "sensacao": d['main']['feels_like'],
+            "umidade": d['main']['humidity'],
+            "vento": d['wind']['speed']
+        }
     except Exception as e:
-        return f"Erro: {e}"
+        return {"erro": str(e)}
 
-# Previsão de 3 dias
-def obter_previsao_estendida():
-    cidade = input("Cidade: ").strip()
-    pais = input("País (ex: BR): ").strip().upper()
+def obter_previsao_estendida(cidade, pais):
+    if not cidade or not pais:
+        return {"erro": "Cidade e país são obrigatórios."}
     url = f"http://api.openweathermap.org/data/2.5/forecast?q={cidade},{pais}&cnt=3&appid={OPENWEATHER_API_KEY}&units=metric&lang=pt"
     try:
         r = requests.get(url)
         d = r.json()
         if r.status_code != 200:
-            return f"Não encontrei previsão para '{cidade}, {pais}'."
+            return {"erro": f"Não encontrei previsão para '{cidade}, {pais}'."}
         previsoes = []
         for dia in d["list"]:
             data = datetime.utcfromtimestamp(dia["dt"]).strftime("%d/%m/%Y")
-            previsoes.append(
-                f"📅 {data}: {dia['weather'][0]['description'].capitalize()}\n"
-                f"🌡️ Mín: {dia['main']['temp_min']}°C | Máx: {dia['main']['temp_max']}°C"
-            )
-        return "🌤️ Previsão Estendida:\n" + "\n\n".join(previsoes)
+            previsoes.append({
+                "data": data,
+                "descricao": dia["weather"][0]["description"],
+                "min": dia["main"]["temp_min"],
+                "max": dia["main"]["temp_max"]
+            })
+        return {"previsao": previsoes}
     except Exception as e:
-        return f"Erro: {e}"
+        return {"erro": str(e)}
 
-# Chatbot IA - OpenAI
-# Chatbot IA - OpenAI
-def enviar_mensagem(mensagem, incluir_localizacao=True, incluir_previsao=True):
+def enviar_mensagem_ia(mensagem, cidade=None, pais=None):
     try:
-        # Obter localização
-        localizacao = obter_localizacao_via_ip() if incluir_localizacao else ""
-        
-        # Obter previsão do tempo (baseada na cidade detectada ou default)
-        previsao = ""
-        if incluir_previsao:
-            try:
-                # Tentativa de extrair cidade da localização
-                r = requests.get("http://ip-api.com/json/")
-                d = r.json()
-                cidade = d.get('city', '')
-                pais = d.get('countryCode', 'BR')
-                if cidade:
-                    url = f"http://api.openweathermap.org/data/2.5/weather?q={cidade},{pais}&appid={OPENWEATHER_API_KEY}&units=metric&lang=pt"
-                    tempo = requests.get(url).json()
-                    if tempo.get('weather'):
-                        previsao = (
-                            f"\n📡 Clima Atual em {cidade}:\n"
-                            f"{tempo['weather'][0]['description'].capitalize()}, "
-                            f"{tempo['main']['temp']}°C, sensação de {tempo['main']['feels_like']}°C, "
-                            f"umidade de {tempo['main']['humidity']}%, vento a {tempo['wind']['speed']} m/s.\n"
-                        )
-            except Exception:
-                previsao = "\n⚠️ Não foi possível carregar os dados do clima.\n"
+        if cidade and pais:
+            clima = obter_previsao_tempo(cidade, pais)
+            cidade_confirmada = f"A cidade que você informou foi {cidade} ({pais})."
+            if 'erro' in clima:
+                clima_info = "Não consegui obter a previsão do tempo."
+            else:
+                clima_info = f"🌦️ Clima: {clima['descricao']}, Temperatura: {clima['temperatura']}°C, Sensação: {clima['sensacao']}°C."
+        else:
+            cidade_confirmada = "Você não informou a cidade nem o país."
+            clima_info = "Não foi possível buscar o clima sem a cidade e o país."
 
-        # Montar prompt final com informações adicionais
         prompt = (
-            "Você é um assistente agrícola no sistema Campo Inteligente.\n"
-            f"{localizacao}\n"
-            f"{previsao}\n"
-            f"Pergunta: {mensagem}"
+            f"Você é um assistente agrícola no sistema Campo Inteligente.\n"
+            f"📍 {cidade_confirmada}\n"
+            f"🌦️ {clima_info}\n"
+            f"❓ Pergunta: {mensagem}"
         )
 
         resposta = client_openai.chat.completions.create(
@@ -137,96 +107,117 @@ def enviar_mensagem(mensagem, incluir_localizacao=True, incluir_previsao=True):
             max_tokens=300,
             temperature=0.4
         )
-        return resposta.choices[0].message.content.strip()
+        conteudo = resposta.choices[0].message.content.strip() if resposta.choices else "Não consegui gerar uma resposta."
+        return {"resposta": conteudo}
     except Exception as e:
-        return f"Erro com o OpenAI: {e}"
+        return {"erro": str(e)}
 
-
-# Respostas frequentes
-def respostas_frequentes(pergunta):
-    perguntas = {
-        "como me cadastrar?": "Basta informar seu nome e localização.",
-        "quais as funcionalidades do sistema?": "Cadastro, IA agrícola e previsão do tempo.",
-        "que dia é hoje?": f"Hoje é {obter_data_hora()[0]}, {obter_data_hora()[1]}."
+def enviar_mensagem_whatsapp(numero_destino, mensagem):
+    headers = {
+        "Authorization": f"Bearer {WHATSAPP_ACCESS_TOKEN}",
+        "Content-Type": "application/json"
     }
-    return perguntas.get(pergunta.lower())
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": numero_destino,
+        "type": "text",
+        "text": {
+            "body": mensagem
+        }
+    }
+    response = requests.post(WHATSAPP_API_URL, headers=headers, json=payload)
+    return response.status_code, response.json()
 
-# Salvar em planilha
 def salvar_planilha(dados):
-    arquivo = "respostas_agricultores_" + datetime.now().strftime("%Y%m%d%H%M%S") + ".xlsx"
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Respostas"
-    ws.append(["Nome", "Localização", "Data", "Dia da Semana"])
-    for linha in dados:
-        ws.append(linha)
-    wb.save(arquivo)
-    print(f"📁 Dados salvos em {arquivo}")
-
-# Cadastro de agricultor
-def coletar_dados():
-    dados = []
-    while True:
-        nome = input("Nome: ").strip()
-        if not nome: print("❌ Nome não pode ser vazio."); continue
-        localizacao = input("Localização: ").strip()
-        if not localizacao: print("❌ Localização não pode ser vazia."); continue
-        data, dia = obter_data_hora()
-        dados.append([nome, localizacao, data, dia])
-        if input("Adicionar outro? (s/n): ").lower() != 's':
-            break
-    salvar_planilha(dados)
-
-# Perguntas interativas
-def fluxo_perguntas():
-    while True:
-        pergunta = input("Pergunte algo (ou 'sair'): ").strip()
-        if pergunta.lower() == 'sair': break
-        termos_localizacao = ["onde estou", "qual minha localização", "me localiza", "minha cidade"]
-        resposta = (
-            obter_localizacao_via_ip() if any(t in pergunta for t in termos_localizacao)
-            else respostas_frequentes(pergunta) or enviar_mensagem(pergunta)
-        )
-        print(f"🤖 {resposta}")
-        if input("Outra pergunta? (s/n): ").lower() != 's': break
-
-# Enviar mensagem WhatsApp via Twilio
-def enviar_mensagem_whatsapp(mensagem, numero_destino):
     try:
-        resposta = enviar_mensagem(mensagem)
-        client_twilio.messages.create(
-            from_=f"whatsapp:{TWILIO_WHATSAPP_NUMBER}",
-            to=f"whatsapp:{numero_destino}",
-            body=resposta
-        )
-        print("✅ Mensagem enviada com sucesso!")
+        arquivo = "respostas_agricultores_" + datetime.now().strftime("%Y%m%d%H%M%S") + ".xlsx"
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Respostas"
+        ws.append(["Nome", "Localização", "Data", "Dia da Semana"])
+        for linha in dados:
+            ws.append(linha)
+        wb.save(arquivo)
+        return {"arquivo_criado": arquivo}
     except Exception as e:
-        print(f"Erro ao enviar WhatsApp: {e}")
+        return {"erro": str(e)}
 
-# Menu principal
-def menu_inicial():
-    while True:
-        print("\n=== MENU CAMPO INTELIGENTE ===")
-        print("1 - Cadastrar Agricultor")
-        print("2 - Perguntar ao Chatbot")
-        print("3 - Obter Previsão do Tempo")
-        print("4 - Previsão Estendida (3 dias)")
-        print("5 - Enviar Mensagem WhatsApp")
-        print("6 - Ver Localização Atual")
-        print("7 - Sair")
-        escolha = input("Escolha: ").strip()
-        if escolha == "1": coletar_dados()
-        elif escolha == "2": fluxo_perguntas()
-        elif escolha == "3": print(obter_previsao_tempo())
-        elif escolha == "4": print(obter_previsao_estendida())
-        elif escolha == "5":
-            numero = input("Número (ex: +55...): ").strip()
-            msg = input("Mensagem: ").strip()
-            enviar_mensagem_whatsapp(msg, numero)
-        elif escolha == "6": print(obter_localizacao_via_ip())
-        elif escolha == "7": print("👋 Até logo!"); break
-        else: print("❌ Opção inválida.")
+# Endpoints
+@app.route("/", methods=["GET", "POST"])
+def home():
+    return {"mensagem": "🚜 API Campo Inteligente Rodando!"}
 
-# Iniciar programa
+@app.route("/localizacao", methods=["GET"])
+def localizacao():
+    return jsonify({"mensagem": "Agora a cidade e país devem ser informados pelo usuário."})
+
+@app.route("/previsao", methods=["GET"])
+def previsao():
+    cidade = request.args.get("cidade")
+    pais = request.args.get("pais")
+    return jsonify(obter_previsao_tempo(cidade, pais))
+
+@app.route("/previsao_estendida", methods=["GET"])
+def previsao_estendida():
+    cidade = request.args.get("cidade")
+    pais = request.args.get("pais")
+    return jsonify(obter_previsao_estendida(cidade, pais))
+
+@app.route("/perguntar", methods=["POST"])
+def perguntar():
+    data = request.json
+    mensagem = data.get("mensagem")
+    cidade = data.get("cidade")
+    pais = data.get("pais")
+    return jsonify(enviar_mensagem_ia(mensagem, cidade, pais))
+
+@app.route("/salvar_agricultores", methods=["POST"])
+def salvar_agricultores():
+    dados = request.json.get("dados", [])
+    return jsonify(salvar_planilha(dados))
+
+@app.route("/webhook", methods=["GET", "POST"])
+def webhook():
+    if request.method == "GET":
+        mode = request.args.get("hub.mode")
+        token = request.args.get("hub.verify_token")
+        challenge = request.args.get("hub.challenge")
+        if mode == "subscribe" and token == VERIFY_TOKEN:
+            return challenge, 200
+        return "Erro de verificação", 403
+
+    if request.method == "POST":
+        data = request.json
+        print("🔔 Webhook recebido:", data)
+
+        try:
+            entry = data['entry'][0]
+            changes = entry['changes'][0]
+            value = changes['value']
+
+            # Verifica se tem mensagem
+            messages = value.get('messages')
+            if messages:
+                msg = messages[0]
+                numero = msg['from']
+
+                if 'text' in msg:
+                    texto_recebido = msg['text']['body']
+                else:
+                    texto_recebido = "Usuário enviou algo que não é texto."
+
+                # IA gera a resposta baseada no que o usuário mandou
+                resposta_ia = enviar_mensagem_ia(texto_recebido)
+                texto_resposta = resposta_ia.get("resposta", "Desculpe, não entendi sua pergunta.")
+
+                # Enviar a resposta no WhatsApp
+                status, resposta_api = enviar_mensagem_whatsapp(numero, texto_resposta)
+                print(f"✅ Mensagem enviada para {numero}: {texto_resposta}")
+
+        except Exception as e:
+            print("❌ Erro ao processar mensagem:", str(e))
+
+        return jsonify({"status": "recebido"}), 200
+
 if __name__ == "__main__":
-    menu_inicial()
+    app.run(debug=True)
