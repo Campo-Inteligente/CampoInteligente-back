@@ -1,11 +1,10 @@
-from flask import Flask, request, jsonify
-from dotenv import load_dotenv
-import os
 import openai
 import requests
 from datetime import datetime
 import locale
 import openpyxl
+import os
+from dotenv import load_dotenv
 
 # Configurações
 load_dotenv()
@@ -15,13 +14,9 @@ try:
 except:
     locale.setlocale(locale.LC_TIME, "")  # fallback
 
-app = Flask(__name__)
-
 # Chaves de API
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
-EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY")
-EVOLUTION_INSTANCE_ID = os.getenv("EVOLUTION_INSTANCE_ID")
 
 client_openai = openai.Client(api_key=OPENAI_API_KEY)
 
@@ -93,33 +88,6 @@ def obter_previsao_estendida(cidade, pais):
     except Exception as e:
         return {"erro": str(e)}
 
-def enviar_mensagem_evolution(numero, mensagem):
-    try:
-        url = f"http://localhost:8081/message/sendText/{EVOLUTION_INSTANCE_ID}"
-        payload = {
-            "number": numero,
-            "options": {
-                "delay": 100,
-                "presence": "composing",
-                "linkPreview": False,
-                "mentions": {
-                    "everyOne": False,
-                    "mentioned": []
-                }
-            },
-            "textMessage": {
-                "text": mensagem
-            }
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "apikey": EVOLUTION_API_KEY
-        }
-        response = requests.post(url, json=payload, headers=headers)
-        return {"status": response.status_code, "mensagem": response.text}
-    except Exception as e:
-        return {"erro": str(e)}
-
 def enviar_mensagem_ia(mensagem):
     try:
         local = obter_localizacao_via_ip()
@@ -155,85 +123,19 @@ def salvar_planilha(dados):
     except Exception as e:
         return {"erro": str(e)}
 
-# Endpoints
-@app.route("/", methods=["GET", "POST"])
-def home():
-    return {"mensagem": "🚜 API Campo Inteligente Rodando!"}
+# Interação no terminal
+def interagir_com_ia():
+    while True:
+        print("\n--- Sistema Campo Inteligente ---")
+        mensagem = input("Digite sua pergunta para o assistente ou 'sair' para encerrar: ")
+        
+        if mensagem.lower() == "sair":
+            print("Saindo do sistema...")
+            break
+        
+        resposta_ia = enviar_mensagem_ia(mensagem)
+        print("\nResposta da IA: ")
+        print(resposta_ia.get("resposta", "Desculpe, não entendi sua pergunta."))
 
-@app.route("/localizacao", methods=["GET"])
-def localizacao():
-    return jsonify(obter_localizacao_via_ip())
-
-@app.route("/previsao", methods=["GET"])
-def previsao():
-    cidade = request.args.get("cidade")
-    pais = request.args.get("pais")
-    return jsonify(obter_previsao_tempo(cidade, pais))
-
-@app.route("/previsao_estendida", methods=["GET"])
-def previsao_estendida():
-    cidade = request.args.get("cidade")
-    pais = request.args.get("pais")
-    return jsonify(obter_previsao_estendida(cidade, pais))
-
-@app.route("/perguntar", methods=["POST"])
-def perguntar():
-    data = request.json
-    mensagem = data.get("mensagem")
-    return jsonify(enviar_mensagem_ia(mensagem))
-
-@app.route("/enviar_evolution", methods=["POST"])
-def enviar_evolution():
-    data = request.json
-    numero = data.get("numero")
-    mensagem = data.get("mensagem")
-    return jsonify(enviar_mensagem_evolution(numero, mensagem))
-
-@app.route("/salvar_agricultores", methods=["POST"])
-def salvar_agricultores():
-    dados = request.json.get("dados", [])
-    return jsonify(salvar_planilha(dados))
-
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    try:
-        data = request.json
-        print("🔔 Webhook recebido:", data)
-
-        if data.get("event") == "messages.upsert":
-            mensagem_info = data.get("data", {})
-            mensagem = mensagem_info.get("message", {})
-
-            if "conversation" in mensagem:
-                mensagem_texto = mensagem.get("conversation")
-            elif "extendedTextMessage" in mensagem:
-                mensagem_texto = mensagem["extendedTextMessage"].get("text")
-            else:
-                mensagem_texto = ""
-
-            numero_completo = mensagem_info.get("key", {}).get("remoteJid", "")
-            if not numero_completo.endswith("@s.whatsapp.net"):
-                print("⚠️ Ignorando mensagem de grupo ou formato inválido:", numero_completo)
-                return jsonify({"status": "ignorado"})
-
-            numero_formatado = numero_completo.split('@')[0]
-
-            if mensagem_texto and numero_formatado:
-                print(f"📩 Mensagem recebida de {numero_formatado}: {mensagem_texto}")
-
-                resposta_ia = enviar_mensagem_ia(mensagem_texto)
-                print("🔎 Resposta da IA:", resposta_ia)
-
-                resposta_final = resposta_ia.get("resposta", "Desculpe, não entendi sua pergunta.")
-                envio = enviar_mensagem_evolution(numero_formatado, resposta_final)
-                print("📤 Resultado do envio Evolution:", envio)
-
-        return jsonify({"status": "mensagem processada com sucesso"})
-
-    except Exception as e:
-        print("❌ Erro ao processar webhook:", str(e))
-        return jsonify({"erro": str(e)}), 500
-
-# Início da aplicação
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    interagir_com_ia()
