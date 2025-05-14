@@ -1,36 +1,32 @@
-import openai
-import requests
+from flask import Flask, request, jsonify
 from datetime import datetime
 import locale
-import openpyxl
 import os
+import requests
+import openpyxl
 from dotenv import load_dotenv
+import openai
 
-# Configurações
+# Carregando variáveis de ambiente
 load_dotenv()
 
 try:
     locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 except:
-    locale.setlocale(locale.LC_TIME, "")  # fallback
+    locale.setlocale(locale.LC_TIME, "")
 
-# Chaves de API
+# Configurando as chaves da API
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+AUTH_KEY = os.getenv("AUTH_KEY")
+EVOLUTION_API_URL = "https://1f27-45-169-217-33.ngrok-free.app"
 
-client_openai = openai.Client(api_key=OPENAI_API_KEY)
 
-# Funções auxiliares
-def obter_data_hora():
-    agora = datetime.now()
-    data = agora.strftime("%d de %B de %Y")
-    dias_semana = {
-        "Monday": "segunda-feira", "Tuesday": "terça-feira", "Wednesday": "quarta-feira",
-        "Thursday": "quinta-feira", "Friday": "sexta-feira", "Saturday": "sábado", "Sunday": "domingo"
-    }
-    dia_semana = dias_semana.get(agora.strftime("%A"), agora.strftime("%A"))
-    return data, dia_semana
+# Inicializando a API do OpenAI
+openai.api_key = OPENAI_API_KEY  # Usando openai diretamente
+app = Flask(__name__)
 
+# Função para obter localização via IP
 def obter_localizacao_via_ip():
     try:
         r = requests.get("http://ip-api.com/json/")
@@ -46,9 +42,8 @@ def obter_localizacao_via_ip():
     except Exception as e:
         return {"erro": str(e)}
 
+# Função para obter previsão do tempo
 def obter_previsao_tempo(cidade, pais):
-    if not cidade or not pais:
-        return {"erro": "Cidade e país são obrigatórios."}
     url = f"http://api.openweathermap.org/data/2.5/weather?q={cidade},{pais}&appid={OPENWEATHER_API_KEY}&units=metric&lang=pt"
     try:
         r = requests.get(url)
@@ -66,9 +61,8 @@ def obter_previsao_tempo(cidade, pais):
     except Exception as e:
         return {"erro": str(e)}
 
+# Função para obter previsão estendida
 def obter_previsao_estendida(cidade, pais):
-    if not cidade or not pais:
-        return {"erro": "Cidade e país são obrigatórios."}
     url = f"http://api.openweathermap.org/data/2.5/forecast?q={cidade},{pais}&cnt=3&appid={OPENWEATHER_API_KEY}&units=metric&lang=pt"
     try:
         r = requests.get(url)
@@ -88,29 +82,105 @@ def obter_previsao_estendida(cidade, pais):
     except Exception as e:
         return {"erro": str(e)}
 
-def enviar_mensagem_ia(mensagem):
+# Função auxiliar para enviar mensagem via Evolution API
+def send_whatsapp_message(numero, mensagem):
+    payload = {
+        "number": numero,
+        "textMessage": {"text": mensagem}  # Alterado para passar um objeto
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "apikey": AUTH_KEY
+    }
+    url = f"http://127.0.0.1:8080/message/sendText/campointeligente"
+    try:
+        resposta = requests.post(url, json=payload, headers=headers)
+        if resposta.status_code == 200:
+            return resposta.status_code, resposta.json()
+        else:
+            return resposta.status_code, {"erro": resposta.text}
+    except Exception as e:
+        return None, {"erro": str(e)}
+
+
+# Rota para chat
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.json
+    mensagem = data.get("mensagem", "")
+
+    if not mensagem:
+        return jsonify({"erro": "Mensagem não fornecida."}), 400
+
     try:
         local = obter_localizacao_via_ip()
         clima = obter_previsao_tempo(local.get("cidade", "Salvador"), local.get("pais", "BR"))
+
         prompt = (
             "Você é um assistente agrícola no sistema Campo Inteligente.\n"
             f"📍 Local: {local}\n"
             f"🌦️ Clima: {clima}\n"
             f"❓ Pergunta: {mensagem}"
         )
-        resposta = client_openai.chat.completions.create(
+
+        resposta = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300,
             temperature=0.4
         )
-        conteudo = resposta.choices[0].message.content.strip() if resposta.choices else "Não consegui gerar uma resposta."
-        return {"resposta": conteudo}
-    except Exception as e:
-        return {"erro": str(e)}
 
-def salvar_planilha(dados):
+        conteudo = resposta.choices[0].message['content'].strip() if resposta.choices else "Não consegui gerar uma resposta."
+        return jsonify({"resposta": conteudo})
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+# Rota para enviar mensagem via WhatsApp
+@app.route("/enviar-mensagem", methods=["POST"])
+def route_enviar_mensagem():
     try:
+        data = request.json
+        numero = data.get("numero")
+        mensagem = data.get("mensagem")
+
+        if not numero or not mensagem:
+            return jsonify({"erro": "Número e mensagem são obrigatórios."}), 400
+
+        status_code, resposta_json = send_whatsapp_message(numero, mensagem)
+        if status_code == 200:
+            return jsonify({"status": "Mensagem enviada com sucesso!", "resposta": resposta_json}), 200
+        else:
+            return jsonify({"erro": "Erro ao enviar mensagem.", "detalhes": resposta_json}), status_code
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+# Rota para obter o clima
+@app.route("/clima", methods=["GET"])
+def clima():
+    local = obter_localizacao_via_ip()
+    if "erro" in local:
+        return jsonify(local), 400
+    clima = obter_previsao_tempo(local.get("cidade"), local.get("pais"))
+    return jsonify(clima)
+
+# Rota para obter previsão estendida do clima
+@app.route("/clima-estendido", methods=["GET"])
+def clima_estendido():
+    local = obter_localizacao_via_ip()
+    if "erro" in local:
+        return jsonify(local), 400
+    clima = obter_previsao_estendida(local.get("cidade"), local.get("pais"))
+    return jsonify(clima)
+
+# Rota para salvar a planilha com os dados fornecidos
+@app.route("/salvar", methods=["POST"])
+def salvar_planilha():
+    try:
+        dados = request.json.get("dados", [])
+        if not dados:
+            return jsonify({"erro": "Dados não fornecidos."}), 400
         arquivo = "respostas_agricultores_" + datetime.now().strftime("%Y%m%d%H%M%S") + ".xlsx"
         wb = openpyxl.Workbook()
         ws = wb.active
@@ -119,23 +189,79 @@ def salvar_planilha(dados):
         for linha in dados:
             ws.append(linha)
         wb.save(arquivo)
-        return {"arquivo_criado": arquivo}
+        return jsonify({"arquivo_criado": arquivo})
     except Exception as e:
-        return {"erro": str(e)}
+        return jsonify({"erro": str(e)}), 500
 
-# Interação no terminal
-def interagir_com_ia():
-    while True:
-        print("\n--- Sistema Campo Inteligente ---")
-        mensagem = input("Digite sua pergunta para o assistente ou 'sair' para encerrar: ")
-        
-        if mensagem.lower() == "sair":
-            print("Saindo do sistema...")
-            break
-        
-        resposta_ia = enviar_mensagem_ia(mensagem)
-        print("\nResposta da IA: ")
-        print(resposta_ia.get("resposta", "Desculpe, não entendi sua pergunta."))
+# Rota inicial
+@app.route("/", methods=["GET"])
+def home():
+    return "API Campo Inteligente está online!"
+
+# Rota do webhook para receber e responder mensagens
+@app.route("/webhook", methods=["POST"])
+def webhook_route():
+    try:
+        data = request.json
+        print(f"Dados recebidos: {data}")
+
+        event = data.get('event')
+
+        if event == 'messages.upsert':
+            # Seu código atual para mensagens
+            mensagem_recebida = data.get('data', {}).get('message', {}).get('conversation', '')
+            if mensagem_recebida:
+                print(f"Mensagem recebida: {mensagem_recebida}")
+                if 'clima' in mensagem_recebida.lower():
+                    local = obter_localizacao_via_ip()
+                    clima = obter_previsao_tempo(local.get("cidade"), local.get("pais"))
+                    resposta = f"Previsão do tempo em {local.get('cidade')}: {clima.get('descricao')}, Temp: {clima.get('temperatura')}°C, Sensação térmica: {clima.get('sensacao')}°C."
+                elif 'previsão' in mensagem_recebida.lower():
+                    local = obter_localizacao_via_ip()
+                    clima_extendido = obter_previsao_estendida(local.get("cidade"), local.get("pais"))
+                    resposta = f"Previsão estendida para os próximos dias: {clima_extendido.get('previsao')}"
+                elif 'boa tarde' in mensagem_recebida.lower() or 'olá' in mensagem_recebida.lower():
+                    resposta = "Olá! Como posso te ajudar hoje?"
+                else:
+                    resposta = "Desculpe, não entendi sua mensagem. Pode ser sobre clima ou previsão?"
+
+                print(f"Resposta enviada: {resposta}")
+
+                numero = data.get('data', {}).get('key', {}).get('remoteJid', '')
+                if numero:
+                    send_status, send_resp = send_whatsapp_message(numero, resposta)
+                    print(f"Status do envio: {send_status}, resposta: {send_resp}")
+                
+                return jsonify({"status": "sucesso", "resposta": resposta}), 200
+            else:
+                print("Mensagem não encontrada.")
+                return jsonify({"erro": "Mensagem não encontrada."}), 400
+
+        elif event == 'presence.update':
+            # Tratar o evento de atualização de presença
+            presence_data = data.get('data', {}).get('presences', {})
+            if presence_data:
+                for number, presence_info in presence_data.items():
+                    last_known_presence = presence_info.get('lastKnownPresence')
+                    print(f"Atualização de presença para {number}: {last_known_presence}")
+                return jsonify({"status": "presença atualizada."}), 200
+            else:
+                print("Nenhuma presença encontrada.")
+                return jsonify({"erro": "Dados de presença não encontrados."}), 400
+
+        elif event == 'connection.update':
+            # Tratando o evento 'connection.update'
+            state = data.get('data', {}).get('state')
+            if state:
+                print(f"Estado da conexão: {state}")
+            return jsonify({"status": "conexão atualizada."}), 200
+
+        else:
+            return jsonify({"erro": "Evento desconhecido."}), 400
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
 
 if __name__ == "__main__":
-    interagir_com_ia()
+    app.run(debug=True, host="0.0.0.0", port=5000)
