@@ -56,5 +56,6 @@ jobs:
               git rebase --abort
               exit 0
             }
+      
             git push
           fi
