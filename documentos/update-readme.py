@@ -7,7 +7,7 @@ import shutil
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Constantes usadas no script
-OCULTA_EXT = {".json", ".txt"}                                        # sempre em minúsculas para padronizar
+OCULTA_EXT = {".yml"}                                        # sempre em minúsculas para padronizar
 OCULTA_DIR = {".git",".env",".env.local",".github", "documentos"}     # como conjunto, para consistência e busca rápida
 VERSAO_FILE = os.path.join(BASE_DIR, "versao.txt")                    # Arquivo de versão dentro de ./documentos
 README_FILE = os.path.join(BASE_DIR, "README.md")                     # README também dentro de ./documentos
