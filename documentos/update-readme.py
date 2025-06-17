@@ -112,27 +112,26 @@ def gerar_readme(versao, data_hora, arquivos):
         )
         
         readme.write("## 📄 Lista de arquivos da raiz deste repositório, atualizada automaticamente.\n\n")
+        readme.write("```\n") 
         readme.write("**Sistema:** [Campo Inteligente](https://www.campointeligente.agr.br/)\n\n")
         readme.write(f"**Versão:** {versao} (AUTO-INCREMENTO)\n\n")
         readme.write(f"**URL:** https://www.campointeligente.agr.br/\n\n")
         readme.write(f"**Data de Atualização:** {data_hora}\n\n")
         readme.write("**Responsável:** Marcos Morais\n\n")
-
-        # Lista simples de arquivos
-        readme.write("## 📂 Listagem de Arquivos\n\n")
-        
-        readme.write("```\n")  # Bloco de código para preservar formatação
-        readme.write(gerar_arvore("."))  # Gera a árvore do diretório atual
         readme.write("\n```\n")        
 
-        #for arquivo in arquivos:
-        #    readme.write(f"- {arquivo}\n")
+        readme.write("<br /><br />")
+        readme.write("\n## 📂 Documentos\n\n")
+        readme.write("Lista de arquivos da pasta `documentos/`, atualizada automaticamente.\n\n")
+        readme.write("```\n")
+        readme.write(gerar_arvore(BASE_DIR))
+        readme.write("\n```\n")
 
-        # Seção adicional: estrutura em árvore
+        readme.write("<br /><br />")
         readme.write("\n## 🌳 Estrutura do Repositório\n\n")
-        
-        readme.write("```\n")  # Bloco de código para preservar formatação
-        readme.write(gerar_arvore(".."))  # Gera árvore da pasta informada
+        readme.write("Lista de arquivos no `repositório`, atualizada automaticamente.\n\n")
+        readme.write("```\n")
+        readme.write(gerar_arvore(os.path.abspath(os.path.join(BASE_DIR, ".."))))
         readme.write("\n```\n")
 
         readme.write("<br /><br />")
