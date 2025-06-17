@@ -2,6 +2,9 @@ import os
 from datetime import datetime
 import pytz
 
+# Caminho base para o diretório onde estão os arquivos do script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Constantes usadas no script
 VERSAO_FILE = "versao.txt"        # Arquivo que controla a versão do README
 README_FILE = "README.md"         # Arquivo README a ser gerado/atualizado
