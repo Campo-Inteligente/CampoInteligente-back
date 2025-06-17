@@ -64,15 +64,11 @@ def listar_arquivos():
     ignorando arquivos específicos definidos na constante 'ignorar'.
     Somente arquivos (não diretórios) são listados.
     """
-    ignorar_arquivos = {os.path.basename(README_FILE), os.path.basename(VERSAO_FILE), UPDATE_FILE, ".gitignore"}
-
-    arquivos = []
-    for f in os.listdir("."):
-        if os.path.isfile(f):
-            ext = os.path.splitext(f)[1].lower()
-            if f not in ignorar_arquivos and ext not in OCULTA_EXT:
-                arquivos.append(f)
-    return sorted(arquivos)
+    ignorar = {README_FILE, VERSAO_FILE, UPDATE_FILE, ".gitignore"}
+    return sorted([
+        f for f in os.listdir(".")
+        if os.path.isfile(f) and f not in ignorar
+    ])
 
 def gerar_arvore(path, prefixo="", ignorar=None):
     """
@@ -88,34 +84,18 @@ def gerar_arvore(path, prefixo="", ignorar=None):
         str: A representação em árvore do diretório.
     """
     if ignorar is None:
-        ignorar = {os.path.basename(README_FILE), os.path.basename(VERSAO_FILE), UPDATE_FILE, ".gitignore"}
+        ignorar = {README_FILE, VERSAO_FILE, UPDATE_FILE, ".gitignore"}
 
     linhas = []
     try:
-        itens = sorted(os.listdir(path))
+        itens = sorted([item for item in os.listdir(path) if item not in ignorar])
     except FileNotFoundError:
         return f"Diretório não encontrado: {path}"
     except PermissionError:
         return f"Permissão negada: {path}"
 
-    # Filtra itens
-    itens_filtrados = []
-    for item in itens:
-        caminho_item = os.path.join(path, item)
-        if item in ignorar:
-            continue
-        if os.path.isdir(caminho_item):
-            if item in OCULTA_DIR:
-                continue
-            itens_filtrados.append(item)
-        else:
-            ext = os.path.splitext(item)[1].lower()
-            if ext in OCULTA_EXT:
-                continue
-            itens_filtrados.append(item)
-
-    total = len(itens_filtrados)
-    for i, item in enumerate(itens_filtrados):
+    total = len(itens)
+    for i, item in enumerate(itens):
         caminho_item = os.path.join(path, item)
         ultimo = (i == total - 1)
         ponteiro = "└── " if ultimo else "├── "
@@ -127,6 +107,8 @@ def gerar_arvore(path, prefixo="", ignorar=None):
             linhas.append(gerar_arvore(caminho_item, prefixo + extensao_prefixo, ignorar))
 
     return "\n".join(linhas)
+
+
 
 def atualizar_readme():
     """
