@@ -7,10 +7,12 @@ import shutil
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Constantes usadas no script
-VERSAO_FILE = os.path.join(BASE_DIR, "versao.txt")        # Arquivo de versão dentro de ./documentos
-README_FILE = os.path.join(BASE_DIR, "README.md")         # README também dentro de ./documentos
-UPDATE_FILE = "update-readme.py"                          # Nome do script
-FUSO_HORARIO_BRASIL = pytz.timezone("America/Sao_Paulo")  # Fuso horário
+OCULTA_EXT = {".json", ".txt"}                                        # sempre em minúsculas para padronizar
+OCULTA_DIR = {".git",".env",".env.local",".github", "documentos"}     # como conjunto, para consistência e busca rápida
+VERSAO_FILE = os.path.join(BASE_DIR, "versao.txt")                    # Arquivo de versão dentro de ./documentos
+README_FILE = os.path.join(BASE_DIR, "README.md")                     # README também dentro de ./documentos
+UPDATE_FILE = "update-readme.py"                                      # Nome do script
+FUSO_HORARIO_BRASIL = pytz.timezone("America/Sao_Paulo")              # Fuso horário
 
 def copiar_readme_para_raiz():
     origem = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.md")
@@ -62,11 +64,15 @@ def listar_arquivos():
     ignorando arquivos específicos definidos na constante 'ignorar'.
     Somente arquivos (não diretórios) são listados.
     """
-    ignorar = {README_FILE, VERSAO_FILE, UPDATE_FILE, ".gitignore"}
-    return sorted([
-        f for f in os.listdir(".")
-        if os.path.isfile(f) and f not in ignorar
-    ])
+    ignorar_arquivos = {os.path.basename(README_FILE), os.path.basename(VERSAO_FILE), UPDATE_FILE, ".gitignore"}
+
+    arquivos = []
+    for f in os.listdir("."):
+        if os.path.isfile(f):
+            ext = os.path.splitext(f)[1].lower()
+            if f not in ignorar_arquivos and ext not in OCULTA_EXT:
+                arquivos.append(f)
+    return sorted(arquivos)
 
 def gerar_arvore(path, prefixo="", ignorar=None):
     """
@@ -82,18 +88,34 @@ def gerar_arvore(path, prefixo="", ignorar=None):
         str: A representação em árvore do diretório.
     """
     if ignorar is None:
-        ignorar = {README_FILE, VERSAO_FILE, UPDATE_FILE, ".gitignore"}
+        ignorar = {os.path.basename(README_FILE), os.path.basename(VERSAO_FILE), UPDATE_FILE, ".gitignore"}
 
     linhas = []
     try:
-        itens = sorted([item for item in os.listdir(path) if item not in ignorar])
+        itens = sorted(os.listdir(path))
     except FileNotFoundError:
         return f"Diretório não encontrado: {path}"
     except PermissionError:
         return f"Permissão negada: {path}"
 
-    total = len(itens)
-    for i, item in enumerate(itens):
+    # Filtra itens
+    itens_filtrados = []
+    for item in itens:
+        caminho_item = os.path.join(path, item)
+        if item in ignorar:
+            continue
+        if os.path.isdir(caminho_item):
+            if item in OCULTA_DIR:
+                continue
+            itens_filtrados.append(item)
+        else:
+            ext = os.path.splitext(item)[1].lower()
+            if ext in OCULTA_EXT:
+                continue
+            itens_filtrados.append(item)
+
+    total = len(itens_filtrados)
+    for i, item in enumerate(itens_filtrados):
         caminho_item = os.path.join(path, item)
         ultimo = (i == total - 1)
         ponteiro = "└── " if ultimo else "├── "
