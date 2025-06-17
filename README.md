@@ -11,7 +11,7 @@ O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, o
 
 **URL:** https://www.campointeligente.agr.br/
 
-**Data de Atualização:** 17/06/2025 15:47:44
+**Data de Atualização:** 17/06/2025 16:08:37
 
 **Responsável:** Marcos Morais
 
@@ -82,18 +82,18 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   │   │   └── 464f837b223d75e139f48316d20f62147425eb
 │   │   ├── 51
 │   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
-│   │   ├── 5e
-│   │   │   └── a5d1dc2b11a10a79ec6630d2c585038891f87e
 │   │   ├── 75
 │   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
 │   │   ├── 80
 │   │   │   └── 1f1801027f3350b08ad85c984db805cd32e736
 │   │   ├── 91
 │   │   │   └── eec88691f99a70f49d6aa5495b1da000da7226
+│   │   ├── a9
+│   │   │   └── 6195e2662fde3250bf746065809a815149c148
+│   │   ├── aa
+│   │   │   └── ac8cdef3fb135a5ba1b84d625502c17a14a1a6
 │   │   ├── af
 │   │   │   └── a5c6f6008fd49de9dc775657851a43ed8af8da
-│   │   ├── b0
-│   │   │   └── 89740ea07b6f6a84c0b0eea9a9fbb742bfad2a
 │   │   ├── c3
 │   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
 │   │   ├── c6
@@ -103,8 +103,9 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   │   ├── e1
 │   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
 │   │   ├── e6
-│   │   │   ├── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
-│   │   │   └── d62069ac46f57ef2c91ca4f12287e7f5c6e257
+│   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+│   │   ├── ec
+│   │   │   └── 46a750b55769b608f8d4c1df8f330e89a8497e
 │   │   ├── f6
 │   │   │   └── 71f6764b92a474b756af02385ccde70aeb17a8
 │   │   ├── f8
