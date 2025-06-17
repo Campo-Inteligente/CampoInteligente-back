@@ -66,9 +66,12 @@ def gerar_arvore(path, prefixo="", ignorar=None):
 
 def gerar_readme(versao, data_hora, arquivos):
     with open(README_FILE, "w", encoding="utf-8") as readme:
-        readme.write("# Bem-vindo à **WeaveTrip**\n\n")
+        
+        readme.write("# Bem-vindo à **CampoInteligente** \n\n")
         readme.write(
-            "A **WeaveTrip** é um sistema B2C, com arquitetura baseada em APIs, que integra serviços de passagens, hospedagem e eventos em uma única interface. Diferencial marcante: Montagem de viagens totalmente sob demanda em um só lugar, com UX centrada no usuário e arquitetura API-first que permite integrações futuras com marketplaces e apps de experiência — indo além das agências tradicionais.\n\n"
+            "O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, "
+            "oferecendo um chatbot com inteligência artificial que integra dados meteorológicos e de mercado "
+            "para auxiliar no plantio, manejo e colheita. A navegação é simples, com foco na interação via WhatsApp.\n\n"
         )
 
         readme.write("<br /><br />")
@@ -79,7 +82,7 @@ def gerar_readme(versao, data_hora, arquivos):
         readme.write(f"**URL:** https://www.WeaveTrip.tours.br/\n\n")
         readme.write(f"**Data de Atualização:** {data_hora}\n\n")
         readme.write("**Responsável:** Marcos Morais\n\n")
-        
+                
         readme.write("<br /><br />")
         readme.write("\n## 🧩 Tecnologias Utilizadas \n\n")
         readme.write("<p align='left'> \n")
@@ -92,63 +95,30 @@ def gerar_readme(versao, data_hora, arquivos):
         readme.write("  <img src='https://img.shields.io/badge/Figma-F24E1E?logo=figma&logoColor=white' alt='Figma' />\n")
         readme.write("  <img src='https://img.shields.io/badge/Axios-5A29E4?logo=axios&logoColor=white' alt='Axios' />\n")
         readme.write("<p /> \n")
+        
+        readme.write("## 📄 Lista de arquivos da raiz deste repositório, atualizada automaticamente.\n\n")
+        readme.write("**Sistema:** [Campo Inteligente](https://www.campointeligente.agr.br/)\n\n")
+        readme.write(f"**Versão:** {versao} (AUTO-INCREMENTO)\n\n")
+        readme.write(f"**URL:** https://www.campointeligente.agr.br/\n\n")
+        readme.write(f"**Data de Atualização:** {data_hora}\n\n")
+        readme.write("**Responsável:** Marcos Morais\n\n")
 
-        readme.write("<br /><br />")
-        readme.write("\n## 🎨 Protótipo no Figma \n\n")
-        readme.write("O design da interface do usuário está disponível no Figma. Ele foi pensado para proporcionar uma experiência fluida, acessível e agradável.\n\n")
-        readme.write("🔗 Link do protótipo: [Figma - WeaveTrip](https://www.figma.com/design/i8ipqOKX0czzeilS9JsMR3/MVP----Restic36?node-id=1-2&t=QV1Mwbs9NK1MDy6H-1)\n\n")
+        # Lista simples de arquivos
+        readme.write("## 📂 Listagem de Arquivos\n\n")
+        
+        readme.write("```\n")  # Bloco de código para preservar formatação
+        readme.write(gerar_arvore("."))  # Gera a árvore do diretório atual
+        readme.write("\n```\n")        
 
-        readme.write("<br /><br />")
-        readme.write("\n## 📂 Documentos\n\n")
-        readme.write("Lista de arquivos da pasta `documentos/`, atualizada automaticamente.\n\n")
-        readme.write("```\n")
-        readme.write(gerar_arvore(BASE_DIR))
-        readme.write("\n```\n")
+        #for arquivo in arquivos:
+        #    readme.write(f"- {arquivo}\n")
 
-        readme.write("<br /><br />")
+        # Seção adicional: estrutura em árvore
         readme.write("\n## 🌳 Estrutura do Repositório\n\n")
-        readme.write("Lista de arquivos no `repositório`, atualizada automaticamente.\n\n")
-        readme.write("```\n")
-        readme.write(gerar_arvore(os.path.abspath(os.path.join(BASE_DIR, ".."))))
+        
+        readme.write("```\n")  # Bloco de código para preservar formatação
+        readme.write(gerar_arvore(".."))  # Gera árvore da pasta informada
         readme.write("\n```\n")
-
-        readme.write("<br /><br />")
-        readme.write("\n## 🚀 Como rodar o projeto\n\n")
-        readme.write("Clone este repositório:\n\n")
-        readme.write("```bash\n")
-        readme.write("git clone https://github.com/seu-usuario/weavetrip-frontend.git\n")
-        readme.write("```\n\n")
-        readme.write("Instale as dependências:\n\n")
-        readme.write("```bash\n")
-        readme.write("npm install\n")
-        readme.write("# ou\\n")
-        readme.write("yarn install\n")
-        readme.write("```\n\n")
-        readme.write("Crie o arquivo .env.local com as variáveis necessárias:\n\n")
-        readme.write("```env\n")
-        readme.write("NEXT_PUBLIC_GRAPHQL_API=https://seu-endpoint.com/graphql\n")
-        readme.write("```\n\n")
-        readme.write("Rode o projeto:\n\n")
-        readme.write("```bash\n")
-        readme.write("npm run dev\n")
-        readme.write("# ou\n")
-        readme.write("yarn dev\n")
-        readme.write("```\n\n")
-        readme.write("Acesse no navegador: http://localhost:3000\n\n")
-
-        readme.write("<br /><br />")
-        readme.write("\n## 🔗 Integração com o Backend\n\n")
-        readme.write("Este frontend se comunica com uma API GraphQL, que está disponível no repositório WeaveTrip Backend. É necessário que o backend esteja em funcionamento para que as funcionalidades do front operem corretamente.\n\n")
-
-        readme.write("\n## 🖼️ Telas da Aplicação\n\n")
-        readme.write("A seguir, algumas telas do MVP WeaveTrip para ilustrar a experiência do usuário na plataforma:\n\n")
-        readme.write("🔐 **Tela de Login**\n\n")
-        readme.write("Interface de autenticação, onde o usuário acessa a plataforma com suas credenciais.\n\n")
-        readme.write("![Login](https://github.com/user-attachments/assets/9523605e-b3ab-4db9-9bf6-7f7f0a719c3f)\n\n")
-        readme.write("🏠 **Tela Inicial (Home)**\n\n")
-        readme.write("Tela principal exibida após o login, com informações da viagem, participantes e opções de navegação.\n\n")
-        readme.write("![Home](https://github.com/user-attachments/assets/71f61cb1-e2f7-4786-82c2-23a0cd3c4058)\n\n")
-        readme.write("---\n\n")
         
         readme.write("<br /><br />")
         readme.write("\n## 📜 Licença\n\n")
@@ -172,4 +142,4 @@ def copiar_readme_para_raiz():
         
 if __name__ == "__main__":
     atualizar_readme()
-    copiar_readme_para_raiz()
+    #copiar_readme_para_raiz()
