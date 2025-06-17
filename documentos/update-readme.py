@@ -67,7 +67,7 @@ def gerar_arvore(path, prefixo="", ignorar=None):
 def gerar_readme(versao, data_hora, arquivos):
     with open(README_FILE, "w", encoding="utf-8") as readme:
         
-        readme.write("# Bem-vindo à **CampoInteligente** \n\n")
+        readme.write("# Bem-vindo à 🍃 **CampoInteligente** \n\n")
         readme.write(
             "O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, "
             "oferecendo um chatbot com inteligência artificial que integra dados meteorológicos e de mercado "
