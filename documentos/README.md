@@ -9,11 +9,11 @@ A **WeaveTrip** é um sistema B2C, com arquitetura baseada em APIs, que integra 
 
 **Sistema:** [WeaveTrip](https://www.WeaveTrip.tours.br/)
 
-**Versão:** 42 (AUTO-INCREMENTO)
+**Versão:** 43 (AUTO-INCREMENTO)
 
 **URL:** https://www.WeaveTrip.tours.br/
 
-**Data de Atualização:** 17/06/2025 14:11:42
+**Data de Atualização:** 17/06/2025 14:40:21
 
 **Responsável:** Marcos Morais
 
@@ -90,8 +90,6 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
 │   │   ├── 03
 │   │   │   └── 47f5219b438fed91e60e5a7d5e260d1dece2a2
-│   │   ├── 04
-│   │   │   └── ad6f506ed6313b31602b0303e687914d8a2e82
 │   │   ├── 0a
 │   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
 │   │   ├── 24
@@ -99,24 +97,23 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   │   ├── 28
 │   │   │   └── 4718be433432cf7d84fe477e3e559d7b2b1855
 │   │   ├── 3a
-│   │   │   ├── 69bd5578baca0fbf15c27a9efa3de9417cb649
-│   │   │   └── ff14cc041cc7af524fabc193eb34e0935dd7eb
+│   │   │   └── 69bd5578baca0fbf15c27a9efa3de9417cb649
 │   │   ├── 40
 │   │   │   └── 464f837b223d75e139f48316d20f62147425eb
 │   │   ├── 51
 │   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
 │   │   ├── 75
 │   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
-│   │   ├── 97
-│   │   │   └── ef36831caf7c38c5594a7e7bc0600ccf2c7331
-│   │   ├── aa
-│   │   │   └── a6442fe902e96a5233b136b973b96a4011fc18
+│   │   ├── 78
+│   │   │   └── 7220c1beff7a1c35895de4b07c8bb6ae6e1a4e
+│   │   ├── 89
+│   │   │   └── 6ac73b46fffea213acb723d2a150d2ea8e0ddd
+│   │   ├── 98
+│   │   │   └── 5dfde8b9b37efda7ebb9e872ede4d3e0a96e72
 │   │   ├── af
 │   │   │   └── a5c6f6008fd49de9dc775657851a43ed8af8da
 │   │   ├── c3
 │   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
-│   │   ├── c5
-│   │   │   └── 8c9efa9c18a5ef0c396fc49e1da71748d7ffa3
 │   │   ├── c6
 │   │   │   └── f35db6ace59bd3298edc265f0ca4aa669692ab
 │   │   ├── d3
@@ -125,9 +122,12 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
 │   │   ├── e6
 │   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+│   │   ├── f1
+│   │   │   └── 09fcd7747f23bd1fe7dfc0b5356312a4b78a05
 │   │   ├── f6
-│   │   │   ├── 6ec619a5e60ec69a72db17deeb786d8c9a8fb9
 │   │   │   └── 71f6764b92a474b756af02385ccde70aeb17a8
+│   │   ├── f7
+│   │   │   └── 0d7bba4ae1f07682e0358bd7a2068094fc023b
 │   │   ├── info
 
 │   │   └── pack
