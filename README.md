@@ -11,7 +11,7 @@ O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, o
 
 **URL:** https://www.campointeligente.agr.br/
 
-**Data de Atualização:** 17/06/2025 17:12:45
+**Data de Atualização:** 17/06/2025 17:34:57
 
 **Responsável:** Marcos Morais
 
@@ -68,34 +68,34 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   ├── objects
 │   │   ├── 02
 │   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
-│   │   ├── 08
-│   │   │   └── 6e4453249701f2f671f71a06b1353d4acc5f2e
 │   │   ├── 0a
 │   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
 │   │   ├── 0d
 │   │   │   └── a0a4f7a54208a61f22a01f1a89daa74b6291b7
+│   │   ├── 13
+│   │   │   └── 0620e5535c3dcbe78bfe0d34f57318f53f6bee
 │   │   ├── 24
 │   │   │   └── 9a50de1dacd00c3fa5dd14f01b690ff6a23809
-│   │   ├── 28
-│   │   │   └── 4718be433432cf7d84fe477e3e559d7b2b1855
 │   │   ├── 3a
 │   │   │   └── 69bd5578baca0fbf15c27a9efa3de9417cb649
 │   │   ├── 40
 │   │   │   └── 464f837b223d75e139f48316d20f62147425eb
 │   │   ├── 51
 │   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
-│   │   ├── 74
-│   │   │   └── 8aa051c8ddcbbfc06899109ca201221dc96662
+│   │   ├── 6c
+│   │   │   └── 5e6493404a85e15094c301677046c9345000d4
 │   │   ├── 75
 │   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
 │   │   ├── 80
 │   │   │   └── 1f1801027f3350b08ad85c984db805cd32e736
+│   │   ├── 8b
+│   │   │   └── dbcfd70ce62d9e9035bdc9d0656945a490c109
 │   │   ├── 91
 │   │   │   └── eec88691f99a70f49d6aa5495b1da000da7226
-│   │   ├── 94
-│   │   │   └── 672860a54e618b435a2d3acccb4903753d2ffb
-│   │   ├── af
-│   │   │   └── a5c6f6008fd49de9dc775657851a43ed8af8da
+│   │   ├── a1
+│   │   │   └── 15147b38ce6b2f38b36c44798165c40ec74ed0
+│   │   ├── ae
+│   │   │   └── edb25033ddcb27802bcdb3916106ef70b625be
 │   │   ├── c3
 │   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
 │   │   ├── c6
@@ -106,8 +106,8 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
 │   │   ├── e6
 │   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
-│   │   ├── f6
-│   │   │   └── 71f6764b92a474b756af02385ccde70aeb17a8
+│   │   ├── ef
+│   │   │   └── 2bac425b767f5f5d32bd5c151355ff82b3667f
 │   │   ├── f8
 │   │   │   └── 995bd55a87288c1a10655a39234998153fe1df
 │   │   ├── info
