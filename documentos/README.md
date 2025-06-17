@@ -9,11 +9,11 @@ A **WeaveTrip** é um sistema B2C, com arquitetura baseada em APIs, que integra 
 
 **Sistema:** [WeaveTrip](https://www.WeaveTrip.tours.br/)
 
-**Versão:** 41 (AUTO-INCREMENTO)
+**Versão:** 42 (AUTO-INCREMENTO)
 
 **URL:** https://www.WeaveTrip.tours.br/
 
-**Data de Atualização:** 17/06/2025 12:45:14
+**Data de Atualização:** 17/06/2025 14:11:42
 
 **Responsável:** Marcos Morais
 
@@ -52,6 +52,7 @@ Lista de arquivos da pasta `documentos/`, atualizada automaticamente.
 Lista de arquivos no `repositório`, atualizada automaticamente.
 
 ```
+├── .env
 ├── .git
 │   ├── FETCH_HEAD
 │   ├── HEAD
@@ -85,12 +86,52 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   │               ├── HEAD
 │   │               └── main
 │   ├── objects
+│   │   ├── 02
+│   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
+│   │   ├── 03
+│   │   │   └── 47f5219b438fed91e60e5a7d5e260d1dece2a2
+│   │   ├── 04
+│   │   │   └── ad6f506ed6313b31602b0303e687914d8a2e82
+│   │   ├── 0a
+│   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
+│   │   ├── 24
+│   │   │   └── 9a50de1dacd00c3fa5dd14f01b690ff6a23809
+│   │   ├── 28
+│   │   │   └── 4718be433432cf7d84fe477e3e559d7b2b1855
+│   │   ├── 3a
+│   │   │   ├── 69bd5578baca0fbf15c27a9efa3de9417cb649
+│   │   │   └── ff14cc041cc7af524fabc193eb34e0935dd7eb
+│   │   ├── 40
+│   │   │   └── 464f837b223d75e139f48316d20f62147425eb
+│   │   ├── 51
+│   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
+│   │   ├── 75
+│   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
+│   │   ├── 97
+│   │   │   └── ef36831caf7c38c5594a7e7bc0600ccf2c7331
+│   │   ├── aa
+│   │   │   └── a6442fe902e96a5233b136b973b96a4011fc18
+│   │   ├── af
+│   │   │   └── a5c6f6008fd49de9dc775657851a43ed8af8da
+│   │   ├── c3
+│   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
+│   │   ├── c5
+│   │   │   └── 8c9efa9c18a5ef0c396fc49e1da71748d7ffa3
+│   │   ├── c6
+│   │   │   └── f35db6ace59bd3298edc265f0ca4aa669692ab
+│   │   ├── d3
+│   │   │   └── 660e9cecf95d68c17af5844ff7981364733c26
+│   │   ├── e1
+│   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
+│   │   ├── e6
+│   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+│   │   ├── f6
+│   │   │   ├── 6ec619a5e60ec69a72db17deeb786d8c9a8fb9
+│   │   │   └── 71f6764b92a474b756af02385ccde70aeb17a8
 │   │   ├── info
 
 │   │   └── pack
-│   │       ├── pack-c00370e3c5421e813736e085dbf9ae2657fbcaac.idx
-│   │       ├── pack-c00370e3c5421e813736e085dbf9ae2657fbcaac.pack
-│   │       └── pack-c00370e3c5421e813736e085dbf9ae2657fbcaac.rev
+
 │   ├── refs
 │   │   ├── heads
 │   │   │   └── main
@@ -103,200 +144,18 @@ Lista de arquivos no `repositório`, atualizada automaticamente.
 │   └── shallow
 ├── .github
 │   └── workflows
-│       ├── update-readme.yml
-│       └── update-readme.yml-bkp
-├── app
-│   ├── assets
-│   │   └── image
-│   │       ├── WeaveTrip.jpg
-│   │       ├── image1.jpg
-│   │       ├── image2.jpg
-│   │       ├── image3.jpg
-│   │       └── profile.webp
-│   ├── components
-│   │   ├── ButtonHome
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── ButtonLogar
-│   │   │   ├── index.tsx
-│   │   │   └── styles.css
-│   │   ├── ButtonModal
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── CardProduct
-│   │   │   ├── index.tsx
-│   │   │   └── styles.css
-│   │   ├── CardTitle
-│   │   │   ├── index.tsx
-│   │   │   └── styles.css
-│   │   ├── CardUser
-│   │   │   ├── index.tsx
-│   │   │   └── styles.css
-│   │   ├── Cards
-│   │   │   ├── DestinationCard
-│   │   │   │   └── index.tsx
-│   │   │   ├── ExperienceCard
-│   │   │   │   ├── index.tsx
-│   │   │   │   └── style.css
-│   │   │   └── PromotionCard
-│   │   │       └── index.tsx
-│   │   ├── Compras
-│   │   │   ├── Button
-│   │   │   │   └── index.tsx
-│   │   │   ├── Card
-│   │   │   │   └── index.tsx
-│   │   │   ├── DetalhesBtn
-│   │   │   │   └── index.tsx
-│   │   │   ├── Nav
-│   │   │   │   └── index.tsx
-│   │   │   ├── ResumoPedido
-│   │   │   │   └── index.tsx
-│   │   │   ├── Table
-│   │   │   │   ├── Td
-│   │   │   │   │   └── index.tsx
-│   │   │   │   ├── Th
-│   │   │   │   │   └── index.tsx
-│   │   │   │   └── index.tsx
-│   │   │   └── Tag
-│   │   │       └── index.tsx
-│   │   ├── DetalheProduto
-│   │   │   ├── Buttons
-│   │   │   │   ├── PrimaryButton.tsx
-│   │   │   │   └── SecondaryButton.tsx
-│   │   │   ├── ImageGallery
-│   │   │   │   └── index.tsx
-│   │   │   ├── Rate
-│   │   │   │   └── index.tsx
-│   │   │   ├── Select
-│   │   │   │   └── index.tsx
-│   │   │   └── Tag
-│   │   │       └── index.tsx
-│   │   ├── EditUserModal
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── Footer
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── Hr
-│   │   │   └── index.tsx
-│   │   ├── InputCadastro
-│   │   │   ├── index.tsx
-│   │   │   └── styles.css
-│   │   ├── InputModal
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── LayoutHome
-│   │   │   ├── Avatar
-│   │   │   │   └── index.tsx
-│   │   │   ├── Button
-│   │   │   │   └── index.tsx
-│   │   │   ├── SideBar
-│   │   │   │   ├── NavItem
-│   │   │   │   │   └── index.tsx
-│   │   │   │   └── index.tsx
-│   │   │   └── index.tsx
-│   │   ├── Menu
-│   │   │   ├── index.tsx
-│   │   │   └── styles.css
-│   │   ├── NavUser
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── ProductTable
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── Profile
-│   │   │   ├── index.tsx
-│   │   │   └── styles.css
-│   │   ├── RecuperarSenha
-│   │   │   ├── Button.tsx
-│   │   │   ├── InputData.tsx
-│   │   │   ├── RecuperarSenhaStep.tsx
-│   │   │   └── SectionHeader.tsx
-│   │   ├── SearchSection
-│   │   │   ├── SearchDestiny
-│   │   │   │   └── index.tsx
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── SelectModal
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   ├── StaticCard
-│   │   │   ├── index.tsx
-│   │   │   └── styles.css
-│   │   ├── UploadImage
-│   │   │   ├── index.tsx
-│   │   │   └── style.css
-│   │   └── UserTable
-│   │       ├── index.tsx
-│   │       └── style.css
-│   ├── globals.css
-│   ├── hooks
-│   │   └── useAuth.tsx
-│   ├── layout.tsx
-│   ├── models
-│   │   ├── product.ts
-│   │   └── user.ts
-│   ├── page.module.css
-│   ├── page.tsx
-│   ├── pages
-│   │   ├── cadastro
-│   │   │   ├── page.tsx
-│   │   │   └── styles.css
-│   │   ├── carrinho
-│   │   │   └── page.tsx
-│   │   ├── configuracao
-│   │   │   ├── page.tsx
-│   │   │   └── styles.css
-│   │   ├── detalheProduto
-│   │   │   └── page.tsx
-│   │   ├── home
-│   │   │   ├── page.tsx
-│   │   │   └── style.css
-│   │   ├── login
-│   │   │   ├── page.tsx
-│   │   │   └── styles.css
-│   │   ├── minhasCompras
-│   │   │   └── page.tsx
-│   │   ├── painelcontrole
-│   │   │   ├── page.tsx
-│   │   │   └── styles.css
-│   │   ├── produtocadastrado
-│   │   │   ├── page.tsx
-│   │   │   └── style.css
-│   │   ├── produtoeditar
-│   │   │   └── [id]
-│   │   │       ├── page.tsx
-│   │   │       └── styles.css
-│   │   ├── profileclient
-│   │   │   ├── page.tsx
-│   │   │   └── styles.css
-│   │   ├── recuperarSenha
-│   │   │   └── page.tsx
-│   │   ├── usuariocadastrado
-│   │   │   ├── page.tsx
-│   │   │   └── style.css
-│   │   └── usuarioeditar
-│   │       └── [id]
-│   │           ├── page.tsx
-│   │           └── styles.css
-│   └── service
-│       ├── ApolloProvider.tsx
-│       ├── api.ts
-│       ├── apollo.ts
-│       └── queries.ts
-├── db.json
+│       └── update-readme.yml
+├── Dockerfile
+├── OBSERVAÇÕES SOBRE OS CODIGOS
+├── chatbot.py
+├── chatbotR.py
+├── db
+│   └── conexao.py
+├── docker-compose.yml
 ├── documentos
 │   ├── LICENSE
 │   └── requirements.txt
-├── eslint.config.mjs
-├── next.config.ts
-├── package-lock.json
-├── package.json
-├── postcss.config.mjs
-├── public
-│   └── logo-header.svg
-├── tsconfig.json
-└── yarn.lock
+└── requirements.txt
 ```
 <br /><br />
 ## 🚀 Como rodar o projeto
