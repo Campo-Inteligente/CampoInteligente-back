@@ -1,4 +1,4 @@
-# Bem-vindo à **CampoInteligente** 
+# Bem-vindo à 🍃 **CampoInteligente** 
 
 O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, oferecendo um chatbot com inteligência artificial que integra dados meteorológicos e de mercado para auxiliar no plantio, manejo e colheita. A navegação é simples, com foco na interação via WhatsApp.
 
@@ -9,11 +9,11 @@ O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, o
 
 **Sistema:** [WeaveTrip](https://www.WeaveTrip.tours.br/)
 
-**Versão:** 45 (AUTO-INCREMENTO)
+**Versão:** 46 (AUTO-INCREMENTO)
 
 **URL:** https://www.WeaveTrip.tours.br/
 
-**Data de Atualização:** 17/06/2025 15:17:37
+**Data de Atualização:** 17/06/2025 15:19:29
 
 **Responsável:** Marcos Morais
 
@@ -34,11 +34,11 @@ O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, o
 
 **Sistema:** [Campo Inteligente](https://www.campointeligente.agr.br/)
 
-**Versão:** 45 (AUTO-INCREMENTO)
+**Versão:** 46 (AUTO-INCREMENTO)
 
 **URL:** https://www.campointeligente.agr.br/
 
-**Data de Atualização:** 17/06/2025 15:17:37
+**Data de Atualização:** 17/06/2025 15:19:29
 
 **Responsável:** Marcos Morais
 
@@ -80,42 +80,44 @@ O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, o
 │   │               └── main
 │   ├── objects
 │   │   ├── 02
-│   │   │   ├── 8875767e5067f8263836cb56a050b25b959df0
-│   │   │   └── baa3ee3a5ac80cb9ce651e9a4bd6862a36992c
+│   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
 │   │   ├── 0a
 │   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
-│   │   ├── 1a
-│   │   │   └── a5618b29ae83cf840df57e1279d288a708747f
 │   │   ├── 24
 │   │   │   └── 9a50de1dacd00c3fa5dd14f01b690ff6a23809
 │   │   ├── 28
 │   │   │   └── 4718be433432cf7d84fe477e3e559d7b2b1855
+│   │   ├── 35
+│   │   │   └── c227570391df49ab4bc1f868e45297b6a309bc
 │   │   ├── 3a
 │   │   │   └── 69bd5578baca0fbf15c27a9efa3de9417cb649
 │   │   ├── 40
 │   │   │   └── 464f837b223d75e139f48316d20f62147425eb
+│   │   ├── 43
+│   │   │   └── bd25b64b7b8a1a0d0f8f3032174ffe0a22c8bc
 │   │   ├── 51
 │   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
+│   │   ├── 6f
+│   │   │   └── 36900666078dde3d1be77c0f5d20465aee39a5
 │   │   ├── 75
+│   │   │   ├── 20bd7f6e7746a93e114611e4fa7d8d37f5cc66
 │   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
-│   │   ├── a3
-│   │   │   └── 3ddf39aa0df1e495afb969fa109e6914015f85
+│   │   ├── 7d
+│   │   │   └── 37386284a97324cbac474cb5ea5360d361d104
+│   │   ├── 9f
+│   │   │   └── e4ffff4d3c63812ab40a2fa5500546d176e10b
 │   │   ├── af
 │   │   │   └── a5c6f6008fd49de9dc775657851a43ed8af8da
 │   │   ├── c3
 │   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
 │   │   ├── c6
 │   │   │   └── f35db6ace59bd3298edc265f0ca4aa669692ab
-│   │   ├── d2
-│   │   │   └── e1cefe89e17269cf846b1b537654757ac8b735
 │   │   ├── d3
 │   │   │   └── 660e9cecf95d68c17af5844ff7981364733c26
 │   │   ├── e1
 │   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
 │   │   ├── e6
 │   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
-│   │   ├── f1
-│   │   │   └── ac99bd0b0434c6cf0ea1230bceac01383f8b58
 │   │   ├── f6
 │   │   │   └── 71f6764b92a474b756af02385ccde70aeb17a8
 │   │   ├── fb
@@ -189,42 +191,44 @@ O **CampoInteligente**, é uma plataforma voltada para a agricultura familiar, o
     │   │               └── main
     │   ├── objects
     │   │   ├── 02
-    │   │   │   ├── 8875767e5067f8263836cb56a050b25b959df0
-    │   │   │   └── baa3ee3a5ac80cb9ce651e9a4bd6862a36992c
+    │   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
     │   │   ├── 0a
     │   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
-    │   │   ├── 1a
-    │   │   │   └── a5618b29ae83cf840df57e1279d288a708747f
     │   │   ├── 24
     │   │   │   └── 9a50de1dacd00c3fa5dd14f01b690ff6a23809
     │   │   ├── 28
     │   │   │   └── 4718be433432cf7d84fe477e3e559d7b2b1855
+    │   │   ├── 35
+    │   │   │   └── c227570391df49ab4bc1f868e45297b6a309bc
     │   │   ├── 3a
     │   │   │   └── 69bd5578baca0fbf15c27a9efa3de9417cb649
     │   │   ├── 40
     │   │   │   └── 464f837b223d75e139f48316d20f62147425eb
+    │   │   ├── 43
+    │   │   │   └── bd25b64b7b8a1a0d0f8f3032174ffe0a22c8bc
     │   │   ├── 51
     │   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
+    │   │   ├── 6f
+    │   │   │   └── 36900666078dde3d1be77c0f5d20465aee39a5
     │   │   ├── 75
+    │   │   │   ├── 20bd7f6e7746a93e114611e4fa7d8d37f5cc66
     │   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
-    │   │   ├── a3
-    │   │   │   └── 3ddf39aa0df1e495afb969fa109e6914015f85
+    │   │   ├── 7d
+    │   │   │   └── 37386284a97324cbac474cb5ea5360d361d104
+    │   │   ├── 9f
+    │   │   │   └── e4ffff4d3c63812ab40a2fa5500546d176e10b
     │   │   ├── af
     │   │   │   └── a5c6f6008fd49de9dc775657851a43ed8af8da
     │   │   ├── c3
     │   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
     │   │   ├── c6
     │   │   │   └── f35db6ace59bd3298edc265f0ca4aa669692ab
-    │   │   ├── d2
-    │   │   │   └── e1cefe89e17269cf846b1b537654757ac8b735
     │   │   ├── d3
     │   │   │   └── 660e9cecf95d68c17af5844ff7981364733c26
     │   │   ├── e1
     │   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
     │   │   ├── e6
     │   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
-    │   │   ├── f1
-    │   │   │   └── ac99bd0b0434c6cf0ea1230bceac01383f8b58
     │   │   ├── f6
     │   │   │   └── 71f6764b92a474b756af02385ccde70aeb17a8
     │   │   ├── fb
