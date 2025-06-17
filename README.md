@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 50 (AUTO-INCREMENTO)
+Versão...............: 51 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 17/06/2025 17:51:24
+Data de Atualização..: 17/06/2025 17:53:12
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
@@ -34,7 +34,8 @@ Responsável..........: Marcos Morais
 ## 📂 Listagem de Arquivos
 
 ```
-└── LICENSE
+├── LICENSE
+└── requirements.txt
 ```
 
 ## 🌳 Estrutura do Repositório
@@ -47,7 +48,7 @@ Responsável..........: Marcos Morais
 ├── chatbotR.py
 ├── db
 │   └── conexao.py
-└── docker-compose.yml
+└── requirements.txt
 ```
 ## 🧑‍💻 Como Contribuir
 
