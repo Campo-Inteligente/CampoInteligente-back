@@ -70,7 +70,7 @@ def listar_arquivos():
         if os.path.isfile(f) and f not in ignorar
     ])
 
-def gerar_arvore(path, prefixo="", ignorar=None):
+def gerar_arvorexxxxxxxxxxx(path, prefixo="", ignorar=None):
     """
     Gera uma representação em árvore do diretório 'path', recursivamente,
     semelhante ao comando 'tree' do DOS/Linux.
@@ -109,6 +109,58 @@ def gerar_arvore(path, prefixo="", ignorar=None):
     return "\n".join(linhas)
 
 
+def gerar_arvore(path, prefixo="", ignorar=None, is_root=True, nome_raiz=None):
+    """
+    Gera uma representação em árvore do diretório 'path', com o nome da raiz
+    e aplicando filtros definidos nas constantes globais.
+    """
+    if ignorar is None:
+        ignorar = {os.path.basename(README_FILE), os.path.basename(VERSAO_FILE), UPDATE_FILE, ".gitignore"}
+
+    linhas = []
+
+    # Define o nome da raiz apenas na chamada inicial
+    if is_root:
+        if nome_raiz is None:
+            nome_raiz = os.path.basename(os.path.normpath(path)) or "."
+        linhas.append(nome_raiz)
+
+    try:
+        itens = sorted(os.listdir(path))
+    except (FileNotFoundError, PermissionError) as e:
+        return f"{prefixo}[Erro ao acessar {path}: {e}]"
+
+    itens_filtrados = []
+    for item in itens:
+        caminho_item = os.path.join(path, item)
+
+        if item in ignorar:
+            continue
+
+        if os.path.isdir(caminho_item):
+            if item in OCULTA_DIR:
+                continue
+            itens_filtrados.append(item)
+        else:
+            ext = os.path.splitext(item)[1].lower()
+            if ext in OCULTA_EXT:
+                continue
+            itens_filtrados.append(item)
+
+    total = len(itens_filtrados)
+    for i, item in enumerate(itens_filtrados):
+        caminho_item = os.path.join(path, item)
+        ultimo = (i == total - 1)
+        ponteiro = "└── " if ultimo else "├── "
+
+        linhas.append(f"{prefixo}{ponteiro}{item}")
+
+        if os.path.isdir(caminho_item):
+            novo_prefixo = prefixo + ("    " if ultimo else "│   ")
+            subarvore = gerar_arvore(caminho_item, novo_prefixo, ignorar, is_root=False)
+            linhas.append(subarvore)
+
+    return "\n".join(linhas)
 
 def atualizar_readme():
     """
