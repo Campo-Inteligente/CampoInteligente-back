@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 88 (AUTO-INCREMENTO)
+Versão...............: 89 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 18/06/2025 08:45:13
+Data de Atualização..: 18/06/2025 08:46:33
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
@@ -86,8 +86,6 @@ startup-campo-inteligente-back
 │   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
 │   │   ├── 0a
 │   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
-│   │   ├── 20
-│   │   │   └── c8d1fc3172c1b1ce9a1f9853c313397e824a26
 │   │   ├── 24
 │   │   │   └── 9a50de1dacd00c3fa5dd14f01b690ff6a23809
 │   │   ├── 3a
@@ -96,8 +94,8 @@ startup-campo-inteligente-back
 │   │   │   └── 464f837b223d75e139f48316d20f62147425eb
 │   │   ├── 51
 │   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
-│   │   ├── 53
-│   │   │   └── 57d600164370d1279b6896edbb155c4a1cad77
+│   │   ├── 55
+│   │   │   └── d247f2ba1a2272fbed77c2b693f055ae5c1a49
 │   │   ├── 75
 │   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
 │   │   ├── 76
@@ -105,26 +103,28 @@ startup-campo-inteligente-back
 │   │   ├── 8b
 │   │   │   ├── 137891791fe96927ad78e64b0aad7bded08bdc
 │   │   │   └── dbcfd70ce62d9e9035bdc9d0656945a490c109
-│   │   ├── 94
-│   │   │   └── f361087af3e28b93e3d0aadf9843aeff2d243e
+│   │   ├── 8e
+│   │   │   └── bd91bc4d8e4403f55d9705a4ee384bb8da2b33
+│   │   ├── 9f
+│   │   │   └── 728587959d189de8b5dcadab2b3aec1276a169
 │   │   ├── a1
 │   │   │   └── 15147b38ce6b2f38b36c44798165c40ec74ed0
-│   │   ├── b5
-│   │   │   └── 70a09dd8a3726ca5b05db604df4c1afdc94c5f
 │   │   ├── c3
 │   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
 │   │   ├── c6
 │   │   │   └── f35db6ace59bd3298edc265f0ca4aa669692ab
-│   │   ├── cc
-│   │   │   └── 2db74f152fbf5c5459c602e9de8be14372eb53
+│   │   ├── d2
+│   │   │   └── 5bf8508e136bd0ec4cea63b2a6be8f8ca26ce2
 │   │   ├── d3
 │   │   │   └── 660e9cecf95d68c17af5844ff7981364733c26
+│   │   ├── d4
+│   │   │   └── db015924e27f22d36b594c846586bbc02da537
 │   │   ├── e1
 │   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
 │   │   ├── e6
 │   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
-│   │   ├── ea
-│   │   │   └── f7a13d15e02e082b62c96f10b881336ece332c
+│   │   ├── e7
+│   │   │   └── 3044321e6efcaf948f03aab7f7f61fe48bf985
 │   │   ├── ef
 │   │   │   └── 2bac425b767f5f5d32bd5c151355ff82b3667f
 │   │   ├── info
@@ -161,6 +161,19 @@ startup-campo-inteligente-back
 │   ├── update-readme.py
 │   └── versao.txt
 └── requirements.txt
+```
+
+## 🌳 Estrutura do Repositório
+
+```
+documentos
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── teste
+│   └── teste.txt
+├── update-readme.py
+└── versao.txt
 ```
 ## 🧑‍💻 Como Contribuir
 
