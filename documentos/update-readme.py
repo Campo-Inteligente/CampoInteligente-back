@@ -88,12 +88,14 @@ def gerar_arvore(path, ignorar=None, prefixo="", is_root=True, nome_raiz=None):
         caminho_item = os.path.join(path, item)
         ultimo = (i == total - 1)
         ponteiro = "└── " if ultimo else "├── "
-        linhas.append(f"{prefixo}{ponteiro}{item}")
 
         if os.path.isdir(caminho_item):
+            linhas.append(f"{prefixo}{ponteiro}🗂️ {item}")
             novo_prefixo = prefixo + ("    " if ultimo else "│   ")
             subarvore = gerar_arvore(caminho_item, ignorar, novo_prefixo, is_root=False)
             linhas.append(subarvore)
+        else:
+            linhas.append(f"{prefixo}{ponteiro}🗃️ {item}")
 
     return "\n".join(linhas)
 
