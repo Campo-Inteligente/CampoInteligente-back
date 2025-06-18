@@ -221,7 +221,7 @@ def gerar_readme(versao, data_hora, arquivos):
         readme.write("- **GitHub**: Controle de versão e colaboração no código.\n\n")
 
         # Lista simples de arquivos
-        readme.write("## 📂 Listagem de Arquivos\n\n")
+        readme.write("## 📂 Documentos\n\n")
         readme.write("```\n")  # Bloco de código para preservar formatação
         readme.write(gerar_arvore(BASE_DIR)) # Gera a árvore do diretório atual
         readme.write("\n```\n")        
