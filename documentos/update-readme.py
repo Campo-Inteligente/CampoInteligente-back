@@ -116,10 +116,13 @@ def gerar_arvore(path, prefixo="", ignorar=None, is_root=True, nome_raiz=None):
     """
     if ignorar is None:
         ignorar = {os.path.basename(README_FILE), os.path.basename(VERSAO_FILE), UPDATE_FILE, ".gitignore"}
+    else:
+        ignorar = set(ignorar)
+
+    ignorar.update(OCULTA_DIR)
 
     linhas = []
 
-    # Define o nome da raiz apenas na chamada inicial
     if is_root:
         if nome_raiz is None:
             nome_raiz = os.path.basename(os.path.normpath(path)) or "."
@@ -132,14 +135,11 @@ def gerar_arvore(path, prefixo="", ignorar=None, is_root=True, nome_raiz=None):
 
     itens_filtrados = []
     for item in itens:
-        if item in ignorar or item in OCULTA_DIR:
+        if item in ignorar:
             continue
-    
+
         caminho_item = os.path.join(path, item)
-        
         if os.path.isdir(caminho_item):
-            if os.path.basename(item) in OCULTA_DIR:
-                continue
             itens_filtrados.append(item)
         else:
             ext = os.path.splitext(item)[1].lower()
@@ -160,6 +160,7 @@ def gerar_arvore(path, prefixo="", ignorar=None, is_root=True, nome_raiz=None):
             linhas.append(subarvore)
 
     return "\n".join(linhas)
+
 
 def atualizar_readme():
     """
