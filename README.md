@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 78 (AUTO-INCREMENTO)
+Versão...............: 79 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 18/06/2025 08:13:37
+Data de Atualização..: 18/06/2025 08:16:04
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
@@ -31,7 +31,7 @@ Responsável..........: Marcos Morais
 - **Tailwind CSS**: Framework CSS para estilização rápida e personalizada.
 - **GitHub**: Controle de versão e colaboração no código.
 
-## 📂 Listagem de Arquivos
+## 📂 Documentos
 
 ```
 documentos
