@@ -58,9 +58,13 @@ def gerar_arvore(path, ignorar=None, prefixo="", is_root=True, nome_raiz=None):
     linhas = []
 
     if is_root:
-        if nome_raiz is None:
-            nome_raiz = os.path.basename(os.path.normpath(path)) or "."
-        linhas.append(nome_raiz)
+        nome_raiz = nome_raiz or os.path.basename(path)
+        linhas.append(f"🗂️ {nome_raiz}")
+    
+    #if is_root:
+    #    if nome_raiz is None:
+    #        nome_raiz = os.path.basename(os.path.normpath(path)) or "."
+    #    linhas.append(nome_raiz)
 
     try:
         itens = sorted(os.listdir(path))
