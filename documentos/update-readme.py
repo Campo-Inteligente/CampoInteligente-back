@@ -132,20 +132,19 @@ def gerar_arvore(path, prefixo="", ignorar=None, is_root=True, nome_raiz=None):
 
     itens_filtrados = []
     for item in itens:
-        caminho_item = os.path.join(path, item)
-
-        if item in ignorar:
+        if item in ignorar or item in OCULTA_DIR:
             continue
-
+    
+        caminho_item = os.path.join(path, item)
+        
         if os.path.isdir(caminho_item):
-            if item in OCULTA_DIR:
+            if os.path.basename(item) in OCULTA_DIR:
                 continue
             itens_filtrados.append(item)
         else:
             ext = os.path.splitext(item)[1].lower()
-            if ext in OCULTA_EXT:
-                continue
-            itens_filtrados.append(item)
+            if ext not in OCULTA_EXT:
+                itens_filtrados.append(item
 
     total = len(itens_filtrados)
     for i, item in enumerate(itens_filtrados):
