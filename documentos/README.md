@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 89 (AUTO-INCREMENTO)
+Versão...............: 90 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 18/06/2025 08:46:33
+Data de Atualização..: 18/06/2025 08:48:26
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
@@ -92,39 +92,38 @@ startup-campo-inteligente-back
 │   │   │   └── 69bd5578baca0fbf15c27a9efa3de9417cb649
 │   │   ├── 40
 │   │   │   └── 464f837b223d75e139f48316d20f62147425eb
+│   │   ├── 43
+│   │   │   └── e1907da2c2a9a941eef212df054a5d7e40b085
+│   │   ├── 46
+│   │   │   └── 9172caae2f502695def40b6d2a635f3365b8d7
 │   │   ├── 51
 │   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
-│   │   ├── 55
-│   │   │   └── d247f2ba1a2272fbed77c2b693f055ae5c1a49
+│   │   ├── 52
+│   │   │   └── bfa092e330099bb83daabdaad18d39df01ce2a
 │   │   ├── 75
 │   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
 │   │   ├── 76
 │   │   │   └── 674b0afb9bd30fca6f482c6795b6050c5aec4c
+│   │   ├── 77
+│   │   │   └── 30ef7f3e0586b9070623baed6032dff904c9ea
+│   │   ├── 85
+│   │   │   └── bd7a1f60198bc72b659a6ca5eab2312cc51ca2
 │   │   ├── 8b
 │   │   │   ├── 137891791fe96927ad78e64b0aad7bded08bdc
 │   │   │   └── dbcfd70ce62d9e9035bdc9d0656945a490c109
-│   │   ├── 8e
-│   │   │   └── bd91bc4d8e4403f55d9705a4ee384bb8da2b33
-│   │   ├── 9f
-│   │   │   └── 728587959d189de8b5dcadab2b3aec1276a169
 │   │   ├── a1
 │   │   │   └── 15147b38ce6b2f38b36c44798165c40ec74ed0
 │   │   ├── c3
 │   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
 │   │   ├── c6
 │   │   │   └── f35db6ace59bd3298edc265f0ca4aa669692ab
-│   │   ├── d2
-│   │   │   └── 5bf8508e136bd0ec4cea63b2a6be8f8ca26ce2
 │   │   ├── d3
 │   │   │   └── 660e9cecf95d68c17af5844ff7981364733c26
-│   │   ├── d4
-│   │   │   └── db015924e27f22d36b594c846586bbc02da537
 │   │   ├── e1
 │   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
 │   │   ├── e6
+│   │   │   ├── 812b6c02822b29a4af01792efb0614e761557a
 │   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
-│   │   ├── e7
-│   │   │   └── 3044321e6efcaf948f03aab7f7f61fe48bf985
 │   │   ├── ef
 │   │   │   └── 2bac425b767f5f5d32bd5c151355ff82b3667f
 │   │   ├── info
@@ -162,8 +161,7 @@ startup-campo-inteligente-back
 │   └── versao.txt
 └── requirements.txt
 ```
-
-## 🌳 Estrutura do Repositório
+## 📂 Documentos
 
 ```
 documentos
@@ -174,6 +172,21 @@ documentos
 │   └── teste.txt
 ├── update-readme.py
 └── versao.txt
+```
+
+## 🌳 Estrutura do Repositório
+
+```
+.
+├── .gitignore
+├── Dockerfile
+├── OBSERVAÇÕES SOBRE OS CODIGOS
+├── README.md
+├── chatbot.py
+├── chatbotR.py
+├── db
+│   └── conexao.py
+└── requirements.txt
 ```
 ## 🧑‍💻 Como Contribuir
 
