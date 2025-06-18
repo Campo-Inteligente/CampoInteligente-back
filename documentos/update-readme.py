@@ -70,6 +70,74 @@ def listar_arquivos():
         if os.path.isfile(f) and f not in ignorar
     ])
 
+def gerar_arvore(path, ignorar=None, prefixo="", is_root=True, nome_raiz=None):
+    """
+    Gera uma representação em forma de árvore do diretório especificado, semelhante ao comando 'tree' do DOS.
+
+    Parâmetros:
+    -----------
+    path : str
+        Caminho do diretório a ser explorado.
+
+    ignorar : set ou list, opcional
+        Conjunto de nomes de arquivos ou diretórios que devem ser ignorados. Por padrão, nenhum é ignorado.
+
+    prefixo : str, opcional
+        Utilizado internamente para controlar a indentação nas chamadas recursivas.
+
+    is_root : bool, opcional
+        Define se é a primeira chamada (raiz da árvore).
+
+    nome_raiz : str, opcional
+        Nome a ser exibido como topo da árvore. Se None, usa o nome da pasta em 'path'.
+
+    Retorna:
+    --------
+    str
+        Árvore textual representando a estrutura de arquivos e pastas.
+    """
+    ignorar = set(ignorar) if ignorar else set()
+    linhas = []
+
+    if is_root:
+        if nome_raiz is None:
+            nome_raiz = os.path.basename(os.path.normpath(path)) or "."
+        linhas.append(nome_raiz)
+
+    try:
+        itens = sorted(os.listdir(path))
+    except (FileNotFoundError, PermissionError) as e:
+        return f"{prefixo}[Erro ao acessar {path}: {e}]"
+
+    itens_filtrados = []
+    for item in itens:
+        if item in ignorar:
+            continue
+
+        caminho_item = os.path.join(path, item)
+        if os.path.isdir(caminho_item):
+            if item not in ignorar:
+                itens_filtrados.append(item)
+        else:
+            ext = os.path.splitext(item)[1].lower()
+            if ext not in OCULTA_EXT:
+                itens_filtrados.append(item)
+
+    total = len(itens_filtrados)
+    for i, item in enumerate(itens_filtrados):
+        caminho_item = os.path.join(path, item)
+        ultimo = (i == total - 1)
+        ponteiro = "└── " if ultimo else "├── "
+
+        linhas.append(f"{prefixo}{ponteiro}{item}")
+
+        if os.path.isdir(caminho_item):
+            novo_prefixo = prefixo + ("    " if ultimo else "│   ")
+            subarvore = gerar_arvore(caminho_item, ignorar, novo_prefixo, is_root=False)
+            linhas.append(subarvore)
+
+    return "\n".join(linhas)
+
 def gerar_arvorexxxxxxxxxxx(path, prefixo="", ignorar=None):
     """
     Gera uma representação em árvore do diretório 'path', recursivamente,
@@ -109,10 +177,43 @@ def gerar_arvorexxxxxxxxxxx(path, prefixo="", ignorar=None):
     return "\n".join(linhas)
 
 
-def gerar_arvore(path, prefixo="", ignorar=None, is_root=True, nome_raiz=None):
+def gerar_arvore_funcionando(path, prefixo="", ignorar=None, is_root=True, nome_raiz=None):
     """
-    Gera uma representação em árvore do diretório 'path', com o nome da raiz
-    e aplicando filtros definidos nas constantes globais.
+    Gera uma representação textual em forma de árvore da estrutura de diretórios e arquivos a partir do caminho especificado.
+
+    Parâmetros:
+    ----------
+    path : str
+        Caminho absoluto ou relativo para o diretório raiz cuja estrutura será representada.
+    
+    prefixo : str, opcional
+        Prefixo utilizado para formatar a indentação dos elementos da árvore durante chamadas recursivas.
+        Por padrão, é uma string vazia. Usuários finais geralmente não precisam alterar esse valor.
+
+    ignorar : set ou list, opcional
+        Conjunto ou lista de nomes de arquivos e diretórios que devem ser ignorados (filtrados) da árvore.
+        Caso não seja informado, serão usados valores padrão definidos nas constantes globais como README_FILE, VERSAO_FILE, etc.
+
+    is_root : bool, opcional
+        Indica se a chamada atual é a raiz da recursão. Usado para adicionar o nome do diretório raiz no topo da árvore.
+        Por padrão, é True. Nas chamadas recursivas, é definido como False automaticamente.
+
+    nome_raiz : str, opcional
+        Nome personalizado a ser exibido no topo da árvore como raiz. Se não for fornecido, o nome do diretório
+        especificado em 'path' será usado.
+
+    Retorna:
+    -------
+    str
+        String formatada representando a estrutura do diretório e seus subdiretórios em forma de árvore.
+    
+    Exemplo de saída:
+    ----------------
+    projeto
+    ├── main.py
+    ├── utils
+    │   └── helper.py
+    └── README.md
     """
     if ignorar is None:
         ignorar = {os.path.basename(README_FILE), os.path.basename(VERSAO_FILE), UPDATE_FILE, ".gitignore"}
