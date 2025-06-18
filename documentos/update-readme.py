@@ -90,12 +90,27 @@ def gerar_arvore(path, ignorar=None, prefixo="", is_root=True, nome_raiz=None):
         ponteiro = "└── " if ultimo else "├── "
 
         if os.path.isdir(caminho_item):
-            linhas.append(f"{prefixo}{ponteiro}🗂️ {item}")
-            novo_prefixo = prefixo + ("    " if ultimo else "│   ")
-            subarvore = gerar_arvore(caminho_item, ignorar, novo_prefixo, is_root=False)
-            linhas.append(subarvore)
+            # Verifica se a pasta tem conteúdo relevante (não ignorado e visível)
+            try:
+                conteudo_dir = [
+                    f for f in os.listdir(caminho_item)
+                    if f not in ignorar and (
+                        os.path.isdir(os.path.join(caminho_item, f)) or
+                        os.path.splitext(f)[1].lower() not in OCULTA_EXT
+                    )
+                ]
+            except (FileNotFoundError, PermissionError):
+                conteudo_dir = []
+
+            emoji = "📂" if conteudo_dir else "🗂️"
+            linhas.append(f"{prefixo}{ponteiro}{emoji} {item}")
+
+            if conteudo_dir:
+                novo_prefixo = prefixo + ("    " if ultimo else "│   ")
+                subarvore = gerar_arvore(caminho_item, ignorar, novo_prefixo, is_root=False)
+                linhas.append(subarvore)
         else:
-            linhas.append(f"{prefixo}{ponteiro}🗃️ {item}")
+            linhas.append(f"{prefixo}{ponteiro}📄 {item}")
 
     return "\n".join(linhas)
 
