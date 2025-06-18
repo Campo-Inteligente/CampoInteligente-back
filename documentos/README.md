@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 87 (AUTO-INCREMENTO)
+Versão...............: 88 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 18/06/2025 08:35:51
+Data de Atualização..: 18/06/2025 08:45:13
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
@@ -36,21 +36,130 @@ Responsável..........: Marcos Morais
 ```
 documentos
 ├── LICENSE
+├── README.md
 ├── requirements.txt
-└── teste
-    └── teste.txt
+├── teste
+│   └── teste.txt
+├── update-readme.py
+└── versao.txt
 ```
 
 ## 🌳 Estrutura do Repositório
 
 ```
 startup-campo-inteligente-back
+├── .env
+├── .git
+│   ├── FETCH_HEAD
+│   ├── HEAD
+│   ├── config
+│   ├── description
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   ├── sendemail-validate.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   └── exclude
+│   ├── logs
+│   │   ├── HEAD
+│   │   └── refs
+│   │       ├── heads
+│   │       │   └── main
+│   │       └── remotes
+│   │           └── origin
+│   │               ├── HEAD
+│   │               └── main
+│   ├── objects
+│   │   ├── 02
+│   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
+│   │   ├── 0a
+│   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
+│   │   ├── 20
+│   │   │   └── c8d1fc3172c1b1ce9a1f9853c313397e824a26
+│   │   ├── 24
+│   │   │   └── 9a50de1dacd00c3fa5dd14f01b690ff6a23809
+│   │   ├── 3a
+│   │   │   └── 69bd5578baca0fbf15c27a9efa3de9417cb649
+│   │   ├── 40
+│   │   │   └── 464f837b223d75e139f48316d20f62147425eb
+│   │   ├── 51
+│   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
+│   │   ├── 53
+│   │   │   └── 57d600164370d1279b6896edbb155c4a1cad77
+│   │   ├── 75
+│   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
+│   │   ├── 76
+│   │   │   └── 674b0afb9bd30fca6f482c6795b6050c5aec4c
+│   │   ├── 8b
+│   │   │   ├── 137891791fe96927ad78e64b0aad7bded08bdc
+│   │   │   └── dbcfd70ce62d9e9035bdc9d0656945a490c109
+│   │   ├── 94
+│   │   │   └── f361087af3e28b93e3d0aadf9843aeff2d243e
+│   │   ├── a1
+│   │   │   └── 15147b38ce6b2f38b36c44798165c40ec74ed0
+│   │   ├── b5
+│   │   │   └── 70a09dd8a3726ca5b05db604df4c1afdc94c5f
+│   │   ├── c3
+│   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
+│   │   ├── c6
+│   │   │   └── f35db6ace59bd3298edc265f0ca4aa669692ab
+│   │   ├── cc
+│   │   │   └── 2db74f152fbf5c5459c602e9de8be14372eb53
+│   │   ├── d3
+│   │   │   └── 660e9cecf95d68c17af5844ff7981364733c26
+│   │   ├── e1
+│   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
+│   │   ├── e6
+│   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+│   │   ├── ea
+│   │   │   └── f7a13d15e02e082b62c96f10b881336ece332c
+│   │   ├── ef
+│   │   │   └── 2bac425b767f5f5d32bd5c151355ff82b3667f
+│   │   ├── info
+
+│   │   └── pack
+
+│   ├── refs
+│   │   ├── heads
+│   │   │   └── main
+│   │   ├── remotes
+│   │   │   └── origin
+│   │   │       ├── HEAD
+│   │   │       └── main
+│   │   └── tags
+
+│   └── shallow
+├── .github
+│   └── workflows
+
+├── .gitignore
 ├── Dockerfile
 ├── OBSERVAÇÕES SOBRE OS CODIGOS
+├── README.md
 ├── chatbot.py
 ├── chatbotR.py
 ├── db
 │   └── conexao.py
+├── documentos
+│   ├── LICENSE
+│   ├── README.md
+│   ├── requirements.txt
+│   ├── teste
+│   │   └── teste.txt
+│   ├── update-readme.py
+│   └── versao.txt
 └── requirements.txt
 ```
 ## 🧑‍💻 Como Contribuir
