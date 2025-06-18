@@ -144,7 +144,7 @@ def gerar_arvore(path, prefixo="", ignorar=None, is_root=True, nome_raiz=None):
         else:
             ext = os.path.splitext(item)[1].lower()
             if ext not in OCULTA_EXT:
-                itens_filtrados.append(item
+                itens_filtrados.append(item)
 
     total = len(itens_filtrados)
     for i, item in enumerate(itens_filtrados):
