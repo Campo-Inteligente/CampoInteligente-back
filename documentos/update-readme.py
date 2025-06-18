@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Constantes usadas no script
 OCULTA_EXT = {".yml"}                                        # sempre em minúsculas para padronizar
-OCULTA_DIR = {".git",".env",".env.local",".github", "documentos"}     # como conjunto, para consistência e busca rápida
+OCULTA_DIR = {""}     # como conjunto, para consistência e busca rápida
 VERSAO_FILE = os.path.join(BASE_DIR, "versao.txt")                    # Arquivo de versão dentro de ./documentos
 README_FILE = os.path.join(BASE_DIR, "README.md")                     # README também dentro de ./documentos
 UPDATE_FILE = "update-readme.py"                                      # Nome do script
