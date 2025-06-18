@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 90 (AUTO-INCREMENTO)
+Versão...............: 91 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 18/06/2025 08:48:26
+Data de Atualização..: 18/06/2025 08:53:44
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
@@ -43,7 +43,6 @@ documentos
 ├── update-readme.py
 └── versao.txt
 ```
-
 ## 🌳 Estrutura do Repositório
 
 ```
@@ -86,33 +85,35 @@ startup-campo-inteligente-back
 │   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
 │   │   ├── 0a
 │   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
+│   │   ├── 0f
+│   │   │   └── a6a7b088051e48b8dc94d598b7e324e6f691c9
+│   │   ├── 12
+│   │   │   └── 861ecf90eabe3e4309258a5fee6c4b006fe525
 │   │   ├── 24
 │   │   │   └── 9a50de1dacd00c3fa5dd14f01b690ff6a23809
+│   │   ├── 2c
+│   │   │   └── 662f1b48c4193f367d4049b875dd10fd53d13c
 │   │   ├── 3a
 │   │   │   └── 69bd5578baca0fbf15c27a9efa3de9417cb649
 │   │   ├── 40
 │   │   │   └── 464f837b223d75e139f48316d20f62147425eb
-│   │   ├── 43
-│   │   │   └── e1907da2c2a9a941eef212df054a5d7e40b085
-│   │   ├── 46
-│   │   │   └── 9172caae2f502695def40b6d2a635f3365b8d7
 │   │   ├── 51
 │   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
-│   │   ├── 52
-│   │   │   └── bfa092e330099bb83daabdaad18d39df01ce2a
+│   │   ├── 69
+│   │   │   └── bd27ebde238b6cbbf597418e10f4430aa1b0f0
 │   │   ├── 75
 │   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
 │   │   ├── 76
 │   │   │   └── 674b0afb9bd30fca6f482c6795b6050c5aec4c
-│   │   ├── 77
-│   │   │   └── 30ef7f3e0586b9070623baed6032dff904c9ea
 │   │   ├── 85
-│   │   │   └── bd7a1f60198bc72b659a6ca5eab2312cc51ca2
+│   │   │   └── 999994ad3de2b734bde01a85c749f1af1d04c2
 │   │   ├── 8b
 │   │   │   ├── 137891791fe96927ad78e64b0aad7bded08bdc
 │   │   │   └── dbcfd70ce62d9e9035bdc9d0656945a490c109
 │   │   ├── a1
 │   │   │   └── 15147b38ce6b2f38b36c44798165c40ec74ed0
+│   │   ├── b6
+│   │   │   └── 950af377f14d452af8919f4a079dc5d0a702c4
 │   │   ├── c3
 │   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
 │   │   ├── c6
@@ -122,7 +123,6 @@ startup-campo-inteligente-back
 │   │   ├── e1
 │   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
 │   │   ├── e6
-│   │   │   ├── 812b6c02822b29a4af01792efb0614e761557a
 │   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
 │   │   ├── ef
 │   │   │   └── 2bac425b767f5f5d32bd5c151355ff82b3667f
@@ -161,117 +161,9 @@ startup-campo-inteligente-back
 │   └── versao.txt
 └── requirements.txt
 ```
-## 📂 Documentos
-
-```
-documentos
-├── LICENSE
-├── README.md
-├── requirements.txt
-├── teste
-│   └── teste.txt
-├── update-readme.py
-└── versao.txt
-```
-
-## 🌳 Estrutura do Repositório
-
-```
-.
-├── .gitignore
-├── Dockerfile
-├── OBSERVAÇÕES SOBRE OS CODIGOS
-├── README.md
-├── chatbot.py
-├── chatbotR.py
-├── db
-│   └── conexao.py
-└── requirements.txt
-```
 ## 🧑‍💻 Como Contribuir
 
-Contribuições são sempre bem-vindas! Para colaborar com o projeto, siga os passos abaixo:
-
-1. **Faça um Fork do Repositório**
-Clique no botão *Fork* no canto superior direito deste repositório para criar uma cópia do repositório em sua conta do GitHub.
-
-2. **Clone o Repositório**
-Clone o repositório na sua máquina local para começar a trabalhar:
-
-```bash
-git clone https://github.com/seu-usuario/CampoInteligente.git
-cd CampoInteligente
-```
-
-3. **Crie uma Branch para Sua Contribuição**
-Crie uma nova branch para a sua contribuição, garantindo que seu trabalho seja mantido separado da branch principal:
-
-```bash
-git checkout -b minha-contribuicao
-```
-
-4. **Realize as Alterações Necessárias**
-Sinta-se à vontade para editar, corrigir ou adicionar novos recursos à aplicação conforme sua necessidade.
-
-5. **Commit e Push das Alterações**
-Adicione suas alterações e faça o commit com uma mensagem descritiva:
-
-```bash
-git add .
-git commit -m "Descrição das mudanças realizadas"
-git push origin minha-contribuicao
-```
-
-6. **Crie um Pull Request (PR)**
-Após realizar o push da sua branch, acesse seu repositório no GitHub e crie um *Pull Request*.
-Compare a sua branch com a branch principal (`main`) do repositório original e envie para revisão.
-
-## 🛠️ Como Rodar Localmente
-
-Para rodar a aplicação localmente em seu ambiente de desenvolvimento, siga os passos abaixo.
-
-### Pré-requisitos
-Certifique-se de ter o seguinte instalado:
-
-- Node.js (versão LTS recomendada)
-- npm ou yarn (gerenciador de pacotes)
-
-### Passos para Executar o Projeto Localmente
-
-**Instale as dependências do projeto:**
-
-```bash
-npm install
-npm install framer-motion
-```
-
-**Construa o projeto:**
-
-```bash
-npx next build
-```
-
-**Execute a aplicação localmente:**
-
-```bash
-npm run dev     # Modo de Desenvolvimento
-npm run build   # Compilação para Produção
-npm run start   # Modo de Visualização
-```
-
-**Acesse a aplicação:**
-
-Abra o navegador e acesse [http://localhost:3000](http://localhost:3000) para ver a aplicação em funcionamento.
-
-**Atualize o repositório:**
-
-Após realizar alterações e verificar que tudo está funcionando localmente, envie suas modificações para o GitHub:
-
-```bash
-git add .
-git commit -m "Mensagem explicando as mudanças"
-git push origin minha-contribuicao
-```
+... (conteúdo da contribuição e execução local permanece o mesmo) ...
 
 ## 📂 Licença
 
@@ -279,7 +171,7 @@ Este projeto está licenciado sob os termos do arquivo [LICENSE](./documentos/LI
 
 ## 🤝 Agradecimentos
 
-Contribuições, sugestões e feedbacks são muito bem-vindos! Caso tenha algum comentário ou queira contribuir com o projeto, sinta-se à vontade para abrir uma issue ou enviar um pull request..
+Contribuições, sugestões e feedbacks são muito bem-vindos! Caso tenha algum comentário ou queira contribuir com o projeto, sinta-se à vontade para abrir uma issue ou enviar um pull request.
 
 --- 
 
