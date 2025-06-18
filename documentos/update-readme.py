@@ -166,10 +166,7 @@ def gerar_readme(versao, data_hora):
         readme.write(gerar_arvore("./", OCULTA_DIR))
         readme.write("\n```\n")
 
-        readme.write("## 🧑‍💻 Como Contribuir\n\n")
-        readme.write("... (conteúdo da contribuição e execução local permanece o mesmo) ...\n\n")
-
-        readme.write("## 📂 Licença\n\n")
+        readme.write("## 📜 Licença\n\n")
         readme.write("Este projeto está licenciado sob os termos do arquivo [LICENSE](./documentos/LICENSE).\n\n")
         readme.write("## 🤝 Agradecimentos\n\n")
         readme.write("Contribuições, sugestões e feedbacks são muito bem-vindos! Caso tenha algum comentário ou queira contribuir com o projeto, sinta-se à vontade para abrir uma issue ou enviar um pull request.\n\n")
