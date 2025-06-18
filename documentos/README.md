@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 85 (AUTO-INCREMENTO)
+Versão...............: 86 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 18/06/2025 08:34:00
+Data de Atualização..: 18/06/2025 08:35:16
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
@@ -45,7 +45,6 @@ documentos
 
 ```
 startup-campo-inteligente-back
-├── .env
 ├── Dockerfile
 ├── OBSERVAÇÕES SOBRE OS CODIGOS
 ├── chatbot.py
