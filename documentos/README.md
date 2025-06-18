@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 80 (AUTO-INCREMENTO)
+Versão...............: 81 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 18/06/2025 08:18:39
+Data de Atualização..: 18/06/2025 08:19:44
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
@@ -46,98 +46,6 @@ documentos
 ```
 startup-campo-inteligente-back
 ├── .env
-├── .git
-│   ├── FETCH_HEAD
-│   ├── HEAD
-│   ├── config
-│   ├── description
-│   ├── hooks
-│   │   ├── applypatch-msg.sample
-│   │   ├── commit-msg.sample
-│   │   ├── fsmonitor-watchman.sample
-│   │   ├── post-update.sample
-│   │   ├── pre-applypatch.sample
-│   │   ├── pre-commit.sample
-│   │   ├── pre-merge-commit.sample
-│   │   ├── pre-push.sample
-│   │   ├── pre-rebase.sample
-│   │   ├── pre-receive.sample
-│   │   ├── prepare-commit-msg.sample
-│   │   ├── push-to-checkout.sample
-│   │   ├── sendemail-validate.sample
-│   │   └── update.sample
-│   ├── index
-│   ├── info
-│   │   └── exclude
-│   ├── logs
-│   │   ├── HEAD
-│   │   └── refs
-│   │       ├── heads
-│   │       │   └── main
-│   │       └── remotes
-│   │           └── origin
-│   │               ├── HEAD
-│   │               └── main
-│   ├── objects
-│   │   ├── 02
-│   │   │   └── 8875767e5067f8263836cb56a050b25b959df0
-│   │   ├── 0a
-│   │   │   └── 158f3b4f5b3917f4a4ad3b86c9dbaf61603ff8
-│   │   ├── 20
-│   │   │   └── 9c007ab3067fa0654c81a9b26a5b1d4672c27e
-│   │   ├── 24
-│   │   │   └── 9a50de1dacd00c3fa5dd14f01b690ff6a23809
-│   │   ├── 29
-│   │   │   └── ce309f069ad7892422e244e12478157af46fc2
-│   │   ├── 3a
-│   │   │   └── 69bd5578baca0fbf15c27a9efa3de9417cb649
-│   │   ├── 40
-│   │   │   └── 464f837b223d75e139f48316d20f62147425eb
-│   │   ├── 4b
-│   │   │   └── 3d60605588b8bedce109f2b4d0dfcd7c7c4826
-│   │   ├── 51
-│   │   │   └── f3e7f026b8a3a25c8e8f4653de436bfd599204
-│   │   ├── 75
-│   │   │   └── bfce93d147e2bdaea7a7e44d8acc850dd1cae4
-│   │   ├── 76
-│   │   │   └── 674b0afb9bd30fca6f482c6795b6050c5aec4c
-│   │   ├── 8b
-│   │   │   ├── 137891791fe96927ad78e64b0aad7bded08bdc
-│   │   │   └── dbcfd70ce62d9e9035bdc9d0656945a490c109
-│   │   ├── a0
-│   │   │   └── 7f47b1d6c1b769603806a458d7b8d95cd61c9b
-│   │   ├── a1
-│   │   │   └── 15147b38ce6b2f38b36c44798165c40ec74ed0
-│   │   ├── c3
-│   │   │   └── 423e883d6db8ac8cb43e1ab07021f306693e2e
-│   │   ├── c6
-│   │   │   └── f35db6ace59bd3298edc265f0ca4aa669692ab
-│   │   ├── d3
-│   │   │   └── 660e9cecf95d68c17af5844ff7981364733c26
-│   │   ├── e1
-│   │   │   └── 6a1ea33f7b56433b15f0375ebc175b73f4a791
-│   │   ├── e6
-│   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
-│   │   ├── eb
-│   │   │   └── 13855b7d70b04d6f04877df2cafe05de51a051
-│   │   ├── ef
-│   │   │   └── 2bac425b767f5f5d32bd5c151355ff82b3667f
-│   │   ├── fe
-│   │   │   └── a2e2b71a5fbd45409eb47386eabe0aafb89226
-│   │   ├── info
-
-│   │   └── pack
-
-│   ├── refs
-│   │   ├── heads
-│   │   │   └── main
-│   │   ├── remotes
-│   │   │   └── origin
-│   │   │       ├── HEAD
-│   │   │       └── main
-│   │   └── tags
-
-│   └── shallow
 ├── .github
 │   └── workflows
 
