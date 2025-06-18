@@ -142,7 +142,7 @@ def gerar_readme(versao, data_hora):
 
         readme.write("## 🌳 Estrutura do Repositório\n\n")
         readme.write("```\n")
-        readme.write(gerar_arvore(".\\", OCULTAR_DIR))
+        readme.write(gerar_arvore(".\", OCULTAR_DIR))
         readme.write("\n```\n")
 
         readme.write("## 🧑‍💻 Como Contribuir\n\n")
