@@ -333,6 +333,12 @@ def gerar_readme(versao, data_hora, arquivos):
         readme.write(gerar_arvore(os.path.abspath(os.path.join(BASE_DIR, ".."))))  # Gera árvore da pasta informada
         readme.write("\n```\n")
 
+          # Seção adicional: estrutura em árvore
+        readme.write("\n## 🌳 Estrutura do Repositório\n\n")
+        readme.write("```\n")  # Bloco de código para preservar formatação
+        readme.write(gerar_arvore("./documentos", OCULTA_DIR))  # Gera árvore da pasta informada
+        readme.write("\n```\n")
+
 
         readme.write("## 🧑‍💻 Como Contribuir\n\n")
         readme.write("Contribuições são sempre bem-vindas! Para colaborar com o projeto, siga os passos abaixo:\n\n")
