@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 
 ```
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 61 (AUTO-INCREMENTO)
+Versão...............: 62 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 17/06/2025 23:41:30
+Data de Atualização..: 18/06/2025 00:42:10
 Responsável..........: Marcos Morais
 ```
 ## 🧩 Tecnologias Utilizadas
