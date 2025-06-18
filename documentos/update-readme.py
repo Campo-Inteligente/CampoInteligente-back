@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Extensões e diretórios que devem ser ocultados na árvore
 OCULTA_EXT = {".yml",".py",".md"}
-OCULTA_DIR = {".git", "documentos", ".github", ".gitignore", ".env", ".env.local"}
+OCULTA_DIR = {".git", ".github", ".gitignore", ".env", ".env.local"}
 
 # Arquivos importantes
 VERSAO_FILE = os.path.join(BASE_DIR, "versao.txt")
