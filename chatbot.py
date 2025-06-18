@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import locale
 import os
 import requests
-import openpyxl # Mantido, pois a função salvar_planilha existe
+import openpyxl  # Mantido, pois a função salvar_planilha existe
 from dotenv import load_dotenv
 import openai
 import re
@@ -48,12 +48,12 @@ REGISTRATION_QUESTIONS = {
     "nome_completo": "Qual é seu nome completo? 👤",
     "cpf": "Qual é seu CPF? (apenas números, por favor) 🔢",
     "rg": "Qual é seu RG? (apenas números, se possível) 🆔",
-    "data_nascimento": "Qual sua data de nascimento? (dd/mm/aaaa) 🎂",
+    "data_nascimento": "Qual sua data de nascimento? (dd/mm/aaaa) �",
     "sexo": "Qual seu sexo? (Masculino ♂️, Feminino ♀️ ou Outro) �",
     "estado_civil": "Qual seu estado civil? Escolha uma opção:\n1. Casado 💍\n2. Solteiro 🧍\n3. Viúvo �\n4. Divorciado 💔",
     "telefone_contato": "Qual seu telefone para contato? (Ex: 11987654321, com DDD e sem espaços ou traços) 📱",
     "email": "Você deseja adicionar um endereço de e-mail ao seu cadastro? 📧\n1. Sim\n2. Não",
-    "endereco_tipo": "Seu endereço é rural ou urbano? 🏡🏙️",
+    "endereco_tipo": "Seu endereço é rural ou urbano? 🏡🏙️\n1. Rural\n2. Urbano",
     "nome_propriedade": "Qual o nome da propriedade (se houver)? 🚜",
     "comunidade_bairro": "Qual a comunidade ou bairro? 🏘️",
     "municipio": "Qual o município? 📍",
@@ -61,7 +61,7 @@ REGISTRATION_QUESTIONS = {
     "cep": "Qual o CEP? ✉️",
     "ponto_referencia": "Você deseja adicionar um ponto de referência? 🗺️\n1. Sim\n2. Não",
     "dap_caf": "Possui DAP ou CAF? Se sim, informe o número. 📄",
-    "tipo_producao": "Sua produção é de que tipo? (Familiar ou Empresarial) 🧑‍🌾🏢",
+    "tipo_producao": "Sua produção é de que tipo? 🧑‍🌾🏢\n1. Familiar\n2. Empresarial",
     "producao_organica": "Sua produção é orgânica? (Sim ou Não) ✅❌",
     "utiliza_irrigacao": "Utiliza irrigação? (Sim ou Não) 💧",
     "area_total_propriedade": "Qual a área total da propriedade (em hectares)? 📏",
@@ -122,7 +122,8 @@ EDITABLE_FIELDS_MAP = {
 def get_db_connection():
     conn = None
     try:
-        print(f"DEBUG_DB_CONNECT: Tentando conectar ao PostgreSQL com: Host={DB_HOST}, Port={DB_PORT}, Database={DB_NAME}, User={DB_USER}")
+        print(
+            f"DEBUG_DB_CONNECT: Tentando conectar ao PostgreSQL com: Host={DB_HOST}, Port={DB_PORT}, Database={DB_NAME}, User={DB_USER}")
         conn = psycopg2.connect(
             database=DB_NAME,
             user=DB_USER,
@@ -133,10 +134,13 @@ def get_db_connection():
         print("DEBUG_DB_CONNECT: Conexão ao PostgreSQL estabelecida com sucesso.")
         return conn
     except psycopg2.Error as e:
-        print(f"DEBUG_DB_CONNECT_ERROR: Erro ao conectar ao banco de dados PostgreSQL: {e}")
+        print(
+            f"DEBUG_DB_CONNECT_ERROR: Erro ao conectar ao banco de dados PostgreSQL: {e}")
         return None
 
 # Função para inicializar a tabela de contexto de conversas no banco de dados
+
+
 def init_db():
     conn = get_db_connection()
     if conn:
@@ -151,38 +155,49 @@ def init_db():
             """)
             conn.commit()
             cur.close()
-            print("DEBUG_DB_INIT: Tabela 'conversation_contexts' verificada/criada com sucesso.")
+            print(
+                "DEBUG_DB_INIT: Tabela 'conversation_contexts' verificada/criada com sucesso.")
         except psycopg2.Error as e:
-            print(f"DEBUG_DB_INIT_ERROR: Erro ao inicializar o banco de dados: {e}")
+            print(
+                f"DEBUG_DB_INIT_ERROR: Erro ao inicializar o banco de dados: {e}")
         finally:
             if conn:
                 conn.close()
 
 # Função para carregar o contexto da conversa do banco de dados
+
+
 def load_conversation_context(phone_number):
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute("SELECT context FROM conversation_contexts WHERE phone_number = %s;", (phone_number,))
+            cur.execute(
+                "SELECT context FROM conversation_contexts WHERE phone_number = %s;", (phone_number,))
             result = cur.fetchone()
             cur.close()
             if result:
                 loaded_context = result[0]
-                print(f"DEBUG_DB_LOAD: Contexto carregado do DB para {phone_number}: {loaded_context}")
+                print(
+                    f"DEBUG_DB_LOAD: Contexto carregado do DB para {phone_number}: {loaded_context}")
                 return loaded_context
-            print(f"DEBUG_DB_LOAD: Nenhum contexto encontrado no DB para {phone_number}. Retornando vazio.")
+            print(
+                f"DEBUG_DB_LOAD: Nenhum contexto encontrado no DB para {phone_number}. Retornando vazio.")
             return {}
         except psycopg2.Error as e:
-            print(f"DEBUG_DB_LOAD_ERROR: Erro ao carregar contexto da conversa do banco de dados para {phone_number}: {e}")
+            print(
+                f"DEBUG_DB_LOAD_ERROR: Erro ao carregar contexto da conversa do banco de dados para {phone_number}: {e}")
             return {}
         finally:
             if conn:
                 conn.close()
-    print(f"DEBUG_DB_LOAD_ERROR: Conexão ao DB falhou ao carregar contexto para {phone_number}.")
+    print(
+        f"DEBUG_DB_LOAD_ERROR: Conexão ao DB falhou ao carregar contexto para {phone_number}.")
     return {}
 
 # Função para salvar o contexto da conversa no banco de dados
+
+
 def save_conversation_context(phone_number, context):
     conn = get_db_connection()
     if conn:
@@ -197,17 +212,21 @@ def save_conversation_context(phone_number, context):
             """, (phone_number, context_json))
             conn.commit()
             cur.close()
-            print(f"DEBUG_DB_SAVE: Contexto para {phone_number} salvo/atualizado no DB: {context}")
+            print(
+                f"DEBUG_DB_SAVE: Contexto para {phone_number} salvo/atualizado no DB: {context}")
             # time.sleep(0.1)  # Removido para otimização do tempo de resposta
         except psycopg2.Error as e:
-            print(f"DEBUG_DB_SAVE_ERROR: Erro ao salvar contexto da conversa no banco de dados para {phone_number}: {e}")
+            print(
+                f"DEBUG_DB_SAVE_ERROR: Erro ao salvar contexto da conversa no banco de dados para {phone_number}: {e}")
             raise
         finally:
             if conn:
                 conn.close()
     else:
-        print(f"DEBUG_DB_SAVE_ERROR: Conexão ao DB falhou ao salvar contexto para {phone_number}.")
-        raise Exception("Falha na conexão com o banco de dados ao tentar salvar o contexto.")
+        print(
+            f"DEBUG_DB_SAVE_ERROR: Conexão ao DB falhou ao salvar contexto para {phone_number}.")
+        raise Exception(
+            "Falha na conexão com o banco de dados ao tentar salvar o contexto.")
 
 
 # Função para obter localização via IP
@@ -272,11 +291,14 @@ def obter_previsao_estendida(cidade, pais):
                     "data_hora": [data_hora_utc]
                 }
             else:
-                previsoes_diarias[data]["min"] = min(previsoes_diarias[data]["min"], item["main"]["temp_min"])
-                previsoes_diarias[data]["max"] = max(previsoes_diarias[data]["max"], item["main"]["temp_max"])
+                previsoes_diarias[data]["min"] = min(
+                    previsoes_diarias[data]["min"], item["main"]["temp_min"])
+                previsoes_diarias[data]["max"] = max(
+                    previsoes_diarias[data]["max"], item["main"]["temp_max"])
                 previsoes_diarias[data]["data_hora"].append(data_hora_utc)
 
-        previsao_formatada = [{"data": data, **dados} for data, dados in previsoes_diarias.items()]
+        previsao_formatada = [{"data": data, **dados}
+                              for data, dados in previsoes_diarias.items()]
         return {"previsao": previsao_formatada}
     except requests.RequestException as e:
         return {"erro": f"Erro de requisição: {e}"}
@@ -294,7 +316,8 @@ def obter_localizacao_por_coordenadas(lat, lon):
         r.raise_for_status()
         d = r.json()
         endereco = d.get("address", {})
-        cidade = endereco.get("city") or endereco.get("town") or endereco.get("village") or endereco.get("municipality") or ""
+        cidade = endereco.get("city") or endereco.get("town") or endereco.get(
+            "village") or endereco.get("municipality") or ""
         estado = endereco.get("state") or ""
         pais = endereco.get("country") or ""
         if not cidade or not estado or not pais:
@@ -323,20 +346,26 @@ def send_whatsapp_message(numero, mensagem):
         resposta = requests.post(url, json=payload, headers=headers)
         resposta.raise_for_status()
         if resposta.status_code == 200:
-            print(f"DEBUG_WHATSAPP: Mensagem enviada com sucesso para {numero}: {mensagem}")
+            print(
+                f"DEBUG_WHATSAPP: Mensagem enviada com sucesso para {numero}: {mensagem}")
             # time.sleep(0.5) # Removido para otimização
             return resposta.status_code, resposta.json()
         else:
-            print(f"DEBUG_WHATSAPP_ERROR: Falha ao enviar mensagem para {numero}. Status: {resposta.status_code}, Erro: {resposta.text}")
+            print(
+                f"DEBUG_WHATSAPP_ERROR: Falha ao enviar mensagem para {numero}. Status: {resposta.status_code}, Erro: {resposta.text}")
             return resposta.status_code, {"erro": resposta.text}
     except requests.RequestException as e:
-        print(f"DEBUG_WHATSAPP_ERROR: Erro de requisição ao enviar mensagem para {numero}: {e}" )
+        print(
+            f"DEBUG_WHATSAPP_ERROR: Erro de requisição ao enviar mensagem para {numero}: {e}")
         return None, {"erro": f"Erro de requisição ao enviar mensagem: {e}"}
     except Exception as e:
-        print(f"DEBUG_WHATSAPP_ERROR: Erro geral ao enviar mensagem para {numero}: {e}")
+        print(
+            f"DEBUG_WHATSAPP_ERROR: Erro geral ao enviar mensagem para {numero}: {e}")
         return None, {"erro": f"Erro geral ao enviar mensagem: {e}"}
 
 # Nova função para formatar a resposta da previsão do tempo
+
+
 def format_weather_response(cidade, pais):
     clima_atual = obter_previsao_tempo(cidade, pais)
     clima_estendido = obter_previsao_estendida(cidade, pais)
@@ -363,21 +392,21 @@ def format_weather_response(cidade, pais):
         "nublado": "☁️ Nublado",
         "overcast clouds": "☁️ Nublado"
     }
-    
+
     descricao_clima = clima_atual['descricao'].lower()
     emoji_desc = "❓ Informação não disponível"
     for key, val in desc_emojis.items():
         if key in descricao_clima:
             emoji_desc = val
             break
-    
+
     resposta = (
         f"Previsão para {clima_atual['cidade']}: {emoji_desc}\n"
         f"Agora: {clima_atual['temperatura']:.1f}°C (Sensação: {clima_atual['sensacao']:.1f}°C)\n"
         f"Umidade: {clima_atual['umidade']}%\n"
         f"Vento: {clima_atual['vento']:.1f} m/s\n\n"
     )
-    
+
     if "previsao" in clima_estendido and clima_estendido["previsao"]:
         resposta += "Próximos dias:\n"
         for dia_previsao in clima_estendido["previsao"][:2]:
@@ -390,7 +419,7 @@ def format_weather_response(cidade, pais):
             resposta += (
                 f"  {dia_previsao['data']}: {emoji_ext_desc} Min: {dia_previsao['min']:.1f}°C, Max: {dia_previsao['max']:.1f}°C\n"
             )
-    
+
     resposta += "\nQuer outra consulta de clima ou voltar ao menu? (Digite 'outra' ou 'voltar')"
     return resposta
 
@@ -408,7 +437,7 @@ def simular_safra(dados):
     ciclo_cultura = dados.get("ciclo_cultura", "N/A")
 
     produtividade_base = 3000
-    
+
     if "soja" in cultura.lower():
         produtividade_base = 3200
     elif "milho" in cultura.lower():
@@ -436,6 +465,8 @@ def simular_safra(dados):
     return resultado
 
 # Função para formatar o resultado da simulação
+
+
 def formatar_resultado_simulacao(dados, resultado):
     """
     Formata o resultado da simulação para exibição ao usuário.
@@ -446,8 +477,9 @@ def formatar_resultado_simulacao(dados, resultado):
     condicoes_climaticas = dados.get("condicoes_climaticas", "Não informado")
     ciclo_cultura = dados.get("ciclo_cultura", "Não informado")
     produtividade_media = resultado.get("produtividade_media", 0)
-    
-    producao_total_kg = area * produtividade_media if isinstance(area, (int, float)) else 0
+
+    producao_total_kg = area * \
+        produtividade_media if isinstance(area, (int, float)) else 0
     producao_total_toneladas = producao_total_kg / 1000
 
     observacoes = ""
@@ -460,7 +492,6 @@ def formatar_resultado_simulacao(dados, resultado):
 
     observacoes += " - Atenção ao manejo de pragas e doenças comuns em climas úmidos. "
     observacoes += " - Recomendado monitoramento regular da umidade do solo. "
-
 
     mensagem = f"""
 🌾 **Simulação de Safra - Resultado** ✅ Cultura: {cultura.capitalize()}
@@ -568,7 +599,8 @@ def salvar_planilha():
         dados = request.json.get("dados", [])
         if not dados:
             return jsonify({"erro": "Dados não forneceeded."}), 400
-        arquivo = "respostas_agricultores_" + datetime.now().strftime("%Y%m%d%H%M%S") + ".xlsx"
+        arquivo = "respostas_agricultores_" + \
+            datetime.now().strftime("%Y%m%d%H%M%S") + ".xlsx"
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Respostas"
@@ -594,27 +626,32 @@ def is_user_registered(phone_number):
     if conn:
         try:
             cur = conn.cursor()
-            where_clauses = [f"context->>'{field}' IS NOT NULL" for field in MANDATORY_REGISTRATION_FIELDS]
+            where_clauses = [
+                f"context->>'{field}' IS NOT NULL" for field in MANDATORY_REGISTRATION_FIELDS]
             query = f"SELECT 1 FROM conversation_contexts WHERE phone_number = %s AND {' AND '.join(where_clauses)};"
             cur.execute(query, (phone_number,))
             result = cur.fetchone()
             cur.close()
             return result is not None
         except psycopg2.Error as e:
-            print(f"DEBUG_REGISTRATION_ERROR: Erro ao verificar cadastro do usuário: {e}")
+            print(
+                f"DEBUG_REGISTRATION_ERROR: Erro ao verificar cadastro do usuário: {e}")
             return False
         finally:
             if conn:
                 conn.close()
     return False
 
-# Funções de validação de CPF e RG (básicas)
+# Funções de validação
+
+
 def is_valid_cpf(cpf_number):
     cpf_number = re.sub(r'\D', '', cpf_number)
     if len(cpf_number) == 11 and cpf_number.isdigit():
         # Adicione lógica de validação de CPF mais robusta se necessário
         return True
     return False
+
 
 def is_valid_rg(rg_number):
     rg_number = re.sub(r'[\W_]', '', rg_number)
@@ -623,6 +660,7 @@ def is_valid_rg(rg_number):
     if 5 <= len(rg_number) <= 15 and rg_number.isalnum():
         return True
     return False
+
 
 def is_valid_date(date_string):
     try:
@@ -637,7 +675,17 @@ def is_valid_date(date_string):
     except ValueError:
         return False
 
+
+def is_valid_email(email):
+    # Expressão regular para validar e-mail
+    regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if re.match(regex, email):
+        return True
+    return False
+
 # Helper function to get the next registration question key
+
+
 def get_next_registration_question_key(contexto):
     current_question_key = contexto.get("registration_step")
     current_index = -1
@@ -651,13 +699,14 @@ def get_next_registration_question_key(contexto):
 
     for i in range(current_index + 1, len(REGISTRATION_ORDER)):
         question_key = REGISTRATION_ORDER[i]
-        
+
         if question_key in contexto and contexto[question_key] not in ["Não informado", None, ""]:
             if question_key == "municipio" and contexto.get("localizacao", {}).get("cidade"):
                 if not contexto.get("municipio"):
                     contexto["municipio"] = contexto["localizacao"]["cidade"]
                 if not contexto.get("estado_propriedade"):
-                    contexto["estado_propriedade"] = contexto["localizacao"].get("estado", "")
+                    contexto["estado_propriedade"] = contexto["localizacao"].get(
+                        "estado", "")
                 continue
             if question_key == "estado_propriedade" and contexto.get("localizacao", {}).get("estado"):
                 continue
@@ -684,10 +733,12 @@ def get_next_registration_question_key(contexto):
                 continue
 
         return question_key
-            
+
     return None
 
 # Função para redefinir todos os flags de fluxo de conversa
+
+
 def reset_all_flow_flags(contexto):
     contexto["awaiting_continuation_choice"] = False
     contexto["awaiting_weather_follow_up_choice"] = False
@@ -754,10 +805,13 @@ def webhook_route():
 
         if event == 'messages.upsert':
             numero = data.get('data', {}).get('key', {}).get('remoteJid', '')
-            location_message = data.get('data', {}).get('message', {}).get('locationMessage', {})
-            mensagem_recebida = data.get('data', {}).get('message', {}).get('conversation', '').lower()
+            location_message = data.get('data', {}).get(
+                'message', {}).get('locationMessage', {})
+            mensagem_recebida = data.get('data', {}).get(
+                'message', {}).get('conversation', '').lower()
 
-            print(f"DEBUG_WEBHOOK_START: Mensagem recebida de {numero}: '{mensagem_recebida}' (Location: {bool(location_message)})")
+            print(
+                f"DEBUG_WEBHOOK_START: Mensagem recebida de {numero}: '{mensagem_recebida}' (Location: {bool(location_message)})")
 
             if not numero:
                 print(f"DEBUG_WEBHOOK_END: Número não fornecido.")
@@ -767,23 +821,25 @@ def webhook_route():
             contexto = load_conversation_context(numero)
             # Definir usuario_cadastrado aqui para que esteja sempre disponível
             usuario_cadastrado = is_user_registered(numero)
-            
+
             # **CORREÇÃO**: Definir o texto da opção de cadastro/edição com base no status do usuário
             if usuario_cadastrado:
                 cadastro_opcao_texto = "Editar dados de cadastro"
             else:
                 cadastro_opcao_texto = "Fazer meu cadastro"
 
-            nome = contexto.get("nome_completo", "Usuário") 
+            nome = contexto.get("nome_completo", "Usuário")
             localizacao = contexto.get("localizacao")
             current_time = datetime.now().timestamp()
 
             # Lógica de Timeout da Conversa (aplicada no início do processamento)
             last_interaction_time = contexto.get("last_interaction_time", 0)
             if (current_time - last_interaction_time) > CONVERSATION_TIMEOUT_SECONDS:
-                print(f"DEBUG_TIMEOUT: Timeout detectado para {numero}. Reiniciando o fluxo da conversa.")
+                print(
+                    f"DEBUG_TIMEOUT: Timeout detectado para {numero}. Reiniciando o fluxo da conversa.")
                 reset_all_flow_flags(contexto)
-                contexto["initial_greeting_step"] = None # Reset initial greeting step on timeout
+                # Reset initial greeting step on timeout
+                contexto["initial_greeting_step"] = None
                 resposta = (
                     f"Olá! 👋 Sou a Iagro, sua assistente de IA da Campo Inteligente. Pronta para otimizar sua gestão agrícola! 🚜🌱 Vamos começar?\n1. Sim\n2. Não"
                 )
@@ -791,7 +847,8 @@ def webhook_route():
                 try:
                     save_conversation_context(numero, contexto)
                 except Exception as e:
-                    print(f"DEBUG_TIMEOUT_SAVE_ERROR: Erro ao salvar contexto após timeout: {e}")
+                    print(
+                        f"DEBUG_TIMEOUT_SAVE_ERROR: Erro ao salvar contexto após timeout: {e}")
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -802,8 +859,8 @@ def webhook_route():
             try:
                 save_conversation_context(numero, contexto)
             except Exception as e:
-                print(f"DEBUG_WEBHOOK_START_SAVE_ERROR: Erro ao salvar contexto após atualização de timestamp: {e}")
-
+                print(
+                    f"DEBUG_WEBHOOK_START_SAVE_ERROR: Erro ao salvar contexto após atualização de timestamp: {e}")
 
             # --- Priorizar o tratamento de mensagens de localização ---
             if location_message:
@@ -817,20 +874,24 @@ def webhook_route():
                     else:
                         cidade = local.get("cidade", "")
                         estado = local.get("estado", "")
-                        pais = local.get("pais", "") 
-                        contexto["localizacao"] = {"cidade": cidade, "estado": estado, "pais": pais}
+                        pais = local.get("pais", "")
+                        contexto["localizacao"] = {
+                            "cidade": cidade, "estado": estado, "pais": pais}
                         if not contexto.get("municipio"):
                             contexto["municipio"] = cidade
                         if not contexto.get("estado_propriedade"):
                             contexto["estado_propriedade"] = estado
 
-                        reset_all_flow_flags(contexto) # Reset all other flags
-                        contexto["awaiting_weather_follow_up_choice"] = True # Set weather follow-up
+                        reset_all_flow_flags(contexto)  # Reset all other flags
+                        # Set weather follow-up
+                        contexto["awaiting_weather_follow_up_choice"] = True
 
                         try:
-                            save_conversation_context(numero, contexto) # Salvar contexto atualizado
+                            # Salvar contexto atualizado
+                            save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_LOCATION_SAVE_ERROR: Erro ao salvar contexto após localização: {e}")
+                            print(
+                                f"DEBUG_LOCATION_SAVE_ERROR: Erro ao salvar contexto após localização: {e}")
                         resposta = format_weather_response(cidade, pais)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
@@ -842,55 +903,95 @@ def webhook_route():
             # --- Se não for mensagem de localização, processar mensagem de texto ---
             if mensagem_recebida:
                 # Recuperando flags do contexto (já carregado anteriormente)
-                awaiting_weather_location = contexto.get("awaiting_weather_location", False)
+                awaiting_weather_location = contexto.get(
+                    "awaiting_weather_location", False)
                 registration_step = contexto.get("registration_step", None)
-                awaiting_continuation_choice = contexto.get("awaiting_continuation_choice", False)
-                awaiting_post_completion_response = contexto.get("awaiting_post_completion_response", False)
-                awaiting_weather_follow_up_choice = contexto.get("awaiting_weather_follow_up_choice", False)
-                awaiting_menu_return_prompt = contexto.get("awaiting_menu_return_prompt", False)
-                simulacao_safra_ativa = contexto.get("simulacao_safra_ativa", False)
+                awaiting_continuation_choice = contexto.get(
+                    "awaiting_continuation_choice", False)
+                awaiting_post_completion_response = contexto.get(
+                    "awaiting_post_completion_response", False)
+                awaiting_weather_follow_up_choice = contexto.get(
+                    "awaiting_weather_follow_up_choice", False)
+                awaiting_menu_return_prompt = contexto.get(
+                    "awaiting_menu_return_prompt", False)
+                simulacao_safra_ativa = contexto.get(
+                    "simulacao_safra_ativa", False)
                 etapa_simulacao = contexto.get("etapa_simulacao", None)
                 dados_simulacao = contexto.get("dados_simulacao", {})
-                awaiting_safra_finalizacao = contexto.get("awaiting_safra_finalizacao", False)
+                awaiting_safra_finalizacao = contexto.get(
+                    "awaiting_safra_finalizacao", False)
                 simulacao_sub_fluxo = contexto.get("simulacao_sub_fluxo", None)
-                gerar_relatorio_simulacao_ativo = contexto.get("gerar_relatorio_simulacao_ativo", False)
-                gestao_rebanho_ativo = contexto.get("gestao_rebanho_ativo", False)
-                gestao_rebanho_sub_fluxo = contexto.get("gestao_rebanho_sub_fluxo", None)
-                gerar_relatorio_rebanho_ativo = contexto.get("gerar_relatorio_rebanho_ativo", False)
-                vacinacao_vermifugacao_ativo = contexto.get("vacinacao_vermifugacao_ativo", False)
-                vacinacao_vermifugacao_opcao = contexto.get("vacinacao_vermifugacao_opcao", None)
-                registro_vacinacao_etapa = contexto.get("registro_vacinacao_etapa", None)
-                dados_vacinacao_registro = contexto.get("dados_vacinacao_registro", {})
-                consulta_vacinacao_ativa = contexto.get("consulta_vacinacao_ativa", False)
-                awaiting_animal_id_consulta_vac = contexto.get("awaiting_animal_id_consulta_vac", False)
-                registro_vermifugacao_etapa = contexto.get("registro_vermifugacao_etapa", None)
-                dados_vermifugacao_registro = contexto.get("dados_vermifugacao_registro", {})
-                consulta_vermifugacao_ativa = contexto.get("consulta_vermifugacao_ativa", False)
-                awaiting_animal_id_consulta_verm = contexto.get("awaiting_animal_id_consulta_verm", False)
-                lembretes_vacinacao_ativa = contexto.get("lembretes_vacinacao_ativa", False)
-                awaiting_lembretes_contato = contexto.get("awaiting_lembretes_contato", False)
-                cadastro_animal_ativo = contexto.get("cadastro_animal_ativo", False)
-                registro_animal_etapa = contexto.get("registro_animal_etapa", None)
-                dados_animal_registro = contexto.get("dados_animal_registro", {})
-                controle_reprodutivo_ativo = contexto.get("controle_reprodutivo_ativo", False)
-                historico_pesagens_ativo = contexto.get("historico_pesagens_ativo", False)
-                controle_estoque_ativo = contexto.get("controle_estoque_ativo", False)
-                controle_estoque_sub_fluxo = contexto.get("controle_estoque_sub_fluxo", None)
-                gerar_relatorio_estoque_ativo = contexto.get("gerar_relatorio_estoque_ativo", False)
-                registro_entrada_estoque_ativo = contexto.get("registro_entrada_estoque_ativo", False)
-                registro_entrada_estoque_etapa = contexto.get("registro_entrada_estoque_etapa", None)
-                dados_entrada_estoque_registro = contexto.get("dados_entrada_estoque_registro", {})
-                registro_saida_estoque_ativo = contexto.get("registro_saida_estoque_ativo", False)
-                registro_saida_estoque_etapa = contexto.get("registro_saida_estoque_etapa", None)
-                dados_saida_estoque_registro = contexto.get("dados_saida_estoque_registro", {})
-                consulta_estoque_ativa = contexto.get("consulta_estoque_ativa", False)
+                gerar_relatorio_simulacao_ativo = contexto.get(
+                    "gerar_relatorio_simulacao_ativo", False)
+                gestao_rebanho_ativo = contexto.get(
+                    "gestao_rebanho_ativo", False)
+                gestao_rebanho_sub_fluxo = contexto.get(
+                    "gestao_rebanho_sub_fluxo", None)
+                gerar_relatorio_rebanho_ativo = contexto.get(
+                    "gerar_relatorio_rebanho_ativo", False)
+                vacinacao_vermifugacao_ativo = contexto.get(
+                    "vacinacao_vermifugacao_ativo", False)
+                vacinacao_vermifugacao_opcao = contexto.get(
+                    "vacinacao_vermifugacao_opcao", None)
+                registro_vacinacao_etapa = contexto.get(
+                    "registro_vacinacao_etapa", None)
+                dados_vacinacao_registro = contexto.get(
+                    "dados_vacinacao_registro", {})
+                consulta_vacinacao_ativa = contexto.get(
+                    "consulta_vacinacao_ativa", False)
+                awaiting_animal_id_consulta_vac = contexto.get(
+                    "awaiting_animal_id_consulta_vac", False)
+                registro_vermifugacao_etapa = contexto.get(
+                    "registro_vermifugacao_etapa", None)
+                dados_vermifugacao_registro = contexto.get(
+                    "dados_vermifugacao_registro", {})
+                consulta_vermifugacao_ativa = contexto.get(
+                    "consulta_vermifugacao_ativa", False)
+                awaiting_animal_id_consulta_verm = contexto.get(
+                    "awaiting_animal_id_consulta_verm", False)
+                lembretes_vacinacao_ativa = contexto.get(
+                    "lembretes_vacinacao_ativa", False)
+                awaiting_lembretes_contato = contexto.get(
+                    "awaiting_lembretes_contato", False)
+                cadastro_animal_ativo = contexto.get(
+                    "cadastro_animal_ativo", False)
+                registro_animal_etapa = contexto.get(
+                    "registro_animal_etapa", None)
+                dados_animal_registro = contexto.get(
+                    "dados_animal_registro", {})
+                controle_reprodutivo_ativo = contexto.get(
+                    "controle_reprodutivo_ativo", False)
+                historico_pesagens_ativo = contexto.get(
+                    "historico_pesagens_ativo", False)
+                controle_estoque_ativo = contexto.get(
+                    "controle_estoque_ativo", False)
+                controle_estoque_sub_fluxo = contexto.get(
+                    "controle_estoque_sub_fluxo", None)
+                gerar_relatorio_estoque_ativo = contexto.get(
+                    "gerar_relatorio_estoque_ativo", False)
+                registro_entrada_estoque_ativo = contexto.get(
+                    "registro_entrada_estoque_ativo", False)
+                registro_entrada_estoque_etapa = contexto.get(
+                    "registro_entrada_estoque_etapa", None)
+                dados_entrada_estoque_registro = contexto.get(
+                    "dados_entrada_estoque_registro", {})
+                registro_saida_estoque_ativo = contexto.get(
+                    "registro_saida_estoque_ativo", False)
+                registro_saida_estoque_etapa = contexto.get(
+                    "registro_saida_estoque_etapa", None)
+                dados_saida_estoque_registro = contexto.get(
+                    "dados_saida_estoque_registro", {})
+                consulta_estoque_ativa = contexto.get(
+                    "consulta_estoque_ativa", False)
                 registros_vacinacao = contexto.get("registros_vacinacao", [])
                 contexto["registros_vacinacao"] = registros_vacinacao
-                registros_vermifugacao = contexto.get("registros_vermifugacao", [])
+                registros_vermifugacao = contexto.get(
+                    "registros_vermifugacao", [])
                 contexto["registros_vermifugacao"] = registros_vermifugacao
                 registros_animais = contexto.get("registros_animais", [])
                 contexto["registros_animais"] = registros_animais
-                registros_reprodutivos = contexto.get("registros_reprodutivos", [])
+                registros_reprodutivos = contexto.get(
+                    "registros_reprodutivos", [])
                 contexto["registros_reprodutivos"] = registros_reprodutivos
                 historico_pesagens = contexto.get("historico_pesagens", [])
                 contexto["historico_pesagens"] = historico_pesagens
@@ -898,20 +999,30 @@ def webhook_route():
                 contexto["registros_estoque"] = registros_estoque
                 simulacoes_passadas = contexto.get("simulacoes_passadas", [])
                 contexto["simulacoes_passadas"] = simulacoes_passadas
-                initial_greeting_step = contexto.get("initial_greeting_step", None)
-                editing_registration = contexto.get("editing_registration", False)
-                awaiting_field_to_edit = contexto.get("awaiting_field_to_edit", False)
-                current_editing_field = contexto.get("current_editing_field", None)
-                awaiting_email_choice = contexto.get("awaiting_email_choice", False)
+                initial_greeting_step = contexto.get(
+                    "initial_greeting_step", None)
+                editing_registration = contexto.get(
+                    "editing_registration", False)
+                awaiting_field_to_edit = contexto.get(
+                    "awaiting_field_to_edit", False)
+                current_editing_field = contexto.get(
+                    "current_editing_field", None)
+                awaiting_email_choice = contexto.get(
+                    "awaiting_email_choice", False)
                 email_choice_made = contexto.get("email_choice_made", False)
-                awaiting_email_value_input = contexto.get("awaiting_email_value_input", False)
-                awaiting_ponto_referencia_choice = contexto.get("awaiting_ponto_referencia_choice", False)
-                ponto_referencia_choice_made = contexto.get("ponto_referencia_choice_made", False)
-                awaiting_ponto_referencia_value_input = contexto.get("awaiting_ponto_referencia_value_input", False)
+                awaiting_email_value_input = contexto.get(
+                    "awaiting_email_value_input", False)
+                awaiting_ponto_referencia_choice = contexto.get(
+                    "awaiting_ponto_referencia_choice", False)
+                ponto_referencia_choice_made = contexto.get(
+                    "ponto_referencia_choice_made", False)
+                awaiting_ponto_referencia_value_input = contexto.get(
+                    "awaiting_ponto_referencia_value_input", False)
 
                 # Handle explicit "voltar" or "menu" command
                 if ("voltar" in mensagem_recebida or "menu" in mensagem_recebida or "opções" in mensagem_recebida):
-                    print(f"DEBUG_COMMAND: Comando 'voltar'/'menu' detectado. Resetando fluxos.")
+                    print(
+                        f"DEBUG_COMMAND: Comando 'voltar'/'menu' detectado. Resetando fluxos.")
                     reset_all_flow_flags(contexto)
                     resposta = (
                         f"Ok, retornando ao menu principal. 👋\n\n"
@@ -929,13 +1040,15 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_COMMAND_SAVE_ERROR: Erro ao salvar contexto após comando 'voltar'/'menu': {e}")
+                        print(
+                            f"DEBUG_COMMAND_SAVE_ERROR: Erro ao salvar contexto após comando 'voltar'/'menu': {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 # Verificação de usuário cadastrado para pular o fluxo de boas-vindas
                 if usuario_cadastrado and initial_greeting_step != "completed":
-                    print(f"DEBUG_REGISTERED_USER: Usuário {numero} já cadastrado. Pulando fluxo de saudação inicial.")
+                    print(
+                        f"DEBUG_REGISTERED_USER: Usuário {numero} já cadastrado. Pulando fluxo de saudação inicial.")
                     contexto["initial_greeting_step"] = "completed"
                     resposta = (
                         f"Olá, {nome}! 👋 Bem-vindo de volta ao Campo Inteligente! Estou aqui para ajudar você com sua produção agrícola.\n\n"
@@ -953,24 +1066,28 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_REGISTERED_USER_SAVE_ERROR: Erro ao salvar contexto para usuário cadastrado: {e}")
+                        print(
+                            f"DEBUG_REGISTERED_USER_SAVE_ERROR: Erro ao salvar contexto para usuário cadastrado: {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 # Initial Greeting Flow
                 if initial_greeting_step is None:
-                    print(f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step None) - Mensagem: '{mensagem_recebida}'")
+                    print(
+                        f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step None) - Mensagem: '{mensagem_recebida}'")
                     resposta = "Olá! 👋 Sou a Iagro, sua assistente de IA da Campo Inteligente. Pronta para otimizar sua gestão agrícola! 🚜🌱 Vamos começar?\n1. Sim\n2. Não"
                     contexto["initial_greeting_step"] = 1
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após step None: {e}")
+                        print(
+                            f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após step None: {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
-                
+
                 elif initial_greeting_step == 1:
-                    print(f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step 1) - Mensagem: '{mensagem_recebida}'")
+                    print(
+                        f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step 1) - Mensagem: '{mensagem_recebida}'")
                     if mensagem_recebida.strip() == "1" or "sim" in mensagem_recebida:
                         resposta = "Ótimo! Para começarmos, posso saber seu nome? 😊"
                         contexto["initial_greeting_step"] = 2
@@ -982,12 +1099,14 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após etapa 1: {e}")
+                        print(
+                            f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após etapa 1: {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif initial_greeting_step == 2:
-                    print(f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step 2) - Mensagem: '{mensagem_recebida}'")
+                    print(
+                        f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step 2) - Mensagem: '{mensagem_recebida}'")
                     contexto["nome_completo"] = mensagem_recebida.strip().title()
                     nome = contexto["nome_completo"]
                     resposta = f"Prazer em te conhecer, {nome}! 👋 Poderia me falar de qual cidade você está falando? 📍"
@@ -995,12 +1114,14 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após etapa 2: {e}")
+                        print(
+                            f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após etapa 2: {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif initial_greeting_step == 3:
-                    print(f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step 3) - Mensagem: '{mensagem_recebida}'")
+                    print(
+                        f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step 3) - Mensagem: '{mensagem_recebida}'")
                     cidade_input = mensagem_recebida.strip().title()
                     local_info = obter_previsao_tempo(cidade_input, "BR")
                     if "erro" not in local_info:
@@ -1009,8 +1130,10 @@ def webhook_route():
                             "estado": local_info.get("estado", ""),
                             "pais": "BR"
                         }
-                        contexto["municipio"] = local_info.get("cidade", cidade_input)
-                        contexto["estado_propriedade"] = local_info.get("estado", "")
+                        contexto["municipio"] = local_info.get(
+                            "cidade", cidade_input)
+                        contexto["estado_propriedade"] = local_info.get(
+                            "estado", "")
 
                         resposta = f"Certo, {cidade_input}! Entendi sua localização. Vamos em frente com o restante do seu cadastro, {nome}?\n1. Sim\n2. Não"
                         contexto["initial_greeting_step"] = 4
@@ -1019,15 +1142,18 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após etapa 3: {e}")
+                        print(
+                            f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após etapa 3: {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif initial_greeting_step == 4:
-                    print(f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step 4) - Mensagem: '{mensagem_recebida}'")
+                    print(
+                        f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step 4) - Mensagem: '{mensagem_recebida}'")
                     if mensagem_recebida.strip() == "1" or "sim" in mensagem_recebida:
                         contexto["initial_greeting_step"] = "completed"
-                        next_question_key = get_next_registration_question_key(contexto)
+                        next_question_key = get_next_registration_question_key(
+                            contexto)
                         if next_question_key:
                             contexto["registration_step"] = next_question_key
                             if next_question_key == "email_choice":
@@ -1047,12 +1173,14 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após etapa 4: {e}")
+                        print(
+                            f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após etapa 4: {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif initial_greeting_step == "awaiting_end_conversation":
-                    print(f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step awaiting_end_conversation) - Mensagem: '{mensagem_recebida}'")
+                    print(
+                        f"DEBUG_GREETING: Entrando no fluxo de saudação inicial (step awaiting_end_conversation) - Mensagem: '{mensagem_recebida}'")
                     if mensagem_recebida.strip() == "1" or "sim" in mensagem_recebida:
                         resposta = f"Ok, {nome}, estarei aqui se precisar de algo mais! Até logo! 👋"
                         contexto.clear()
@@ -1077,7 +1205,8 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após awaiting_end_conversation: {e}")
+                        print(
+                            f"DEBUG_GREETING_SAVE_ERROR: Erro ao salvar contexto após awaiting_end_conversation: {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1088,25 +1217,27 @@ def webhook_route():
                         contexto["awaiting_continuation_choice"] = False
                         resposta = f"Ótimo, {nome}! Vamos continuar de onde paramos. {REGISTRATION_QUESTIONS[registration_step]}"
                     elif "sair" in mensagem_recebida:
-                        reset_all_flow_flags(contexto) # Reset all flags
+                        reset_all_flow_flags(contexto)  # Reset all flags
                         resposta = f"Ok, {nome}, o cadastro foi cancelado. Posso ajudar com mais alguma coisa? 👋"
                     else:
                         resposta = f"Por favor, {nome}, diga 'continuar' para retomar o cadastro ou 'sair' para cancelá-lo."
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (continuar cadastro): {e}")
+                        print(
+                            f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (continuar cadastro): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif awaiting_weather_follow_up_choice:
                     print(f"DEBUG_FLOW: Fluxo: awaiting_weather_follow_up_choice")
                     if "outra" in mensagem_recebida or "nova" in mensagem_recebida or "sim" in mensagem_recebida or "clima" in mensagem_recebida:
-                        reset_all_flow_flags(contexto) # Reset all flags
-                        contexto["awaiting_weather_location"] = True # Only set this flag
+                        reset_all_flow_flags(contexto)  # Reset all flags
+                        # Only set this flag
+                        contexto["awaiting_weather_location"] = True
                         resposta = f"Por favor, {nome}, me diga o nome da cidade ou compartilhe sua localização. 📍\n(Ou 'voltar' para o menu principal)"
                     elif "voltar" in mensagem_recebida or "menu" in mensagem_recebida or "opções" in mensagem_recebida or "não" in mensagem_recebida or "nao" in mensagem_recebida:
-                        reset_all_flow_flags(contexto) # Reset all flags
+                        reset_all_flow_flags(contexto)  # Reset all flags
                         resposta = (
                             f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
@@ -1123,14 +1254,15 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (seguimento clima): {e}")
+                        print(
+                            f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (seguimento clima): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif awaiting_menu_return_prompt:
                     print(f"DEBUG_FLOW: Fluxo: awaiting_menu_return_prompt")
                     if "sim" in mensagem_recebida or "voltar" in mensagem_recebida or "menu" in mensagem_recebida or "opções" in mensagem_recebida:
-                        reset_all_flow_flags(contexto) # Reset all flags
+                        reset_all_flow_flags(contexto)  # Reset all flags
                         resposta = (
                             f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
@@ -1152,7 +1284,8 @@ def webhook_route():
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (retorno ao menu principal após opção informativa): {e}")
+                        print(
+                            f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (retorno ao menu principal após opção informativa): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1234,11 +1367,12 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (pós-conclusão - sim): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (pós-conclusão - sim): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
                     elif "não" in mensagem_recebida or "nao" in mensagem_recebida:
-                        reset_all_flow_flags(contexto) # Reset all flags
+                        reset_all_flow_flags(contexto)  # Reset all flags
                         resposta = (
                             f"Ok, {nome}! Estou aqui para ajudar você com sua produção agrícola! 👋\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
@@ -1255,7 +1389,8 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (retorno ao menu principal após 'não'): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (retorno ao menu principal após 'não'): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
                     else:
@@ -1263,7 +1398,8 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (pós-conclusão - opção inválida): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (pós-conclusão - opção inválida): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1285,7 +1421,7 @@ def webhook_route():
                                 "Ou 'voltar' para o menu principal."
                             )
                         elif etapa == 1:
-                            reset_all_flow_flags(contexto) # Reset all flags
+                            reset_all_flow_flags(contexto)  # Reset all flags
                             resposta = (
                                 f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                                 f"Escolha uma das opções abaixo para começarmos:\n"
@@ -1302,7 +1438,8 @@ def webhook_route():
                         else:
                             contexto["etapa_simulacao"] -= 1
                             if contexto["etapa_simulacao"] == 0:
-                                reset_all_flow_flags(contexto) # Reset all flags
+                                reset_all_flow_flags(
+                                    contexto)  # Reset all flags
                                 resposta = (
                                     f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                                     f"Escolha uma das opções abaixo para começarmos:\n"
@@ -1321,7 +1458,8 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação voltar): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação voltar): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1338,7 +1476,8 @@ def webhook_route():
                                 for i, sim in enumerate(contexto["simulacoes_passadas"]):
                                     cultura = sim.get("cultura", "N/A")
                                     area = sim.get("area", "N/A")
-                                    produtividade = sim.get("produtividade_media", "N/A")
+                                    produtividade = sim.get(
+                                        "produtividade_media", "N/A")
                                     resposta += f"{i+1}. Cultura: {cultura.capitalize()}, Área: {area} ha, Produtividade Estimada: {produtividade} kg/ha\n"
                             else:
                                 resposta = f"Você ainda não realizou nenhuma simulação, {nome}. Que tal iniciar uma? 🌱"
@@ -1353,10 +1492,13 @@ def webhook_route():
                                     cultura = sim.get("cultura", "N/A")
                                     area = sim.get("area", "N/A")
                                     tipo_solo = sim.get("tipo_solo", "N/A")
-                                    condicoes_climaticas = sim.get("condicoes_climaticas", "N/A")
-                                    ciclo_cultura = sim.get("ciclo_cultura", "N/A")
-                                    produtividade = sim.get("produtividade_media", "N/A")
-                                    
+                                    condicoes_climaticas = sim.get(
+                                        "condicoes_climaticas", "N/A")
+                                    ciclo_cultura = sim.get(
+                                        "ciclo_cultura", "N/A")
+                                    produtividade = sim.get(
+                                        "produtividade_media", "N/A")
+
                                     resposta += f"--- Simulação {i+1} ---\n"
                                     resposta += f"Cultura: {cultura.capitalize()}\n"
                                     resposta += f"Área: {area} ha\n"
@@ -1364,7 +1506,7 @@ def webhook_route():
                                     resposta += f"Condições Climáticas: {condicoes_climaticas.capitalize()}\n"
                                     resposta += f"Ciclo da Cultura: {ciclo_cultura.capitalize()}\n"
                                     resposta += f"Produtividade Estimada: {produtividade} kg/ha\n\n"
-                                
+
                                 resposta += (
                                     "Este é um resumo textual. Se você esperava um relatório em formato de imagem (gráfico), PDF, Word ou Excel, "
                                     "informo que, no momento, nosso sistema via WhatsApp só consegue enviar relatórios em texto. "
@@ -1372,7 +1514,7 @@ def webhook_route():
                                 )
                             else:
                                 resposta = f"Não há simulações registradas para gerar um relatório, {nome}. Que tal iniciar uma? 🌱"
-                            
+
                             resposta += "\n\nDeseja voltar ao menu de Simulação de Safra? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             contexto["awaiting_post_completion_response"] = True
                         else:
@@ -1386,7 +1528,8 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação safra sub-menu): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação safra sub-menu): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1398,24 +1541,29 @@ def webhook_route():
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 1): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 1): {e}")
                             resposta = f"✅ Ótimo, {nome}! Agora, informe a área de plantio em hectares (ha): 🌱\nEx.: 50 ha\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         elif etapa == 2:
                             try:
-                                area_str = re.findall(r'(\d+\.?\d*)', mensagem_recebida)
+                                area_str = re.findall(
+                                    r'(\d+\.?\d*)', mensagem_recebida)
                                 if area_str:
                                     area = float(area_str[0])
                                 else:
-                                    raise ValueError("Nenhum número válido encontrado para a área.")
+                                    raise ValueError(
+                                        "Nenhum número válido encontrado para a área.")
                                 if area <= 0:
-                                    raise ValueError("Área deve ser um número positivo.")
+                                    raise ValueError(
+                                        "Área deve ser um número positivo.")
                                 dados["area"] = area
                                 contexto["etapa_simulacao"] = 3
                                 contexto["dados_simulacao"] = dados
                                 try:
                                     save_conversation_context(numero, contexto)
                                 except Exception as e:
-                                    print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 2): {e}")
+                                    print(
+                                        f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 2): {e}")
                                 resposta = f"✅ Perfeito, {nome}! Qual o tipo de solo predominante? ⛰️\nEx.: arenoso, argiloso, misto, etc.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             except ValueError:
                                 resposta = f"Por favor, {nome}, informe a área em hectares usando um número válido (ex: 50, 100.5).\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
@@ -1428,7 +1576,8 @@ def webhook_route():
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 3): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 3): {e}")
                             resposta = f"✅ E quais são as condições climáticas previstas, {nome}? ☀️🌧️\nEx.: seca, chuva moderada, excesso de chuva, clima ideal...\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         elif etapa == 4:
                             dados["condicoes_climaticas"] = mensagem_recebida
@@ -1437,7 +1586,8 @@ def webhook_route():
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 4): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 4): {e}")
                             resposta = f"✅ Por fim, {nome}, qual é a variedade ou o ciclo da cultura? ⏳\nEx.: ciclo precoce, médio ou tardio?\n(Se não souber, pode digitar \"não sei\")\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         elif etapa == 5:
                             dados["ciclo_cultura"] = mensagem_recebida
@@ -1451,40 +1601,47 @@ def webhook_route():
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 5): {e}")
-                            
-                            send_whatsapp_message(numero, "🚜 Processando a simulação da sua safra... \n\n🔄 Isso pode levar alguns segundos...")
-                            
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação etapa 5): {e}")
+
+                            send_whatsapp_message(
+                                numero, "🚜 Processando a simulação da sua safra... \n\n🔄 Isso pode levar alguns segundos...")
+
                             resultado_simulacao = simular_safra(dados)
-                            
-                            resposta_resultado = formatar_resultado_simulacao(dados, resultado_simulacao)
+
+                            resposta_resultado = formatar_resultado_simulacao(
+                                dados, resultado_simulacao)
                             send_whatsapp_message(numero, resposta_resultado)
 
                             contexto["awaiting_safra_finalizacao"] = True
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação finalização): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação finalização): {e}")
                             resposta = f"✅ Deseja realizar **outra simulação**, {nome}, ou **finalizar**? 🤔\n\n1. Nova simulação\n2. Sair\n(Ou 'voltar' para o menu principal)"
                         else:
                             resposta = f"Ocorreu um erro no fluxo da simulação, {nome}. Por favor, digite '4' para iniciar uma nova simulação ou 'menu' para voltar ao menu principal."
-                            reset_all_flow_flags(contexto) # Reset all flags
-                            contexto["simulacao_safra_ativa"] = True # Keep simulation active
+                            reset_all_flow_flags(contexto)  # Reset all flags
+                            # Keep simulation active
+                            contexto["simulacao_safra_ativa"] = True
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro simulação etapa): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro simulação etapa): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                     else:
                         resposta = f"Ocorreu um erro no fluxo de Simulação de Safra, {nome}. Por favor, digite '4' para voltar ao menu de Simulação de Safra ou 'menu' para voltar ao menu principal."
-                        reset_all_flow_flags(contexto) # Reset all flags
+                        reset_all_flow_flags(contexto)  # Reset all flags
                         contexto["simulacao_safra_ativa"] = True
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro simulação safra sub-fluxo): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro simulação safra sub-fluxo): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1500,12 +1657,13 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação nova): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação nova): {e}")
                         resposta_nova_simulacao = f"Ok, {nome}, vamos iniciar uma nova simulação. 🌱\n\n👉 Qual é a cultura que deseja simular?\nEx.: soja, milho, trigo, café, etc.\n(Ou 'voltar' para o menu principal)"
                         send_whatsapp_message(numero, resposta_nova_simulacao)
                         return jsonify({"status": "sucesso", "resposta": resposta_nova_simulacao}), 200
                     elif mensagem_recebida.strip() == "2":
-                        reset_all_flow_flags(contexto) # Reset all flags
+                        reset_all_flow_flags(contexto)  # Reset all flags
                         resposta_sair = (
                             f"Ok, {nome}, obrigado por utilizar a simulação de safra! 👋 Posso ajudar com mais alguma coisa?\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
@@ -1522,7 +1680,8 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação sair): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (simulação sair): {e}")
                         send_whatsapp_message(numero, resposta_sair)
                         return jsonify({"status": "sucesso", "resposta": resposta_sair}), 200
                     else:
@@ -1554,7 +1713,7 @@ def webhook_route():
                                 "Ou 'voltar' para o menu principal."
                             )
                         elif controle_estoque_sub_fluxo is None:
-                            reset_all_flow_flags(contexto) # Reset all flags
+                            reset_all_flow_flags(contexto)  # Reset all flags
                             resposta = (
                                 f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                                 f"Escolha uma das opções abaixo para começarmos:\n"
@@ -1571,7 +1730,8 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (controle estoque voltar): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (controle estoque voltar): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1596,9 +1756,12 @@ def webhook_route():
                                 for i, item in enumerate(contexto["registros_estoque"]):
                                     nome_item = item.get("nome_item", "N/A")
                                     quantidade = item.get("quantidade", "N/A")
-                                    data_entrada = item.get("data_entrada", "N/A")
-                                    data_fabricacao = item.get("data_fabricacao", "N/A")
-                                    data_vencimento = item.get("data_vencimento", "N/A")
+                                    data_entrada = item.get(
+                                        "data_entrada", "N/A")
+                                    data_fabricacao = item.get(
+                                        "data_fabricacao", "N/A")
+                                    data_vencimento = item.get(
+                                        "data_vencimento", "N/A")
                                     lote = item.get("numero_lote", "N/A")
                                     resposta += f"{i+1}. {nome_item.capitalize()} - Qtd: {quantidade} - Entrada: {data_entrada} - Fab: {data_fabricacao} - Venc: {data_vencimento} - Lote: {lote}\n"
                             else:
@@ -1617,11 +1780,15 @@ def webhook_route():
                                 for i, item in enumerate(contexto["registros_estoque"]):
                                     nome_item = item.get("nome_item", "N/A")
                                     quantidade = item.get("quantidade", "N/A")
-                                    data_entrada = item.get("data_entrada", "N/A")
-                                    data_fabricacao = item.get("data_fabricacao", "N/A")
-                                    data_vencimento = item.get("data_vencimento", "N/A")
-                                    numero_lote = item.get("numero_lote", "N/A")
-                                    
+                                    data_entrada = item.get(
+                                        "data_entrada", "N/A")
+                                    data_fabricacao = item.get(
+                                        "data_fabricacao", "N/A")
+                                    data_vencimento = item.get(
+                                        "data_vencimento", "N/A")
+                                    numero_lote = item.get(
+                                        "numero_lote", "N/A")
+
                                     resposta += f"--- Item {i+1} ---\n"
                                     resposta += f"Nome: {nome_item.capitalize()}\n"
                                     resposta += f"Quantidade: {quantidade}\n"
@@ -1629,7 +1796,7 @@ def webhook_route():
                                     resposta += f"Data de Fabricação: {data_fabricacao}\n"
                                     resposta += f"Data de Vencimento: {data_vencimento}\n"
                                     resposta += f"Número de Lote: {numero_lote}\n\n"
-                                
+
                                 resposta += (
                                     "Este é um resumo textual. Se você esperava um relatório em formato de imagem (gráfico), PDF, Word ou Excel, "
                                     "informo que, no momento, nosso sistema via WhatsApp só consegue enviar relatórios em texto. "
@@ -1637,7 +1804,7 @@ def webhook_route():
                                 )
                             else:
                                 resposta = f"Não há itens registrados no estoque para gerar um relatório, {nome}. Que tal registrar uma entrada? 📦"
-                            
+
                             resposta += "\n\nDeseja voltar ao menu de Controle de Estoque? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             contexto["awaiting_post_completion_response"] = True
                         else:
@@ -1653,57 +1820,80 @@ def webhook_route():
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (controle estoque sub-menu): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (controle estoque sub-menu): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
-                    
+
                     elif registro_entrada_estoque_ativo:
-                        print(f"DEBUG_FLOW: Fluxo: registro_entrada_estoque_etapa {registro_entrada_estoque_etapa}")
+                        print(
+                            f"DEBUG_FLOW: Fluxo: registro_entrada_estoque_etapa {registro_entrada_estoque_etapa}")
                         if registro_entrada_estoque_etapa == 1:
-                            dados_entrada_estoque_registro["nome_item"] = mensagem_recebida.strip()
+                            dados_entrada_estoque_registro["nome_item"] = mensagem_recebida.strip(
+                            )
                             contexto["registro_entrada_estoque_etapa"] = 2
                             resposta = f"✅ Qual a quantidade do item, {nome}? (Ex: 100 kg, 50 litros, 3 unidades) 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         elif registro_entrada_estoque_etapa == 2:
-                            dados_entrada_estoque_registro["quantidade"] = mensagem_recebida.strip()
+                            dados_entrada_estoque_registro["quantidade"] = mensagem_recebida.strip(
+                            )
                             contexto["registro_entrada_estoque_etapa"] = 3
                             resposta = f"✅ Qual a data de entrada do item, {nome}? (dd/mm/aaaa) 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         elif registro_entrada_estoque_etapa == 3:
                             if not is_valid_date(mensagem_recebida.strip()):
                                 resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024). 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                try:
+                                    save_conversation_context(numero, contexto)
+                                except Exception as e:
+                                    print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                    send_whatsapp_message(
+                                        numero, "Erro ao salvar.")
+                                    return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
-                            dados_entrada_estoque_registro["data_entrada"] = mensagem_recebida.strip()
+                            dados_entrada_estoque_registro["data_entrada"] = mensagem_recebida.strip(
+                            )
                             contexto["registro_entrada_estoque_etapa"] = 4
                             resposta = f"✅ Qual a data de fabricação do item, {nome}? (dd/mm/aaaa) 🗓️\n(Se não houver, responda \"não\")\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         elif registro_entrada_estoque_etapa == 4:
                             data_fabricacao = mensagem_recebida.strip()
                             if data_fabricacao != "não" and not is_valid_date(data_fabricacao):
                                 resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024) ou responda 'não'. 🗓️\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                try:
+                                    save_conversation_context(numero, contexto)
+                                except Exception as e:
+                                    print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                    send_whatsapp_message(
+                                        numero, "Erro ao salvar.")
+                                    return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
-                            dados_entrada_estoque_registro["data_fabricacao"] = data_fabricacao if data_fabricacao != "não" else "Não informado"
+                            dados_entrada_estoque_registro[
+                                "data_fabricacao"] = data_fabricacao if data_fabricacao != "não" else "Não informado"
                             contexto["registro_entrada_estoque_etapa"] = 5
                             resposta = f"✅ Qual a data de vencimento do item, {nome}? (dd/mm/aaaa) ⏳\n(Se não houver, responda \"não\")\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         elif registro_entrada_estoque_etapa == 5:
                             data_vencimento = mensagem_recebida.strip()
                             if data_vencimento != "não" and not is_valid_date(data_vencimento):
                                 resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024) ou responda 'não'. ⏳\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                try:
+                                    save_conversation_context(numero, contexto)
+                                except Exception as e:
+                                    print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                    send_whatsapp_message(
+                                        numero, "Erro ao salvar.")
+                                    return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
-                            dados_entrada_estoque_registro["data_vencimento"] = data_vencimento if data_vencimento != "não" else "Não informado"
+                            dados_entrada_estoque_registro[
+                                "data_vencimento"] = data_vencimento if data_vencimento != "não" else "Não informado"
                             contexto["registro_entrada_estoque_etapa"] = 6
                             resposta = f"✅ Qual o número do lote do item, {nome}? (Se não houver, responda \"não\") 🏷️\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         elif registro_entrada_estoque_etapa == 6:
                             numero_lote = mensagem_recebida.strip()
                             dados_entrada_estoque_registro["numero_lote"] = numero_lote if numero_lote != "não" else "Não informado"
-                            
-                            contexto["registros_estoque"].append(dados_entrada_estoque_registro)
+
+                            contexto["registros_estoque"].append(
+                                dados_entrada_estoque_registro)
 
                             contexto["registro_entrada_estoque_ativo"] = False
                             contexto["registro_entrada_estoque_etapa"] = None
@@ -1717,18 +1907,20 @@ Data de Fabricação: {dados_entrada_estoque_registro.get("data_fabricacao", "N/
 Data de Vencimento: {dados_entrada_estoque_registro.get("data_vencimento", "N/A")}
 Número de Lote: {dados_entrada_estoque_registro.get("numero_lote", "N/A")}
 ✅ Item registrado com sucesso! 🎉"""
-                            
+
                             resposta += f"\n\nO que você gostaria de fazer agora no Controle de Estoque, {nome}? 📦\n\nDigite:\n1. Registrar Entrada de Insumos/Produtos\n2. Registrar Saída de Insumos/Produtos\n3. Consultar Estoque\n4. Avisos de estoque baixo\n5. Gerar Relatório\nOu 'voltar' para o menu principal."
                             contexto["awaiting_post_completion_response"] = True
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (registro entrada estoque etapa {registro_entrada_estoque_etapa}): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (registro entrada estoque etapa {registro_entrada_estoque_etapa}): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                     elif registro_saida_estoque_ativo:
-                        print(f"DEBUG_FLOW: Fluxo: registro_saida_estoque_etapa {registro_saida_estoque_etapa}")
+                        print(
+                            f"DEBUG_FLOW: Fluxo: registro_saida_estoque_etapa {registro_saida_estoque_etapa}")
                         if registro_saida_estoque_etapa == 1:
                             item_nome_saida = mensagem_recebida.strip().lower()
                             # Verificar se o item existe no estoque
@@ -1737,66 +1929,104 @@ Número de Lote: {dados_entrada_estoque_registro.get("numero_lote", "N/A")}
                                 if item.get("nome_item", "").lower() == item_nome_saida:
                                     item_encontrado = item
                                     break
-                            
+
                             if item_encontrado:
                                 dados_saida_estoque_registro["nome_item"] = item_nome_saida
                                 contexto["registro_saida_estoque_etapa"] = 2
                                 resposta = f"✅ Qual a quantidade de '{item_nome_saida.capitalize()}' que está saindo, {nome}? (Disponível: {item_encontrado.get('quantidade', 'N/A')}) 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             else:
                                 resposta = f"O item '{item_nome_saida.capitalize()}' não foi encontrado no seu estoque, {nome}. Por favor, verifique o nome e tente novamente.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                try:
+                                    save_conversation_context(numero, contexto)
+                                except Exception as e:
+                                    print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                    send_whatsapp_message(
+                                        numero, "Erro ao salvar.")
+                                    return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                         elif registro_saida_estoque_etapa == 2:
                             try:
-                                quantidade_saida_str = re.findall(r'(\d+\.?\d*)', mensagem_recebida)
+                                quantidade_saida_str = re.findall(
+                                    r'(\d+\.?\d*)', mensagem_recebida)
                                 if quantidade_saida_str:
-                                    quantidade_saida = float(quantidade_saida_str[0])
+                                    quantidade_saida = float(
+                                        quantidade_saida_str[0])
                                 else:
-                                    raise ValueError("Nenhum número válido encontrado para a quantidade.")
-                                
+                                    raise ValueError(
+                                        "Nenhum número válido encontrado para a quantidade.")
+
                                 item_nome = dados_saida_estoque_registro["nome_item"]
-                                item_no_estoque = next((item for item in contexto["registros_estoque"] if item.get("nome_item", "").lower() == item_nome), None)
+                                item_no_estoque = next((item for item in contexto["registros_estoque"] if item.get(
+                                    "nome_item", "").lower() == item_nome), None)
 
                                 if item_no_estoque:
-                                    quantidade_disponivel_str = str(item_no_estoque.get("quantidade", "0")).replace(',', '.')
-                                    quantidade_disponivel_match = re.findall(r'(\d+\.?\d*)', quantidade_disponivel_str)
-                                    quantidade_disponivel = float(quantidade_disponivel_match[0]) if quantidade_disponivel_match else 0
+                                    quantidade_disponivel_str = str(
+                                        item_no_estoque.get("quantidade", "0")).replace(',', '.')
+                                    quantidade_disponivel_match = re.findall(
+                                        r'(\d+\.?\d*)', quantidade_disponivel_str)
+                                    quantidade_disponivel = float(
+                                        quantidade_disponivel_match[0]) if quantidade_disponivel_match else 0
 
                                     if quantidade_saida > quantidade_disponivel:
                                         resposta = f"A quantidade de saída ({quantidade_saida}) é maior que a disponível ({quantidade_disponivel}), {nome}. Por favor, digite uma quantidade válida. 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                        try: save_conversation_context(numero, contexto)
-                                        except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                        try:
+                                            save_conversation_context(
+                                                numero, contexto)
+                                        except Exception as e:
+                                            print(
+                                                f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                            send_whatsapp_message(
+                                                numero, "Erro ao salvar.")
+                                            return jsonify({"status": "erro"}), 500
                                         send_whatsapp_message(numero, resposta)
                                         return jsonify({"status": "erro", "resposta": resposta}), 200
                                     else:
                                         # Atualiza a quantidade no estoque
-                                        item_no_estoque["quantidade"] = str(quantidade_disponivel - quantidade_saida)
-                                        dados_saida_estoque_registro["quantidade"] = mensagem_recebida.strip()
+                                        item_no_estoque["quantidade"] = str(
+                                            quantidade_disponivel - quantidade_saida)
+                                        dados_saida_estoque_registro["quantidade"] = mensagem_recebida.strip(
+                                        )
                                         contexto["registro_saida_estoque_etapa"] = 3
                                         resposta = f"✅ Qual a data de saída do item, {nome}? (dd/mm/aaaa) 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 else:
                                     resposta = f"Ocorreu um erro ao encontrar o item no estoque para atualização de quantidade, {nome}. Por favor, tente novamente.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                             except ValueError:
                                 resposta = f"Por favor, {nome}, informe a quantidade em números. 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                try:
+                                    save_conversation_context(numero, contexto)
+                                except Exception as e:
+                                    print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                    send_whatsapp_message(
+                                        numero, "Erro ao salvar.")
+                                    return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                         elif registro_saida_estoque_etapa == 3:
                             if not is_valid_date(mensagem_recebida.strip()):
                                 resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024). 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                try:
+                                    save_conversation_context(numero, contexto)
+                                except Exception as e:
+                                    print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                    send_whatsapp_message(
+                                        numero, "Erro ao salvar.")
+                                    return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
-                            dados_saida_estoque_registro["data_saida"] = mensagem_recebida.strip()
-                            
+                            dados_saida_estoque_registro["data_saida"] = mensagem_recebida.strip(
+                            )
+
                             contexto["registro_saida_estoque_ativo"] = False
                             contexto["registro_saida_estoque_etapa"] = None
                             contexto["controle_estoque_sub_fluxo"] = None
@@ -1812,18 +2042,20 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (registro saída estoque etapa {registro_saida_estoque_etapa}): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (registro saída estoque etapa {registro_saida_estoque_etapa}): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                     else:
                         resposta = f"Ocorreu um erro no fluxo de Controle de Estoque, {nome}. Por favor, digite '2' para voltar ao menu de Controle de Estoque ou 'menu' para voltar ao menu principal."
-                        reset_all_flow_flags(contexto) # Reset all flags
+                        reset_all_flow_flags(contexto)  # Reset all flags
                         contexto["controle_estoque_ativo"] = True
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro controle estoque sub-fluxo): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro controle estoque sub-fluxo): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1865,7 +2097,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 "Ou 'voltar' para o menu principal."
                             )
                         else:
-                            reset_all_flow_flags(contexto) # Reset all flags
+                            reset_all_flow_flags(contexto)  # Reset all flags
                             resposta = (
                                 f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                                 f"Escolha uma das opções abaixo para começarmos:\n"
@@ -1882,7 +2114,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (gestão rebanho voltar para principal): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (gestão rebanho voltar para principal): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1936,19 +2169,21 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 resposta = "📊 **Relatório Detalhado do Rebanho:** 📊\n\n"
                                 for i, animal in enumerate(contexto["registros_animais"]):
                                     animal_id = animal.get("animal_id", "N/A")
-                                    vacinas_animal = [v for v in contexto["registros_vacinacao"] if v.get("animal_id", "").lower() == animal_id.lower()]
-                                    vermifugos_animal = [v for v in contexto["registros_vermifugacao"] if v.get("animal_id", "").lower() == animal_id.lower()]
+                                    vacinas_animal = [v for v in contexto["registros_vacinacao"] if v.get(
+                                        "animal_id", "").lower() == animal_id.lower()]
+                                    vermifugos_animal = [v for v in contexto["registros_vermifugacao"] if v.get(
+                                        "animal_id", "").lower() == animal_id.lower()]
 
                                     resposta += f"--- Animal {i+1} ---\n"
                                     resposta += f"Identificação: {animal_id.capitalize()}\n"
-                                    
+
                                     if vacinas_animal:
                                         resposta += "Vacinações:\n"
                                         for vac in vacinas_animal:
                                             resposta += f"  - {vac.get('vacina', 'N/A')} em {vac.get('data_vacinacao', 'N/A')}\n"
                                     else:
                                         resposta += "Vacinações: Nenhuma registrada.\n"
-                                    
+
                                     if vermifugos_animal:
                                         resposta += "Vermifugações:\n"
                                         for verm in vermifugos_animal:
@@ -1956,7 +2191,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                     else:
                                         resposta += "Vermifugações: Nenhuma registrada.\n"
                                     resposta += "\n"
-                                
+
                                 resposta += (
                                     "Este é um resumo textual. Se você esperava um relatório em formato de imagem (gráfico), PDF, Word ou Excel, "
                                     "informo que, no momento, nosso sistema via WhatsApp só consegue enviar relatórios em texto. "
@@ -1964,7 +2199,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 )
                             else:
                                 resposta = f"Não há animais registrados para gerar um relatório, {nome}. Que tal cadastrar um novo animal? 🐮"
-                            
+
                             resposta += "\n\nDeseja voltar ao menu de Gestão de Rebanho? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             contexto["awaiting_post_completion_response"] = True
                         else:
@@ -1981,7 +2216,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (gestão rebanho sub-menu): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (gestão rebanho sub-menu): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2007,12 +2243,14 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro animal voltar): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro animal voltar): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                         if registro_animal_etapa == 1:
-                            dados_animal_registro["animal_id"] = mensagem_recebida.strip()
+                            dados_animal_registro["animal_id"] = mensagem_recebida.strip(
+                            )
                             contexto["registro_animal_etapa"] = None
                             contexto["cadastro_animal_ativo"] = False
                             contexto["gestao_rebanho_sub_fluxo"] = None
@@ -2020,13 +2258,15 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if any(animal.get("animal_id", "").lower() == dados_animal_registro["animal_id"].lower() for animal in contexto["registros_animais"]):
                                 resposta = f"O animal '{dados_animal_registro['animal_id'].capitalize()}' já está cadastrado, {nome}. Por favor, informe um nome ou identificação diferente ou digite 'voltar'. 🐮\n(Ou 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal)"
                             else:
-                                contexto["registros_animais"].append(dados_animal_registro)
+                                contexto["registros_animais"].append(
+                                    dados_animal_registro)
                                 resposta = f"✅ Animal '{dados_animal_registro['animal_id'].capitalize()}' cadastrado com sucesso, {nome}! 🎉"
                                 resposta += f"\n\nO que você gostaria de fazer agora na Gestão de Rebanho, {nome}? 🐄\n\nDigite:\n1. Cadastrar novo animal\n2. Controle de vacinação e vermifugação\n3. Controle reprodutivo\n4. Histórico de pesagens\n5. Consultar Animais\n6. Gerar Relatório\nOu 'voltar' para o menu principal."
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro animal): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro animal): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2074,7 +2314,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (vac/verm voltar): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (vac/verm voltar): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2117,57 +2358,84 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (vac/verm sub-menu choice): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (vac/verm sub-menu choice): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                         elif vacinacao_vermifugacao_opcao == 1:
-                            print(f"DEBUG_FLOW: Fluxo: registro_vacinacao_etapa {registro_vacinacao_etapa}")
+                            print(
+                                f"DEBUG_FLOW: Fluxo: registro_vacinacao_etapa {registro_vacinacao_etapa}")
                             if registro_vacinacao_etapa == 1:
                                 animal_id_vac = mensagem_recebida.strip()
                                 # Verifica se o animal está cadastrado
                                 if not any(animal.get("animal_id", "").lower() == animal_id_vac.lower() for animal in contexto["registros_animais"]):
                                     resposta = f"O animal '{animal_id_vac.capitalize()}' não está cadastrado, {nome}. Por favor, cadastre o animal primeiro ou informe um animal já cadastrado.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                                 dados_vacinacao_registro["animal_id"] = animal_id_vac
                                 contexto["registro_vacinacao_etapa"] = 2
                                 resposta = f"✅ Qual foi a vacina aplicada, {nome}? 💉\nEx.: Aftosa, Brucelose, Raiva...\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             elif registro_vacinacao_etapa == 2:
-                                dados_vacinacao_registro["vacina"] = mensagem_recebida.strip()
+                                dados_vacinacao_registro["vacina"] = mensagem_recebida.strip(
+                                )
                                 contexto["registro_vacinacao_etapa"] = 3
                                 resposta = f"✅ Qual a data da vacinação, {nome}? (dd/mm/aaaa) 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             elif registro_vacinacao_etapa == 3:
                                 if not is_valid_date(mensagem_recebida.strip()):
                                     resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024). 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
-                                dados_vacinacao_registro["data_vacinacao"] = mensagem_recebida.strip()
+                                dados_vacinacao_registro["data_vacinacao"] = mensagem_recebida.strip(
+                                )
                                 contexto["registro_vacinacao_etapa"] = 4
                                 resposta = f"✅ Quando será a próxima dose ou reforço, {nome}? 🗓️\nEx.: 27/11/2025\n(Se não houver, responda \"não\")\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             elif registro_vacinacao_etapa == 4:
                                 proxima_dose = mensagem_recebida.strip()
                                 if proxima_dose != "não" and not is_valid_date(proxima_dose):
                                     resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024) ou responda 'não'. 🗓️\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                                 dados_vacinacao_registro["proxima_dose"] = proxima_dose if proxima_dose != "não" else "Não informado"
-                                
-                                contexto["registros_vacinacao"].append(dados_vacinacao_registro)
+
+                                contexto["registros_vacinacao"].append(
+                                    dados_vacinacao_registro)
 
                                 contexto["registro_vacinacao_etapa"] = None
                                 contexto["vacinacao_vermifugacao_opcao"] = None
-                                
-                                animal_id = dados_vacinacao_registro.get("animal_id", "N/A")
-                                vacina = dados_vacinacao_registro.get("vacina", "N/A")
-                                data_vacinacao = dados_vacinacao_registro.get("data_vacinacao", "N/A")
-                                proxima_dose_msg = dados_vacinacao_registro.get("proxima_dose", "N/A")
+
+                                animal_id = dados_vacinacao_registro.get(
+                                    "animal_id", "N/A")
+                                vacina = dados_vacinacao_registro.get(
+                                    "vacina", "N/A")
+                                data_vacinacao = dados_vacinacao_registro.get(
+                                    "data_vacinacao", "N/A")
+                                proxima_dose_msg = dados_vacinacao_registro.get(
+                                    "proxima_dose", "N/A")
 
                                 resposta = f"""🐄 **Registro de Vacinação, {nome}** 🐄
 ✅ Animal: {animal_id.capitalize()}
@@ -2175,17 +2443,18 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
 ✅ Data: {data_vacinacao}
 ✅ Próxima dose: {proxima_dose_msg}
 💉 Lembrete agendado para a próxima vacinação. 🎉"""
-                                
+
                                 resposta += f"\n\nO que deseja fazer agora na seção de Vacinação e Vermifugação, {nome}? 💉🐛\nDigite:\n1. Registrar outra vacinação\n2. Consultar vacinação\n3. Registrar vermifugação\n4. Consultar vermifugação\n5. Receber lembretes futuros\nOu 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal."
                                 contexto["awaiting_post_completion_response"] = True
-                                
+
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (registro vacinação etapa {registro_vacinacao_etapa}): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (registro vacinação etapa {registro_vacinacao_etapa}): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
-                        
+
                         elif vacinacao_vermifugacao_opcao == 2:
                             print(f"DEBUG_FLOW: Fluxo: consulta_vacinacao_ativa")
                             if awaiting_animal_id_consulta_vac:
@@ -2193,13 +2462,19 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 # Verifica se o animal está cadastrado
                                 if not any(animal.get("animal_id", "").lower() == animal_id_consulta.lower() for animal in contexto["registros_animais"]):
                                     resposta = f"O animal '{animal_id_consulta.capitalize()}' não está cadastrado, {nome}. Por favor, cadastre o animal primeiro ou informe um animal já cadastrado.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
 
                                 contexto["awaiting_animal_id_consulta_vac"] = False
-                                
+
                                 historico_animal = [
                                     reg for reg in contexto["registros_vacinacao"]
                                     if reg.get("animal_id", "").lower() == animal_id_consulta.lower()
@@ -2209,84 +2484,114 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                     resposta = f"🐄 **Histórico de Vacinação - {animal_id_consulta.capitalize()}** 🐄\n"
                                     for i, reg in enumerate(historico_animal):
                                         vacina = reg.get("vacina", "N/A")
-                                        data_vacinacao = reg.get("data_vacinacao", "N/A")
-                                        proxima_dose = reg.get("proxima_dose", "N/A")
+                                        data_vacinacao = reg.get(
+                                            "data_vacinacao", "N/A")
+                                        proxima_dose = reg.get(
+                                            "proxima_dose", "N/A")
                                         resposta += f"{i+1}. {vacina.capitalize()} - {data_vacinacao} → Próxima: {proxima_dose}\n"
                                 else:
                                     resposta = f"Não encontrei registros de vacinação para o animal '{animal_id_consulta.capitalize()}', {nome}. 🙁"
-                                
+
                                 resposta += f"\n✅ Deseja consultar outro animal, {nome}? Digite `sim` ou `não`.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 contexto["consulta_vacinacao_ativa"] = False
                                 contexto["vacinacao_vermifugacao_opcao"] = None
                                 contexto["awaiting_post_completion_response"] = True
-                            
+
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (consulta vacinação): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (consulta vacinação): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                         elif vacinacao_vermifugacao_opcao == 3:
-                            print(f"DEBUG_FLOW: Fluxo: registro_vermifugacao_etapa {registro_vermifugacao_etapa}")
+                            print(
+                                f"DEBUG_FLOW: Fluxo: registro_vermifugacao_etapa {registro_vermifugacao_etapa}")
                             if registro_vermifugacao_etapa == 1:
                                 animal_id_verm = mensagem_recebida.strip()
                                 # Verifica se o animal está cadastrado
                                 if not any(animal.get("animal_id", "").lower() == animal_id_verm.lower() for animal in contexto["registros_animais"]):
                                     resposta = f"O animal '{animal_id_verm.capitalize()}' não está cadastrado, {nome}. Por favor, cadastre o animal primeiro ou informe um animal já cadastrado.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                                 dados_vermifugacao_registro["animal_id"] = animal_id_verm
                                 contexto["registro_vermifugacao_etapa"] = 2
                                 resposta = f"✅ Qual foi o vermífugo aplicado, {nome}? 🐛\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             elif registro_vermifugacao_etapa == 2:
-                                dados_vermifugacao_registro["vermifugo"] = mensagem_recebida.strip()
+                                dados_vermifugacao_registro["vermifugo"] = mensagem_recebida.strip(
+                                )
                                 contexto["registro_vermifugacao_etapa"] = 3
                                 resposta = f"✅ Qual a data da vermifugação, {nome}? (dd/mm/aaaa) 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             elif registro_vermifugacao_etapa == 3:
                                 if not is_valid_date(mensagem_recebida.strip()):
                                     resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024). 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
-                                dados_vermifugacao_registro["data_vermifugacao"] = mensagem_recebida.strip()
+                                dados_vermifugacao_registro["data_vermifugacao"] = mensagem_recebida.strip(
+                                )
                                 contexto["registro_vermifugacao_etapa"] = 4
                                 resposta = f"✅ Quando será a próxima dose ou reforço, {nome}? 🗓️ (Se não houver, responda \"não\")\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             elif registro_vermifugacao_etapa == 4:
                                 proxima_dose_verm = mensagem_recebida.strip()
                                 if proxima_dose_verm != "não" and not is_valid_date(proxima_dose_verm):
                                     resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024) ou responda 'não'. 🗓️\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                                 dados_vermifugacao_registro["proxima_dose"] = proxima_dose_verm if proxima_dose_verm != "não" else "Não informado"
-                                
-                                contexto["registros_vermifugacao"].append(dados_vermifugacao_registro)
+
+                                contexto["registros_vermifugacao"].append(
+                                    dados_vermifugacao_registro)
 
                                 contexto["registro_vermifugacao_etapa"] = None
                                 contexto["vacinacao_vermifugacao_opcao"] = None
-                                
-                                animal_id = dados_vermifugacao_registro.get("animal_id", "N/A")
-                                vermifugo = dados_vermifugacao_registro.get("vermifugo", "N/A")
-                                data_vermifugacao = dados_vermifugacao_registro.get("data_vermifugacao", "N/A")
-                                proxima_dose_msg = dados_vermifugacao_registro.get("proxima_dose", "N/A")
+
+                                animal_id = dados_vermifugacao_registro.get(
+                                    "animal_id", "N/A")
+                                vermifugo = dados_vermifugacao_registro.get(
+                                    "vermifugo", "N/A")
+                                data_vermifugacao = dados_vermifugacao_registro.get(
+                                    "data_vermifugacao", "N/A")
+                                proxima_dose_msg = dados_vermifugacao_registro.get(
+                                    "proxima_dose", "N/A")
 
                                 resposta = f"""🐛 **Registro de Vermifugação, {nome}** 🐛
 ✅ Animal: {animal_id.capitalize()}
 ✅ Vermífugo: {vermifugo.capitalize()}
 ✅ Data: {data_vermifugacao}
 ✅ Próxima dose: {proxima_dose_msg}"""
-                                
+
                                 resposta += f"\n\nO que deseja fazer agora na seção de Vacinação e Vermifugação, {nome}? 💉🐛\nDigite:\n1. Registrar vacinação\n2. Consultar vacinação\n3. Registrar vermifugação\n4. Consultar vermifugação\n5. Receber lembretes futuros\nOu 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal."
                                 contexto["awaiting_post_completion_response"] = True
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (registro vermifugação etapa {registro_vermifugacao_etapa}): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (registro vermifugação etapa {registro_vermifugacao_etapa}): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2297,13 +2602,19 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 # Verifica se o animal está cadastrado
                                 if not any(animal.get("animal_id", "").lower() == animal_id_consulta.lower() for animal in contexto["registros_animais"]):
                                     resposta = f"O animal '{animal_id_consulta.capitalize()}' não está cadastrado, {nome}. Por favor, cadastre o animal primeiro ou informe um animal já cadastrado.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
 
                                 contexto["awaiting_animal_id_consulta_verm"] = False
-                                
+
                                 historico_animal_verm = [
                                     reg for reg in contexto["registros_vermifugacao"]
                                     if reg.get("animal_id", "").lower() == animal_id_consulta.lower()
@@ -2313,21 +2624,24 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                     resposta = f"🐛 **Histórico de Vermifugação - {animal_id_consulta.capitalize()}** 🐛\n"
                                     for i, reg in enumerate(historico_animal_verm):
                                         vermifugo = reg.get("vermifugo", "N/A")
-                                        data_vermifugacao = reg.get("data_vermifugacao", "N/A")
-                                        proxima_dose = reg.get("proxima_dose", "N/A")
+                                        data_vermifugacao = reg.get(
+                                            "data_vermifugacao", "N/A")
+                                        proxima_dose = reg.get(
+                                            "proxima_dose", "N/A")
                                         resposta += f"{i+1}. {vermifugo.capitalize()} - {data_vermifugacao} → Próxima: {proxima_dose}\n"
                                 else:
                                     resposta = f"Não encontrei registros de vermifugação para o animal '{animal_id_consulta.capitalize()}', {nome}. 🙁"
-                                
+
                                 resposta += f"\n✅ Deseja consultar outro animal, {nome}? Digite `sim` ou `não`.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 contexto["consulta_vermifugacao_ativa"] = False
                                 contexto["vacinacao_vermifugacao_opcao"] = None
                                 contexto["awaiting_post_completion_response"] = True
-                            
+
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (consulta vermifugação): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (consulta vermifugação): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2338,19 +2652,20 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 contexto["contato_lembretes"] = contato_lembretes
                                 contexto["awaiting_lembretes_contato"] = False
                                 contexto["lembretes_vacinacao_ativa"] = False
-                                
+
                                 resposta = f"✅ Pronto, {nome}! Você receberá lembretes sempre que um reforço de vacinação estiver próximo. 🐮📩"
-                                
+
                                 resposta += f"\n\nO que deseja fazer agora na seção de Vacinação e Vermifugação, {nome}? 💉🐛\nDigite:\n1. Registrar vacinação\n2. Consultar vacinação\n3. Registrar vermifugação\n4. Consultar vermifugação\n5. Receber lembretes futuros\nOu 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal."
                                 contexto["awaiting_post_completion_response"] = True
-                            
+
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (lembretes vacinação): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (lembretes vacinação): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
-                        
+
                         else:
                             resposta = f"Ocorreu um erro no fluxo de vacinação/vermifugação, {nome}. Por favor, digite '2' para voltar ao menu de Vacinação e Vermifugação ou 'menu' para voltar ao menu principal."
                             contexto["vacinacao_vermifugacao_ativo"] = True
@@ -2358,7 +2673,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro vac/verm sub-fluxo): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro vac/verm sub-fluxo): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2383,7 +2699,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (controle reprodutivo voltar): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (controle reprodutivo voltar): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
                         resposta = f"Você está no fluxo de Controle Reprodutivo, {nome}. Em breve teremos mais funcionalidades aqui! 🤰\n\nDeseja voltar ao menu de Gestão de Rebanho? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal)"
@@ -2391,7 +2708,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (controle reprodutivo): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (controle reprodutivo): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2416,7 +2734,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (histórico pesagens voltar): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (histórico pesagens voltar): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
                         resposta = f"Você está no fluxo de Histórico de Pesagens, {nome}. Em breve teremos mais funcionalidades aqui! ⚖️\n\nDeseja voltar ao menu de Gestão de Rebanho? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal)"
@@ -2424,32 +2743,35 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (histórico pesagens): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (histórico pesagens): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                     else:
                         resposta = f"Ocorreu um erro no fluxo de Gestão de Rebanho, {nome}. Por favor, digite '3' para iniciar a Gestão de Rebanho ou 'menu' para voltar ao menu principal."
-                        reset_all_flow_flags(contexto) # Reset all flags
+                        reset_all_flow_flags(contexto)  # Reset all flags
                         contexto["gestao_rebanho_ativo"] = True
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro gestão rebanho sub-fluxo): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (erro gestão rebanho sub-fluxo): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif registration_step:
-                    print(f"DEBUG_FLOW: Fluxo: registration_step (etapa: {registration_step})")
+                    print(
+                        f"DEBUG_FLOW: Fluxo: registration_step (etapa: {registration_step})")
                     current_question_key = registration_step
-                    
+
                     if "voltar" in mensagem_recebida:
                         if contexto.get("editing_registration"):
                             contexto["current_editing_field"] = None
                             contexto["awaiting_field_to_edit"] = True
                             resposta = f"Qual campo você gostaria de editar, {nome}? (Ex: 'nome completo', 'cpf', 'endereço', etc.) 📝\n\nSe preferir, posso te mostrar seus dados atuais. Diga 'meus dados'.\n(Ou 'voltar' para o menu principal)"
                         else:
-                            reset_all_flow_flags(contexto) # Reset all flags
+                            reset_all_flow_flags(contexto)  # Reset all flags
                             resposta = (
                                 f"Ok, {nome}, o cadastro foi cancelado. Retornando ao menu principal. 👋\n\n"
                                 f"Escolha uma das opções abaixo para começarmos:\n"
@@ -2466,7 +2788,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro voltar): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro voltar): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2478,7 +2801,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 if term in mensagem_recebida:
                                     field_to_edit = key
                                     break
-                            
+
                             if field_to_edit:
                                 contexto["current_editing_field"] = field_to_edit
                                 contexto["awaiting_field_to_edit"] = False
@@ -2495,7 +2818,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 for key, question in REGISTRATION_QUESTIONS.items():
                                     # Formata a exibição para campos de escolha Sim/Não
                                     if key in ["email", "ponto_referencia"]:
-                                        display_value = contexto.get(key, "Não preenchido")
+                                        display_value = contexto.get(
+                                            key, "Não preenchido")
                                         # Ajusta o prefixo da pergunta para um título mais limpo para exibição
                                         if key == "email":
                                             display_question = "E-mail"
@@ -2503,13 +2827,17 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                             display_question = "Ponto de referência"
                                         dados_atuais += f"- {display_question}: {display_value}\n"
                                     else:
-                                        value = contexto.get(key, "Não preenchido")
+                                        value = contexto.get(
+                                            key, "Não preenchido")
                                         # Remove os "Qual é seu/sua/o" e emojis da pergunta original para exibição
-                                        clean_question = question.splitlines()[0].replace('Qual é seu ', '').replace('Qual o seu ', '').replace('Qual a sua ', '').replace('Qual seu ', '').replace('Qual a ', '').replace('Qual o ', '').replace('Seu ', '').replace('Tem algum ', '').replace('Sua ', '').replace('Sua produção é de que tipo?', 'Tipo de produção?').replace('Sua produção é orgânica?', 'Produção orgânica?').replace('Utiliza irrigação?', 'Utiliza irrigação?').split("?")[0].strip() # Pega só a primeira linha, remove o '?', e limpa espaços
+                                        clean_question = question.splitlines()[0].replace('Qual é seu ', '').replace('Qual o seu ', '').replace('Qual a sua ', '').replace('Qual seu ', '').replace('Qual a ', '').replace('Qual o ', '').replace('Seu ', '').replace('Tem algum ', '').replace(
+                                            # Pega só a primeira linha, remove o '?', e limpa espaços
+                                            'Sua ', '').replace('Sua produção é de que tipo?', 'Tipo de produção?').replace('Sua produção é orgânica?', 'Produção orgânica?').replace('Utiliza irrigação?', 'Utiliza irrigação?').split("?")[0].strip()
                                         dados_atuais += f"- {clean_question}: {value}\n"
                                 resposta = f"{dados_atuais}\nQual campo você gostaria de editar agora, {nome}? Ou diga 'concluído' para finalizar a edição. ✅\n(Ou 'voltar' para o menu principal)"
                             elif "concluído" in mensagem_recebida or "concluido" in mensagem_recebida:
-                                reset_all_flow_flags(contexto) # Reset all flags
+                                reset_all_flow_flags(
+                                    contexto)  # Reset all flags
                                 contexto["awaiting_post_completion_response"] = True
                                 resposta = f"Edição de cadastro concluída, {nome}! 🎉 Posso ajudar com mais alguma coisa? (Responda 'sim' ou 'não')"
                             else:
@@ -2517,7 +2845,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (edição de cadastro): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (edição de cadastro): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2526,40 +2855,68 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if field_to_update == "cpf":
                                 if not is_valid_cpf(mensagem_recebida):
                                     resposta = f"CPF inválido, {nome}. Por favor, digite um CPF válido (apenas 11 números). 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                                 else:
-                                    contexto[field_to_update] = re.sub(r'\D', '', mensagem_recebida)
+                                    contexto[field_to_update] = re.sub(
+                                        r'\D', '', mensagem_recebida)
                             elif field_to_update == "rg":
                                 if not is_valid_rg(mensagem_recebida):
                                     resposta = f"RG inválido, {nome}. Por favor, digite um RG válido. 🆔\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                                 else:
-                                    contexto[field_to_update] = mensagem_recebida.strip()
+                                    contexto[field_to_update] = mensagem_recebida.strip(
+                                    )
                             elif field_to_update == "data_nascimento":
                                 if not is_valid_date(mensagem_recebida.strip()):
                                     resposta = f"Data de nascimento inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2000). 🎂\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                                 else:
-                                    contexto[field_to_update] = mensagem_recebida.strip()
+                                    contexto[field_to_update] = mensagem_recebida.strip(
+                                    )
                             elif field_to_update == "estado_civil":
                                 estado_civil_map = {
                                     "1": "Casado", "2": "Solteiro", "3": "Viúvo", "4": "Divorciado"
                                 }
                                 if mensagem_recebida.strip() in estado_civil_map:
-                                    contexto[field_to_update] = estado_civil_map[mensagem_recebida.strip()]
+                                    contexto[field_to_update] = estado_civil_map[mensagem_recebida.strip(
+                                    )]
                                 else:
                                     resposta = f"Opção inválida, {nome}. Por favor, escolha uma das opções para estado civil:\n1. Casado 💍\n2. Solteiro 🧍\n3. Viúvo 💔\n4. Divorciado 💔\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                    try: save_conversation_context(numero, contexto)
-                                    except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                    try:
+                                        save_conversation_context(
+                                            numero, contexto)
+                                    except Exception as e:
+                                        print(f"DEBUG_FLOW_SAVE_ERROR: {e}")
+                                        send_whatsapp_message(
+                                            numero, "Erro ao salvar.")
+                                        return jsonify({"status": "erro"}), 500
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                             else:
@@ -2570,14 +2927,18 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (campo editado): {e}")
-                            
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (campo editado): {e}")
+
                             # Formata a mensagem de confirmação de atualização
-                            question_text = REGISTRATION_QUESTIONS[field_to_update].splitlines()[0]
+                            question_text = REGISTRATION_QUESTIONS[field_to_update].splitlines()[
+                                0]
                             # Remove "Qual é seu/sua/o", emojis e o ponto de interrogação
-                            clean_question_text = re.sub(r'Qual (?:é )?s(?:eu|ua|ua)?\s', '', question_text).replace('?', '').strip()
-                            clean_question_text = re.sub(r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F900-\U0001F9FF\U0001F4C0-\U0001F4FF\U0001F1E0-\U0001F1FF]+', '', clean_question_text).strip()
-                            
+                            clean_question_text = re.sub(
+                                r'Qual (?:é )?s(?:eu|ua|ua)?\s', '', question_text).replace('?', '').strip()
+                            clean_question_text = re.sub(
+                                r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F900-\U0001F9FF\U0001F4C0-\U0001F4FF\U0001F1E0-\U0001F1FF]+', '', clean_question_text).strip()
+
                             if field_to_update == "email":
                                 clean_question_text = "E-mail"
                             elif field_to_update == "ponto_referencia":
@@ -2597,11 +2958,12 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (início da edição): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (início da edição): {e}")
                             resposta = f"Qual campo você gostaria de editar, {nome}? (Ex: 'nome completo', 'cpf', 'endereço', etc.) 📝\n\nSe preferir, posso te mostrar seus dados atuais. Diga 'meus dados'.\n(Ou 'voltar' para o menu principal)"
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
-                    
+
                     elif awaiting_email_choice:
                         if mensagem_recebida.strip() == "1" or "sim" in mensagem_recebida:
                             contexto["email_choice_made"] = "sim"
@@ -2612,7 +2974,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             contexto["email"] = "Não informado"
                             contexto["email_choice_made"] = "nao"
                             contexto["awaiting_email_choice"] = False
-                            next_question_key = get_next_registration_question_key(contexto)
+                            next_question_key = get_next_registration_question_key(
+                                contexto)
                             if next_question_key:
                                 contexto["registration_step"] = next_question_key
                                 resposta = REGISTRATION_QUESTIONS[next_question_key]
@@ -2625,14 +2988,22 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (email choice): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (email choice): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                     elif awaiting_email_value_input:
-                        contexto["email"] = mensagem_recebida.strip()
+                        email_input = mensagem_recebida.strip()
+                        if not is_valid_email(email_input):
+                            resposta = "Endereço de e-mail inválido. Por favor, digite um e-mail válido (ex: seuemail@dominio.com). 📧"
+                            send_whatsapp_message(numero, resposta)
+                            return jsonify({"status": "erro", "resposta": resposta}), 200
+
+                        contexto["email"] = email_input
                         contexto["awaiting_email_value_input"] = False
-                        next_question_key = get_next_registration_question_key(contexto)
+                        next_question_key = get_next_registration_question_key(
+                            contexto)
                         if next_question_key:
                             contexto["registration_step"] = next_question_key
                             resposta = REGISTRATION_QUESTIONS[next_question_key]
@@ -2643,7 +3014,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (email value): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (email value): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2657,7 +3029,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             contexto["ponto_referencia"] = "Não informado"
                             contexto["ponto_referencia_choice_made"] = "nao"
                             contexto["awaiting_ponto_referencia_choice"] = False
-                            next_question_key = get_next_registration_question_key(contexto)
+                            next_question_key = get_next_registration_question_key(
+                                contexto)
                             if next_question_key:
                                 contexto["registration_step"] = next_question_key
                                 resposta = REGISTRATION_QUESTIONS[next_question_key]
@@ -2670,14 +3043,16 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (ponto_referencia choice): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (ponto_referencia choice): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                     elif awaiting_ponto_referencia_value_input:
                         contexto["ponto_referencia"] = mensagem_recebida.strip()
                         contexto["awaiting_ponto_referencia_value_input"] = False
-                        next_question_key = get_next_registration_question_key(contexto)
+                        next_question_key = get_next_registration_question_key(
+                            contexto)
                         if next_question_key:
                             contexto["registration_step"] = next_question_key
                             resposta = REGISTRATION_QUESTIONS[next_question_key]
@@ -2688,7 +3063,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (ponto_referencia value): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (ponto_referencia value): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2696,17 +3072,14 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         if current_question_key == "cpf":
                             if not is_valid_cpf(mensagem_recebida):
                                 resposta = f"CPF inválido, {nome}. Por favor, digite um CPF válido (apenas 11 números). 🔢\n(Ou 'voltar' para cancelar o cadastro, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             else:
-                                contexto[current_question_key] = re.sub(r'\D', '', mensagem_recebida)
+                                contexto[current_question_key] = re.sub(
+                                    r'\D', '', mensagem_recebida)
                         elif current_question_key == "rg":
                             if not is_valid_rg(mensagem_recebida):
                                 resposta = f"RG inválido, {nome}. Por favor, digite um RG válido. 🆔\n(Ou 'voltar' para cancelar o cadastro, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             else:
@@ -2714,8 +3087,6 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         elif current_question_key == "data_nascimento":
                             if not is_valid_date(mensagem_recebida.strip()):
                                 resposta = f"Data de nascimento inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2000). 🎂\n(Ou 'voltar' para cancelar o cadastro, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             else:
@@ -2728,20 +3099,42 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 contexto[current_question_key] = estado_civil_map[mensagem_recebida.strip()]
                             else:
                                 resposta = f"Opção inválida, {nome}. Por favor, escolha uma das opções para estado civil:\n1. Casado 💍\n2. Solteiro 🧍\n3. Viúvo 💔\n4. Divorciado 💔\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                try: save_conversation_context(numero, contexto)
-                                except Exception as e: print(f"DEBUG_FLOW_SAVE_ERROR: {e}"); send_whatsapp_message(numero, "Erro ao salvar."); return jsonify({"status": "erro"}), 500
+                                send_whatsapp_message(numero, resposta)
+                                return jsonify({"status": "erro", "resposta": resposta}), 200
+                        elif current_question_key == "endereco_tipo":
+                            endereco_map = {"1": "Rural", "2": "Urbano"}
+                            user_input = mensagem_recebida.strip()
+                            if user_input in endereco_map:
+                                contexto[current_question_key] = endereco_map[user_input]
+                            elif user_input.lower() in [v.lower() for v in endereco_map.values()]:
+                                contexto[current_question_key] = user_input.capitalize()
+                            else:
+                                resposta = f"Opção inválida, {nome}. Por favor, escolha uma das opções:\n1. Rural\n2. Urbano\n(Ou 'voltar' para cancelar, ou 'menu' para o principal)"
+                                send_whatsapp_message(numero, resposta)
+                                return jsonify({"status": "erro", "resposta": resposta}), 200
+                        elif current_question_key == "tipo_producao":
+                            producao_map = {"1": "Familiar", "2": "Empresarial"}
+                            user_input = mensagem_recebida.strip()
+                            if user_input in producao_map:
+                                contexto[current_question_key] = producao_map[user_input]
+                            elif user_input.lower() in [v.lower() for v in producao_map.values()]:
+                                contexto[current_question_key] = user_input.capitalize()
+                            else:
+                                resposta = f"Opção inválida, {nome}. Por favor, escolha uma das opções:\n1. Familiar\n2. Empresarial\n(Ou 'voltar' para cancelar, ou 'menu' para o principal)"
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                         else:
                             contexto[current_question_key] = mensagem_recebida.strip()
-                        
+
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro etapa {current_question_key}): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro etapa {current_question_key}): {e}")
 
-                        next_question_key = get_next_registration_question_key(contexto)
-                        
+                        next_question_key = get_next_registration_question_key(
+                            contexto)
+
                         if next_question_key:
                             contexto["registration_step"] = next_question_key
                             if next_question_key == "email_choice":
@@ -2753,41 +3146,49 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (próxima etapa cadastro): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (próxima etapa cadastro): {e}")
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "sucesso", "resposta": resposta}), 200
                         else:
-                            reset_all_flow_flags(contexto) # Reset all flags
+                            reset_all_flow_flags(contexto)  # Reset all flags
                             contexto["awaiting_post_completion_response"] = True
                             try:
                                 save_conversation_context(numero, contexto)
                             except Exception as e:
-                                print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro concluído): {e}")
+                                print(
+                                    f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (cadastro concluído): {e}")
                             resposta = f"Cadastro concluído com sucesso, {nome}! 🎉 Posso ajudar com mais alguma coisa? (Responda 'sim' ou 'não')"
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
-                
+
                 elif awaiting_weather_location:
                     print(f"DEBUG_FLOW: Fluxo: awaiting_weather_location")
-                    city_match_explicit = re.search(r"(?:clima|previsão|tempo)\s+(?:em|para)\s+([a-zA-Z\u00C0-\u017F\s-]+)", mensagem_recebida)
+                    city_match_explicit = re.search(
+                        r"(?:clima|previsão|tempo)\s+(?:em|para)\s+([a-zA-Z\u00C0-\u017F\s-]+)", mensagem_recebida)
                     cidade_solicitada_from_message = ""
 
                     if mensagem_recebida.strip() and not mensagem_recebida.strip().isdigit():
                         cidade_solicitada_from_message = mensagem_recebida.strip()
-                    
+
                     if city_match_explicit:
-                        cidade_solicitada_from_message = city_match_explicit.group(1).strip()
+                        cidade_solicitada_from_message = city_match_explicit.group(
+                            1).strip()
 
                     if cidade_solicitada_from_message:
                         pais_solicitado = "BR"
-                        resposta_clima = format_weather_response(cidade_solicitada_from_message, pais_solicitado)
-                        reset_all_flow_flags(contexto) # Reset all flags
-                        contexto["awaiting_weather_follow_up_choice"] = True # Only set this flag
-                        contexto["localizacao"] = {"cidade": cidade_solicitada_from_message, "estado": "", "pais": pais_solicitado}
+                        resposta_clima = format_weather_response(
+                            cidade_solicitada_from_message, pais_solicitado)
+                        reset_all_flow_flags(contexto)  # Reset all flags
+                        # Only set this flag
+                        contexto["awaiting_weather_follow_up_choice"] = True
+                        contexto["localizacao"] = {
+                            "cidade": cidade_solicitada_from_message, "estado": "", "pais": pais_solicitado}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (clima por cidade): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (clima por cidade): {e}")
                         send_whatsapp_message(numero, resposta_clima)
                         return jsonify({"status": "sucesso", "resposta": resposta_clima}), 200
                     else:
@@ -2795,18 +3196,20 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         try:
                             save_conversation_context(numero, contexto)
                         except Exception as e:
-                            print(f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (re-prompt localização): {e}")
+                            print(
+                                f"DEBUG_FLOW_SAVE_ERROR: Erro ao salvar contexto (re-prompt localização): {e}")
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 # Handle Main Menu Options
                 elif mensagem_recebida.strip() == "1" or "clima" in mensagem_recebida or "previsão climática" in mensagem_recebida:
                     print(f"DEBUG_MAIN_MENU: Opção 1 - Previsão Climática selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
+                    reset_all_flow_flags(contexto)  # Reset all flags
                     if localizacao and localizacao.get("cidade"):
                         cidade_salva = localizacao["cidade"]
                         pais_salvo = localizacao["pais"]
-                        resposta = format_weather_response(cidade_salva, pais_salvo)
+                        resposta = format_weather_response(
+                            cidade_salva, pais_salvo)
                         contexto["awaiting_weather_follow_up_choice"] = True
                     else:
                         resposta = f"Para qual cidade você gostaria da previsão climática, {nome}? Você também pode compartilhar sua localização. 📍\n(Ou 'voltar' para o menu principal)"
@@ -2814,13 +3217,15 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 1): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 1): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif mensagem_recebida.strip() == "2" or "controle de estoque" in mensagem_recebida or "estoque" in mensagem_recebida:
-                    print(f"DEBUG_MAIN_MENU: Opção 2 - Controle de Estoque selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
+                    print(
+                        f"DEBUG_MAIN_MENU: Opção 2 - Controle de Estoque selecionada.")
+                    reset_all_flow_flags(contexto)  # Reset all flags
                     contexto["controle_estoque_ativo"] = True
                     resposta = (
                         f"Bem-vindo ao Controle de Estoque, {nome}! 📦\n\n"
@@ -2835,13 +3240,14 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 2 - controle de estoque): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 2 - controle de estoque): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif mensagem_recebida.strip() == "3" or "gestão de rebanho" in mensagem_recebida or "gestao de rebanho" in mensagem_recebida or "rebanho" in mensagem_recebida:
                     print(f"DEBUG_MAIN_MENU: Opção 3 - Gestão de Rebanho selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
+                    reset_all_flow_flags(contexto)  # Reset all flags
                     contexto["gestao_rebanho_ativo"] = True
                     resposta = (
                         f"Bem-vindo à Gestão de Rebanho, {nome}! 🐄\n\n"
@@ -2858,13 +3264,14 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 3 - gestão de rebanho): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 3 - gestão de rebanho): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif mensagem_recebida.strip() == "4" or "simulação de safra" in mensagem_recebida or "safra" in mensagem_recebida:
                     print(f"DEBUG_MAIN_MENU: Opção 4 - Simulação de Safra selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
+                    reset_all_flow_flags(contexto)  # Reset all flags
                     contexto["simulacao_safra_ativa"] = True
                     resposta = (
                         f"Bem-vindo à Simulação de Safra, {nome}! 🌾\n\n"
@@ -2877,15 +3284,17 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 4 - simulação de safra): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 4 - simulação de safra): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif mensagem_recebida.strip() == "5" or "cadastro" in mensagem_recebida or "cadastra-se" in mensagem_recebida or "editar dados" in mensagem_recebida:
                     print(f"DEBUG_MAIN_MENU: Opção 5 - Cadastro/Editar selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
+                    reset_all_flow_flags(contexto)  # Reset all flags
                     if usuario_cadastrado:
-                        contexto["registration_step"] = "nome_completo" # Reinicia o passo de cadastro para que o get_next_registration_question_key funcione
+                        # Reinicia o passo de cadastro para que o get_next_registration_question_key funcione
+                        contexto["registration_step"] = "nome_completo"
                         contexto["editing_registration"] = True
                         resposta = f"Entendido, {nome}! Você deseja editar seus dados de cadastro. Qual campo você gostaria de editar? (Ex: 'nome completo', 'cpf', 'endereço', etc.) 📝\n\nSe preferir, posso te mostrar seus dados atuais. Diga 'meus dados'.\n(Ou 'voltar' para o menu principal)"
                     else:
@@ -2894,37 +3303,42 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 5 - cadastrar/editar): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 5 - cadastrar/editar): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif mensagem_recebida.strip() == "6" or "alertas" in mensagem_recebida or "pragas" in mensagem_recebida:
                     print(f"DEBUG_MAIN_MENU: Opção 6 - Alertas de Pragas selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
-                    contexto["awaiting_menu_return_prompt"] = True # Set flag to expect return to menu prompt
+                    reset_all_flow_flags(contexto)  # Reset all flags
+                    # Set flag to expect return to menu prompt
+                    contexto["awaiting_menu_return_prompt"] = True
                     resposta = f"Em breve teremos alertas de pragas para a sua região, {nome}! Fique ligado! 🐛\nDeseja voltar ao menu principal? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu principal)"
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 6): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 6): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif mensagem_recebida.strip() == "7" or "análise de mercado" in mensagem_recebida or "mercado" in mensagem_recebida:
                     print(f"DEBUG_MAIN_MENU: Opção 7 - Análise de Mercado selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
-                    contexto["awaiting_menu_return_prompt"] = True # Set flag to expect return to menu prompt
+                    reset_all_flow_flags(contexto)  # Reset all flags
+                    # Set flag to expect return to menu prompt
+                    contexto["awaiting_menu_return_prompt"] = True
                     resposta = f"Em breve teremos análises de mercado para te ajudar a tomar as melhores decisões, {nome}! Aguarde! 📈\nDeseja voltar ao menu principal? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu principal)"
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 7): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 7): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif mensagem_recebida.strip() == "8" or "localização" in mensagem_recebida or "minha localização" in mensagem_recebida or "onde estou" in mensagem_recebida:
                     print(f"DEBUG_MAIN_MENU: Opção 8 - Localização selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
+                    reset_all_flow_flags(contexto)  # Reset all flags
                     local = obter_localizacao_via_ip()
                     if "erro" in local:
                         resposta = f"Desculpe, {nome}, não consegui determinar sua localização atual. Por favor, tente compartilhar sua localização pelo WhatsApp ou digite o nome da sua cidade para que eu possa ajudar. 📍\n(Ou 'voltar' para o menu principal)"
@@ -2938,24 +3352,28 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 8): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 8): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 elif mensagem_recebida.strip() == "9" or "outras informações" in mensagem_recebida or "outras informacoes" in mensagem_recebida:
                     print(f"DEBUG_MAIN_MENU: Opção 9 - Outras Informações selecionada.")
-                    reset_all_flow_flags(contexto) # Reset all flags
-                    contexto["awaiting_menu_return_prompt"] = True # Set flag to expect return to menu prompt
+                    reset_all_flow_flags(contexto)  # Reset all flags
+                    # Set flag to expect return to menu prompt
+                    contexto["awaiting_menu_return_prompt"] = True
                     resposta = f"Para outras informações, você pode visitar nosso site em www.campointeligente.com.br ou entrar em contato com nosso suporte técnico. 💡\n\nDeseja voltar ao menu principal? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu principal)"
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 9): {e}")
+                        print(
+                            f"DEBUG_MAIN_MENU_SAVE_ERROR: Erro ao salvar contexto (opção 9): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
                 else:
-                    print(f"DEBUG_FALLBACK: Mensagem não reconhecida: '{mensagem_recebida}'")
+                    print(
+                        f"DEBUG_FALLBACK: Mensagem não reconhecida: '{mensagem_recebida}'")
                     resposta = (
                         f"Desculpe, {nome}, não entendi sua mensagem. 🤔\n"
                         f"Por favor, escolha uma das opções do menu principal ou diga 'menu' para vê-las novamente:\n"
@@ -2972,12 +3390,14 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     try:
                         save_conversation_context(numero, contexto)
                     except Exception as e:
-                        print(f"DEBUG_FALLBACK_SAVE_ERROR: Erro ao salvar contexto (fallback): {e}")
+                        print(
+                            f"DEBUG_FALLBACK_SAVE_ERROR: Erro ao salvar contexto (fallback): {e}")
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
             else:
-                print(f"DEBUG_WEBHOOK_END: Nenhum tipo de mensagem suportado ou mensagem vazia para {numero}.")
+                print(
+                    f"DEBUG_WEBHOOK_END: Nenhum tipo de mensagem suportado ou mensagem vazia para {numero}.")
                 return jsonify({"status": "erro", "mensagem": "Nenhum tipo de mensagem suportado ou mensagem vazia."}), 400
         else:
             print(f"DEBUG_WEBHOOK_END: Evento não suportado: {event}")
@@ -2986,6 +3406,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
     except Exception as e:
         print(f"DEBUG_WEBHOOK_ERROR: Erro inesperado no webhook: {e}")
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
+
 
 if __name__ == "__main__":
     init_db()
