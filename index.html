@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Bem-vindo ao Servidor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="repo-path" content="marcosmoraisjr/CampoInteligente-back">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -36,7 +38,8 @@
   </div>
 
   <script>
-    fetch("https://api.github.com/repos/restic36/startup-campo-inteligente-back/commits/main")
+    const repoPath = document.querySelector('meta[name="repo-path"]').content;
+    fetch(`https://api.github.com/repos/${repoPath}/commits/main`)
       .then(response => response.json())
       .then(data => {
         const date = new Date(data.commit.committer.date);
