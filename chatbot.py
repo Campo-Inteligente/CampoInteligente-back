@@ -23,7 +23,8 @@ except:
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 AUTH_KEY = os.getenv("AUTH_KEY")
-EVOLUTION_API_URL = "https://1f27-45-169-217-33.ngrok-free.app"
+# CORREÇÃO: URL da API Evolution atualizada para o seu servidor DDNS com a porta correta.
+EVOLUTION_API_URL = "http://campointeligente.ddns.com.br:21085"
 
 # Configurações do Banco de Dados PostgreSQL
 DB_NAME = os.getenv("DB_NAME")
@@ -46,12 +47,12 @@ conversa_contextos = {}
 # Definição das perguntas de cadastro e as chaves correspondentes no contexto
 REGISTRATION_QUESTIONS = {
     "nome_completo": "Qual é seu nome completo? 👤",
-    "cpf": "Qual é seu CPF? (apenas números, por favor) 🔢",
+    "cpf": "Qual é seu CPF? (apenas números, por favor) �",
     "rg": "Qual é seu RG? (apenas números, se possível) 🆔",
     "data_nascimento": "Qual sua data de nascimento? (dd/mm/aaaa) �",
     "sexo": "Qual seu sexo? (Masculino ♂️, Feminino ♀️ ou Outro) �",
     "estado_civil": "Qual seu estado civil? Escolha uma opção:\n1. Casado 💍\n2. Solteiro 🧍\n3. Viúvo �\n4. Divorciado 💔",
-    "telefone_contato": "Qual seu telefone para contato? (Ex: 11987654321, com DDD e sem espaços ou traços) �",
+    "telefone_contato": "Qual seu telefone para contato? (Ex: 11987654321, com DDD e sem espaços ou traços) ?",
     "email": "Você deseja adicionar um endereço de e-mail ao seu cadastro? 📧\n1. Sim\n2. Não",
     "endereco_tipo": "Seu endereço é rural ou urbano? 🏡🏙️\n1. Rural\n2. Urbano",
     "nome_propriedade": "Qual o nome da propriedade (se houver)? 🚜",
@@ -61,7 +62,7 @@ REGISTRATION_QUESTIONS = {
     "cep": "Qual o CEP? ✉️",
     "ponto_referencia": "Você deseja adicionar um ponto de referência? 🗺️\n1. Sim\n2. Não",
     "dap_caf": "Possui DAP ou CAF? Se sim, informe o número. 📄",
-    "tipo_producao": "Sua produção é de que tipo? 🧑‍🌾🏢\n1. Familiar\n2. Empresarial",
+    "tipo_producao": "Sua produção é de que tipo? 🧑‍?🏢\n1. Familiar\n2. Empresarial",
     "producao_organica": "Sua produção é orgânica? (Sim ou Não) ✅❌",
     "utiliza_irrigacao": "Utiliza irrigação? (Sim ou Não) 💧",
     "area_total_propriedade": "Qual a área total da propriedade (em hectares)? 📏",
@@ -341,7 +342,8 @@ def send_whatsapp_message(numero, mensagem):
         "Content-Type": "application/json",
         "apikey": AUTH_KEY
     }
-    url = f"http://127.0.0.1:8080/message/sendText/campointeligente"
+    # CORREÇÃO: Usa a variável EVOLUTION_API_URL
+    url = f"{EVOLUTION_API_URL}/message/sendText/campointeligente"
     try:
         resposta = requests.post(url, json=payload, headers=headers)
         if resposta.status_code in [200, 201]:
@@ -361,9 +363,24 @@ def send_whatsapp_message(numero, mensagem):
             f"DEBUG_WHATSAPP_ERROR: Erro geral ao enviar mensagem para {numero}: {e}")
         return None, {"erro": f"Erro geral ao enviar mensagem: {e}"}
 
+# NOVA FUNÇÃO: Enviar indicador de "digitando..."
+
+
+def send_typing_indicator(numero):
+    payload = {"number": numero, "presence": "composing"}
+    headers = {"Content-Type": "application/json", "apikey": AUTH_KEY}
+    # CORREÇÃO: Usa a variável EVOLUTION_API_URL
+    url = f"{EVOLUTION_API_URL}/chat/sendPresence/campointeligente"
+    try:
+        requests.post(url, json=payload, headers=headers, timeout=5)
+        print(f"DEBUG_TYPING: Indicador 'digitando' enviado para {numero}.")
+        time.sleep(2)  # Pausa para simular digitação
+    except requests.RequestException as e:
+        print(
+            f"DEBUG_TYPING_ERROR: Falha ao enviar indicador de digitação: {e}")
+
+
 # Nova função para formatar a resposta da previsão do tempo
-
-
 def format_weather_response(cidade, pais):
     clima_atual = obter_previsao_tempo(cidade, pais)
     clima_estendido = obter_previsao_estendida(cidade, pais)
@@ -724,21 +741,36 @@ def get_next_registration_question_key(contexto):
 
 
 def reset_all_flow_flags(contexto):
+    # Flags de estado geral
     contexto["awaiting_continuation_choice"] = False
     contexto["awaiting_weather_follow_up_choice"] = False
     contexto["awaiting_menu_return_prompt"] = False
     contexto["awaiting_weather_location"] = False
+    contexto["awaiting_post_completion_response"] = False
+    contexto["conversational_mode_active"] = False  # NOVO
+
+    # Flags de saudação e cadastro
+    contexto["initial_greeting_step"] = "completed"
     contexto["registration_step"] = None
     contexto["editing_registration"] = False
     contexto["awaiting_field_to_edit"] = False
     contexto["current_editing_field"] = None
-    contexto["awaiting_post_completion_response"] = False
+    contexto["awaiting_email_choice"] = False
+    contexto["email_choice_made"] = False
+    contexto["awaiting_email_value_input"] = False
+    contexto["awaiting_ponto_referencia_choice"] = False
+    contexto["ponto_referencia_choice_made"] = False
+    contexto["awaiting_ponto_referencia_value_input"] = False
+
+    # Flags de simulação de safra
     contexto["simulacao_safra_ativa"] = False
     contexto["etapa_simulacao"] = None
     contexto["dados_simulacao"] = {}
     contexto["awaiting_safra_finalizacao"] = False
     contexto["simulacao_sub_fluxo"] = None
     contexto["gerar_relatorio_simulacao_ativo"] = False
+
+    # Flags de gestão de rebanho
     contexto["gestao_rebanho_ativo"] = False
     contexto["gestao_rebanho_sub_fluxo"] = None
     contexto["gerar_relatorio_rebanho_ativo"] = False
@@ -759,6 +791,8 @@ def reset_all_flow_flags(contexto):
     contexto["dados_animal_registro"] = {}
     contexto["controle_reprodutivo_ativo"] = False
     contexto["historico_pesagens_ativo"] = False
+
+    # Flags de controle de estoque
     contexto["controle_estoque_ativo"] = False
     contexto["controle_estoque_sub_fluxo"] = None
     contexto["gerar_relatorio_estoque_ativo"] = False
@@ -769,13 +803,6 @@ def reset_all_flow_flags(contexto):
     contexto["registro_saida_estoque_etapa"] = None
     contexto["dados_saida_estoque_registro"] = {}
     contexto["consulta_estoque_ativa"] = False
-    contexto["initial_greeting_step"] = "completed"
-    contexto["awaiting_email_choice"] = False
-    contexto["email_choice_made"] = False
-    contexto["awaiting_email_value_input"] = False
-    contexto["awaiting_ponto_referencia_choice"] = False
-    contexto["ponto_referencia_choice_made"] = False
-    contexto["awaiting_ponto_referencia_value_input"] = False
 
 
 # Rota do webhook para receber e responder mensagens
@@ -818,21 +845,40 @@ def webhook_route():
         current_time = datetime.now().timestamp()
         last_interaction_time = contexto.get("last_interaction_time", 0)
 
-        # CORREÇÃO: Lógica unificada para início de conversa / timeout
-        is_new_conversation = not contexto or (
-            current_time - last_interaction_time) > CONVERSATION_TIMEOUT_SECONDS
-
-        if is_new_conversation and not is_user_registered(numero):
-            print(
-                f"DEBUG_SESSION: Nova conversa ou timeout para {numero}. Iniciando fluxo de saudação.")
+        # CORREÇÃO: Lógica de timeout agora se aplica a todos os usuários
+        if contexto and (current_time - last_interaction_time) > CONVERSATION_TIMEOUT_SECONDS:
+            print(f"DEBUG_SESSION: Timeout detectado para {numero}. Reiniciando o fluxo da conversa.")
+            # Mantém os dados de registro, mas reinicia o fluxo da conversa
+            dados_persistentes = {
+                k: v for k, v in contexto.items() if k in REGISTRATION_ORDER or k in [
+                    "localizacao", "registros_estoque", "registros_animais", "registros_vacinacao",
+                    "registros_vermifugacao", "simulacoes_passadas"
+                ]
+            }
             contexto.clear()
-            # Definir valores padrão
-            contexto["nome_completo"] = "Usuário"
-            for key in ["registros_vacinacao", "registros_vermifugacao", "registros_animais", "registros_reprodutivos", "historico_pesagens", "registros_estoque", "simulacoes_passadas"]:
-                contexto[key] = []
+            contexto.update(dados_persistentes)
+            
+            if is_user_registered(numero):
+                reset_all_flow_flags(contexto)
+                nome = contexto.get("nome_completo", "Usuário")
+                resposta = f"Olá, {nome}! Notei que você esteve ausente. Vamos recomeçar? Escolha uma opção no menu."
+                # Envia o menu principal diretamente
+                resposta += (
+                    f"\n\nEscolha uma das opções abaixo para começarmos:\n"
+                    f"1. Previsão Climática ☁️\n"
+                    f"2. Controle de Estoque 📦\n"
+                    f"3. Gestão de Rebanho 🐄\n"
+                    f"4. Simulação de Safra 🌾\n"
+                    f"5. { 'Editar dados de cadastro' } 📝\n"
+                    f"6. Alertas de Pragas 🐛\n"
+                    f"7. Análise de Mercado 📈\n"
+                    f"8. Localização 📍\n"
+                    f"9. Outras Informações 💡"
+                )
+            else:
+                resposta = "Olá! 👋 Sou a Iagro, sua assistente de IA da Campo Inteligente. Pronta para otimizar sua gestão agrícola! 🚜🌱 Vamos começar?\n1. Sim\n2. Não"
+                contexto["initial_greeting_step"] = 1
 
-            resposta = "Olá! 👋 Sou a Iagro, sua assistente de IA da Campo Inteligente. Pronta para otimizar sua gestão agrícola! 🚜🌱 Vamos começar?\n1. Sim\n2. Não"
-            contexto["initial_greeting_step"] = 1
             contexto["last_interaction_time"] = current_time
             save_conversation_context(numero, contexto)
             send_whatsapp_message(numero, resposta)
