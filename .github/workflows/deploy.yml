@@ -1,0 +1,29 @@
+# Workflow para fazer deploy automático ao dar push na branch main
+name: Deploy on main push
+
+on:
+  push:
+    branches:
+      - main  # Dispara somente em commits na branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Ambiente Ubuntu para rodar o job
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3  # Faz o checkout do código do repositório
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Chave privada SSH para autenticação no servidor remoto
+
+    - name: Deploy to server
+      run: |
+        # Conecta no servidor via SSH na porta 21022 e atualiza o repositório local
+        ssh -p 21022 marcosmorais@campointeligente.ddns.com.br '
+          cd /var/www/campointeligente-back &&
+          git fetch origin &&
+          git reset --hard origin/main
+        '
