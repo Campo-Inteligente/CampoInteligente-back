@@ -2,19 +2,35 @@
 
 O **CampoInteligente** é uma plataforma voltada para a agricultura familiar, oferecendo um chatbot com inteligência artificial que integra dados meteorológicos e de mercado para auxiliar no plantio, manejo e colheita. A navegação é simples, com foco na interação via WhatsApp.
 
-
 ## ℹ️ Importante 
 
 ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN 
 
 ```
-Repositório..........: BACK-END
+Repositório..........: FRONT-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 527 (AUTO-INCREMENTO)
+Versão...............: 528 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 07/07/2025 20:37:09
+Data de Atualização..: 07/07/2025 21:55:47
 Responsável..........: Marcos Morais
 ```
+## 👥 Participantes
+
+<table style='width:100%'>
+<thead><tr><th style='text-align:left'>Nome</th><th style='text-align:left'>Função</th><th style='text-align:left'>Contato</th></tr></thead>
+<tbody>
+<tr><td>MARCOS MORAIS DE SOUSA            </td><td>Gerente de Projetos       </td><td><a href='https://www.linkedin.com/in/marcosmoraisjr/'>LinkedIn</a> | <a href='https://instagram.com/marcosmoraisjr'>Instagram</a> | <a href='mailto:mmstec@gmail.com'>Email</a></td></tr>
+<tr><td>ARTHUR LAGO MARTINS               </td><td>Scrum Master              </td><td><a href='https://www.linkedin.com/in/arthur-martins-510b36235/'>LinkedIn</a> | <a href='https://instagram.com/arthurmarttins_'>Instagram</a> | <a href='mailto:202110445@uesb.edu.br'>Email</a></td></tr>
+<tr><td>JOÃO VICTOR OLIVEIRA SANTOS       </td><td>Ciência de Dados          </td><td><a href='https://www.linkedin.com/in/joão-victor-oliveira-santos-3b8aa1203/'>LinkedIn</a> | <a href='https://instagram.com/jv.osantos'>Instagram</a> | <a href='mailto:joao.osantos27@gmail.com'>Email</a></td></tr>
+<tr><td>JUAN PABLO SÃO PEDRO SAPUCAIA     </td><td>Back-End                  </td><td><a href='https://www.linkedin.com/in/juan-pablo-09a65b2a6/'>LinkedIn</a> | <a href='https://instagram.com/juan_pablosps'>Instagram</a> | <a href='mailto:juan.psapucaia7@gmail.com'>Email</a></td></tr>
+<tr><td>ABIMAEL UANDERSON S. CRISTÓVÃO    </td><td>Back-End                  </td><td><a href='https://www.linkedin.com/in/abimael-uanderson/'>LinkedIn</a> | <a href='https://instagram.com/abimaeluanderson'>Instagram</a> | <a href='mailto:abimael.servicos12dt@gmail.com'>Email</a></td></tr>
+<tr><td>FABIO SANTOS FRUTUOSO             </td><td>Front-End                 </td><td><a href='https://www.linkedin.com/in/fabio-santos-frutuoso-1784401b9/'>LinkedIn</a> | <a href='https://instagram.com/gandalfs_800'>Instagram</a> | <a href='mailto:frutuosofabio10@gmail.com'>Email</a></td></tr>
+<tr><td>BRUNA DE QUEIROZ COSTA            </td><td>Publicidade e Processos   </td><td><a href='https://www.linkedin.com/in/bruna-queiroz-5422a7261/'>LinkedIn</a> | <a href='https://instagram.com/brhunaqueiroz'>Instagram</a> | <a href='mailto:qbruna2003@gmail.com'>Email</a></td></tr>
+<tr><td>GISELE GOMES OLIVEIRA             </td><td>Front-End                 </td><td><a href='https://www.linkedin.com/in/gisele-gomes-oliveira-037bb1128/'>LinkedIn</a> | <a href='https://instagram.com/belagisa13'>Instagram</a> | <a href='mailto:belagisa14@gmail.com'>Email</a></td></tr>
+<tr><td>CAMPO INTELIGENTE                 </td><td>Startup                   </td><td><a href='https://instagram.com/startupcampointeligente'>LinkedIn | <a href='https://www.instagram.com/startupcampointeligente'>Instagram</a> | <a href='mailto:startupcampointeligente@gmail.com'>Email</a></td></tr>
+</tbody>
+</table>
+
 ## 🧩 Tecnologias Utilizadas
 
 <p align='left'>
@@ -25,7 +41,7 @@ Responsável..........: Marcos Morais
   <img src='https://img.shields.io/badge/GitHub-100000?logo=github&logoColor=white&style=flat' alt='GitHub' />
 </p>
 
-### Descrição das tecnologias:
+Descrição das tecnologias:
 
 - **Next.js**: Framework React para criação de aplicações web escaláveis e de alto desempenho.
 - **React**: Biblioteca JavaScript para construção de interfaces de usuário interativas.
@@ -37,6 +53,7 @@ Responsável..........: Marcos Morais
 ```
 📂 documentos
 ├── 📄 LICENSE
+├── 📄 README.md
 ├── 📄 requirements.txt
 ├── 📂 teste
 │   └── 📄 teste.txt
@@ -45,13 +62,15 @@ Responsável..........: Marcos Morais
 ## 🌳 Estrutura do Repositório
 
 ```
-📂 .
+📂 startup-campo-inteligente-back
 ├── 📄 Dockerfile
 ├── 📄 OBSERVAÇÕES SOBRE OS CODIGOS
+├── 📄 README.md
 ├── 📄 atualizar-campo.sh
 ├── 🗂️ db
 ├── 📂 documentos
 │   ├── 📄 LICENSE
+│   ├── 📄 README.md
 │   ├── 📄 requirements.txt
 │   ├── 📂 teste
 │   │   └── 📄 teste.txt
@@ -522,6 +541,7 @@ Responsável..........: Marcos Morais
     │           │   │       └── 📄 tag.cpython-312.pyc
     │           │   ├── 📄 py.typed
     │           │   └── 📂 sansio
+    │           │       ├── 📄 README.md
     │           │       └── 📂 __pycache__
     │           │           ├── 📄 app.cpython-312.pyc
     │           │           ├── 📄 blueprints.cpython-312.pyc
@@ -685,7 +705,8 @@ Responsável..........: Marcos Morais
     │           │   ├── 📄 RECORD
     │           │   ├── 📄 REQUESTED
     │           │   ├── 📄 WHEEL
-    │           │   └── 🗂️ licenses
+    │           │   └── 📂 licenses
+    │           │       └── 📄 LICENSE.md
     │           ├── 📂 httpx
     │           │   ├── 📂 __pycache__
     │           │   │   ├── 📄 __init__.cpython-312.pyc
@@ -721,7 +742,8 @@ Responsável..........: Marcos Morais
     │           │   ├── 📄 REQUESTED
     │           │   ├── 📄 WHEEL
     │           │   ├── 📄 entry_points.txt
-    │           │   └── 🗂️ licenses
+    │           │   └── 📂 licenses
+    │           │       └── 📄 LICENSE.md
     │           ├── 📂 idna
     │           │   ├── 📂 __pycache__
     │           │   │   ├── 📄 __init__.cpython-312.pyc
@@ -735,6 +757,7 @@ Responsável..........: Marcos Morais
     │           │   └── 📄 py.typed
     │           ├── 📂 idna-3.10.dist-info
     │           │   ├── 📄 INSTALLER
+    │           │   ├── 📄 LICENSE.md
     │           │   ├── 📄 METADATA
     │           │   ├── 📄 RECORD
     │           │   ├── 📄 REQUESTED
@@ -3679,6 +3702,7 @@ Responsável..........: Marcos Morais
     │           │           ├── 📄 messaging_response.cpython-312.pyc
     │           │           └── 📄 voice_response.cpython-312.pyc
     │           ├── 📂 twilio-9.5.0.dist-info
+    │           │   ├── 📄 AUTHORS.md
     │           │   ├── 📄 INSTALLER
     │           │   ├── 📄 LICENSE
     │           │   ├── 📄 METADATA
@@ -3786,6 +3810,7 @@ Responsável..........: Marcos Morais
     │           │   │   │   ├── 📄 repr.cpython-312.pyc
     │           │   │   │   └── 📄 tbtools.cpython-312.pyc
     │           │   │   └── 📂 shared
+    │           │   │       ├── 📄 ICON_LICENSE.md
     │           │   │       ├── 📄 console.png
     │           │   │       ├── 📄 debugger.js
     │           │   │       ├── 📄 less.png
@@ -4295,6 +4320,7 @@ Responsável..........: Marcos Morais
     │           │   │       └── 📄 tag.cpython-312.pyc
     │           │   ├── 📄 py.typed
     │           │   └── 📂 sansio
+    │           │       ├── 📄 README.md
     │           │       └── 📂 __pycache__
     │           │           ├── 📄 app.cpython-312.pyc
     │           │           ├── 📄 blueprints.cpython-312.pyc
@@ -4458,7 +4484,8 @@ Responsável..........: Marcos Morais
     │           │   ├── 📄 RECORD
     │           │   ├── 📄 REQUESTED
     │           │   ├── 📄 WHEEL
-    │           │   └── 🗂️ licenses
+    │           │   └── 📂 licenses
+    │           │       └── 📄 LICENSE.md
     │           ├── 📂 httpx
     │           │   ├── 📂 __pycache__
     │           │   │   ├── 📄 __init__.cpython-312.pyc
@@ -4494,7 +4521,8 @@ Responsável..........: Marcos Morais
     │           │   ├── 📄 REQUESTED
     │           │   ├── 📄 WHEEL
     │           │   ├── 📄 entry_points.txt
-    │           │   └── 🗂️ licenses
+    │           │   └── 📂 licenses
+    │           │       └── 📄 LICENSE.md
     │           ├── 📂 idna
     │           │   ├── 📂 __pycache__
     │           │   │   ├── 📄 __init__.cpython-312.pyc
@@ -4508,6 +4536,7 @@ Responsável..........: Marcos Morais
     │           │   └── 📄 py.typed
     │           ├── 📂 idna-3.10.dist-info
     │           │   ├── 📄 INSTALLER
+    │           │   ├── 📄 LICENSE.md
     │           │   ├── 📄 METADATA
     │           │   ├── 📄 RECORD
     │           │   ├── 📄 REQUESTED
@@ -7452,6 +7481,7 @@ Responsável..........: Marcos Morais
     │           │           ├── 📄 messaging_response.cpython-312.pyc
     │           │           └── 📄 voice_response.cpython-312.pyc
     │           ├── 📂 twilio-9.5.0.dist-info
+    │           │   ├── 📄 AUTHORS.md
     │           │   ├── 📄 INSTALLER
     │           │   ├── 📄 LICENSE
     │           │   ├── 📄 METADATA
@@ -7559,6 +7589,7 @@ Responsável..........: Marcos Morais
     │           │   │   │   ├── 📄 repr.cpython-312.pyc
     │           │   │   │   └── 📄 tbtools.cpython-312.pyc
     │           │   │   └── 📂 shared
+    │           │   │       ├── 📄 ICON_LICENSE.md
     │           │   │       ├── 📄 console.png
     │           │   │       ├── 📄 debugger.js
     │           │   │       ├── 📄 less.png
@@ -7637,5 +7668,5 @@ Contribuições, sugestões e feedbacks são muito bem-vindos! Caso tenha algum 
 
 --- 
 
-Desenvolvido com ❤️ pela equipe CampoInteligente | [Campo Inteligente](https://www.campointeligente.agr.br/) 
+Desenvolvido com ❤️ pela equipe 12 | [Campo Inteligente](https://www.campointeligente.agr.br/) 
 
