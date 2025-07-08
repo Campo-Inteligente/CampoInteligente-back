@@ -7,11 +7,11 @@ O **CampoInteligente** é uma plataforma voltada para a agricultura familiar, of
 ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN 
 
 ```
-Repositório..........: FRONT-END
+Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 528 (AUTO-INCREMENTO)
+Versão...............: 529 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 07/07/2025 21:55:47
+Data de Atualização..: 07/07/2025 21:57:04
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -57,6 +57,7 @@ Descrição das tecnologias:
 ├── 📄 requirements.txt
 ├── 📂 teste
 │   └── 📄 teste.txt
+├── 📄 update-readme.py-bkp
 └── 📄 versao.txt
 ```
 ## 🌳 Estrutura do Repositório
@@ -74,6 +75,7 @@ Descrição das tecnologias:
 │   ├── 📄 requirements.txt
 │   ├── 📂 teste
 │   │   └── 📄 teste.txt
+│   ├── 📄 update-readme.py-bkp
 │   └── 📄 versao.txt
 ├── 📄 index.html
 ├── 📄 index.html-txt
