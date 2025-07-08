@@ -23,7 +23,8 @@ except:
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 AUTH_KEY = os.getenv("AUTH_KEY")
-# CORREÇÃO: URL da API Evolution atualizada para o seu servidor DDNS com a porta correta.
+# NOVO: Adicione o número de telefone do seu bot no arquivo .env
+BOT_NUMBER = os.getenv("BOT_NUMBER")
 EVOLUTION_API_URL = "http://campointeligente.ddns.com.br:21085"
 
 # Configurações do Banco de Dados PostgreSQL
@@ -64,7 +65,7 @@ REGISTRATION_QUESTIONS = {
     "dap_caf": "Possui DAP ou CAF? Se sim, informe o número. 📄",
     "tipo_producao": "Sua produção é de que tipo? 🧑‍?🏢\n1. Familiar\n2. Empresarial",
     "producao_organica": "Sua produção é orgânica? (Sim ou Não) ✅❌",
-    "utiliza_irrigacao": "Utiliza irrigação? (Sim ou Não) 💧",
+    "utiliza_irrigacao": "Utiliza irrigação? (Sim ou Não) �",
     "area_total_propriedade": "Qual a área total da propriedade (em hectares)? 📏",
     "area_cultivada": "Qual a área cultivada (em hectares)? 🌱",
     "culturas_produzidas": "Quais culturas você produz? (Você pode informar várias, ex: milho, feijão, mandioca...) 🌽🥔"
@@ -342,7 +343,6 @@ def send_whatsapp_message(numero, mensagem):
         "Content-Type": "application/json",
         "apikey": AUTH_KEY
     }
-    # CORREÇÃO: Usa a variável EVOLUTION_API_URL
     url = f"{EVOLUTION_API_URL}/message/sendText/campointeligente"
     try:
         resposta = requests.post(url, json=payload, headers=headers)
@@ -369,7 +369,6 @@ def send_whatsapp_message(numero, mensagem):
 def send_typing_indicator(numero):
     payload = {"number": numero, "presence": "composing"}
     headers = {"Content-Type": "application/json", "apikey": AUTH_KEY}
-    # CORREÇÃO: Usa a variável EVOLUTION_API_URL
     url = f"{EVOLUTION_API_URL}/chat/sendPresence/campointeligente"
     try:
         requests.post(url, json=payload, headers=headers, timeout=5)
@@ -815,13 +814,11 @@ def webhook_route():
         event = data.get('event')
         webhook_data = data.get('data')
 
-        # CORREÇÃO: Ignorar eventos que não são mensagens de utilizadores
         if event != 'messages.upsert':
             print(
                 f"DEBUG_WEBHOOK_IGNORE: Evento '{event}' não é 'messages.upsert', ignorando.")
             return jsonify({"status": f"Evento {event} ignorado."}), 200
 
-        # CORREÇÃO: Lidar com o caso de a 'data' ser uma lista
         if isinstance(webhook_data, list):
             print(
                 f"DEBUG_WEBHOOK_IGNORE: 'data' é uma lista, ignorando evento {event}.")
@@ -829,7 +826,6 @@ def webhook_route():
 
         message_data = webhook_data
 
-        # CORREÇÃO: Ignorar eventos de mensagens enviadas pelo próprio bot
         if message_data.get('key', {}).get('fromMe', False):
             print("DEBUG_WEBHOOK_IGNORE: Ignorando mensagem do próprio bot.")
             return jsonify({"status": "ignorado"}), 200
@@ -841,14 +837,65 @@ def webhook_route():
             print(f"DEBUG_WEBHOOK_END: Número não fornecido.")
             return jsonify({"status": "erro", "mensagem": "Número não fornecido."}), 400
 
-        contexto = load_conversation_context(numero)
+        # --- LÓGICA DE GRUPO ---
+        is_group = numero.endswith('@g.us')
+        message_content = message_data.get('message', {})
+        mensagem_recebida_bruta = message_content.get(
+            'conversation', '').strip()
+
+        # Tenta obter a mensagem de um texto estendido (para menções)
+        extended_text_message = message_content.get('extendedTextMessage', {})
+        if extended_text_message and 'text' in extended_text_message:
+            mensagem_recebida_bruta = extended_text_message.get(
+                'text', '').strip()
+
+        # CORREÇÃO: Ignorar eventos sem texto (reações, stickers, etc.)
+        if not mensagem_recebida_bruta and not message_content.get('locationMessage'):
+            print(
+                f"DEBUG_WEBHOOK_IGNORE: Mensagem bruta vazia e sem localização. Ignorando evento.")
+            return jsonify({"status": "ignorado, mensagem vazia"}), 200
+
+        if is_group:
+            print(f"DEBUG_GROUP: Mensagem recebida do grupo {numero}.")
+
+            # Verifica se o bot foi mencionado
+            mentioned_jids = extended_text_message.get(
+                'contextInfo', {}).get('mentionedJid', [])
+            bot_jid = f"{BOT_NUMBER}@s.whatsapp.net"
+
+            is_mentioned_by_jid = bot_jid in mentioned_jids
+            is_mentioned_by_name = '@iagro' in mensagem_recebida_bruta.lower()
+
+            if not is_mentioned_by_jid and not is_mentioned_by_name:
+                print(
+                    f"DEBUG_GROUP_IGNORE: Bot não foi mencionado no grupo {numero}. Ignorando.")
+                return jsonify({"status": "ignorado, sem menção em grupo"}), 200
+
+            print(
+                f"DEBUG_GROUP_ACTION: Bot mencionado no grupo {numero}. Processando...")
+            # Limpa a menção da mensagem para processar o comando
+            mensagem_recebida = re.sub(
+                r'@\d+|@iagro', '', mensagem_recebida_bruta, flags=re.IGNORECASE).strip()
+            # Em grupos, o "usuário" para fins de cadastro é quem enviou a mensagem
+            participant_number = key.get('participant', numero)
+            contexto = load_conversation_context(participant_number)
+            # O nome do usuário é o nome de quem mandou a mensagem no grupo
+            nome = message_data.get('pushName', 'Membro do Grupo')
+            # Atualiza o nome no contexto para a pessoa que falou
+            contexto['nome_completo'] = nome
+        else:
+            # Lógica para chat privado (como estava antes)
+            participant_number = numero
+            contexto = load_conversation_context(participant_number)
+            mensagem_recebida = mensagem_recebida_bruta.lower()
+            nome = contexto.get("nome_completo", "Usuário")
+
         current_time = datetime.now().timestamp()
         last_interaction_time = contexto.get("last_interaction_time", 0)
 
-        # CORREÇÃO: Lógica de timeout agora se aplica a todos os usuários
         if contexto and (current_time - last_interaction_time) > CONVERSATION_TIMEOUT_SECONDS:
-            print(f"DEBUG_SESSION: Timeout detectado para {numero}. Reiniciando o fluxo da conversa.")
-            # Mantém os dados de registro, mas reinicia o fluxo da conversa
+            print(
+                f"DEBUG_SESSION: Timeout detectado para {participant_number}. Reiniciando o fluxo da conversa.")
             dados_persistentes = {
                 k: v for k, v in contexto.items() if k in REGISTRATION_ORDER or k in [
                     "localizacao", "registros_estoque", "registros_animais", "registros_vacinacao",
@@ -857,48 +904,48 @@ def webhook_route():
             }
             contexto.clear()
             contexto.update(dados_persistentes)
-            
-            if is_user_registered(numero):
+
+            if is_user_registered(participant_number):
                 reset_all_flow_flags(contexto)
-                nome = contexto.get("nome_completo", "Usuário")
-                resposta = f"Olá, {nome}! Notei que você esteve ausente. Vamos recomeçar? Escolha uma opção no menu."
-                # Envia o menu principal diretamente
+                nome_usuario = contexto.get("nome_completo", "Usuário")
+                resposta = f"Olá, {nome_usuario}! Notei que você esteve ausente. Vamos recomeçar? Escolha uma opção no menu."
                 resposta += (
                     f"\n\nEscolha uma das opções abaixo para começarmos:\n"
                     f"1. Previsão Climática ☁️\n"
-                    f"2. Controle de Estoque 📦\n"
-                    f"3. Gestão de Rebanho 🐄\n"
-                    f"4. Simulação de Safra 🌾\n"
-                    f"5. { 'Editar dados de cadastro' } 📝\n"
-                    f"6. Alertas de Pragas 🐛\n"
-                    f"7. Análise de Mercado 📈\n"
-                    f"8. Localização 📍\n"
-                    f"9. Outras Informações 💡"
+                    f"2. Conversar com a Iagro 🤖\n"
+                    f"3. Controle de Estoque 📦\n"
+                    f"4. Gestão de Rebanho 🐄\n"
+                    f"5. Simulação de Safra 🌾\n"
+                    f"6. {'Editar dados de cadastro'} 📝\n"
+                    f"7. Alertas de Pragas 🐛\n"
+                    f"8. Análise de Mercado 📈\n"
+                    f"9. Localização 📍\n"
+                    f"10. Outras Informações 💡"
                 )
             else:
                 resposta = "Olá! 👋 Sou a Iagro, sua assistente de IA da Campo Inteligente. Pronta para otimizar sua gestão agrícola! 🚜🌱 Vamos começar?\n1. Sim\n2. Não"
                 contexto["initial_greeting_step"] = 1
 
             contexto["last_interaction_time"] = current_time
-            save_conversation_context(numero, contexto)
+            save_conversation_context(participant_number, contexto)
+            # Responde no grupo ou no privado
             send_whatsapp_message(numero, resposta)
             return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-        # Atualiza o timestamp da última interação para conversas ativas
         contexto["last_interaction_time"] = current_time
-        save_conversation_context(numero, contexto)
+        save_conversation_context(participant_number, contexto)
 
-        message_content = message_data.get('message', {})
         location_message = message_content.get('locationMessage', {})
-        mensagem_recebida = message_content.get(
-            'conversation', '').lower().strip()
+
+        # A mensagem recebida já foi definida acima, agora convertemos para minúsculo para processamento
+        mensagem_recebida = mensagem_recebida.lower().strip()
 
         print(
-            f"DEBUG_WEBHOOK_START: Mensagem recebida de {numero}: '{mensagem_recebida}' (Location: {bool(location_message)})")
+            f"DEBUG_WEBHOOK_START: Mensagem recebida de {participant_number} (no chat {numero}): '{mensagem_recebida}' (Location: {bool(location_message)})")
 
-        usuario_cadastrado = is_user_registered(numero)
+        usuario_cadastrado = is_user_registered(participant_number)
         cadastro_opcao_texto = "Editar dados de cadastro" if usuario_cadastrado else "Fazer meu cadastro"
-        nome = contexto.get("nome_completo", "Usuário")
+
         localizacao = contexto.get("localizacao")
 
         # --- Lógica de tratamento de localização com reconhecimento de contexto ---
@@ -936,7 +983,8 @@ def webhook_route():
                         contexto["awaiting_weather_follow_up_choice"] = True
                         resposta = format_weather_response(cidade, pais)
 
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
+                # Responde no grupo ou no privado
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
             else:
@@ -947,6 +995,8 @@ def webhook_route():
         # --- Se não for mensagem de localização, processar mensagem de texto ---
         if mensagem_recebida:
             # Recuperando flags do contexto
+            conversational_mode_active = contexto.get(
+                "conversational_mode_active", False)
             awaiting_weather_location = contexto.get(
                 "awaiting_weather_location", False)
             registration_step = contexto.get("registration_step", None)
@@ -1043,6 +1093,24 @@ def webhook_route():
             awaiting_ponto_referencia_value_input = contexto.get(
                 "awaiting_ponto_referencia_value_input", False)
 
+            # NOVO: Lógica para finalizar a conversa
+            if any(cmd in mensagem_recebida for cmd in ["sair", "finalizar", "encerrar"]):
+                print(
+                    f"DEBUG_COMMAND: Comando de finalização detectado para {participant_number}.")
+                # Mantém apenas os dados de cadastro, se houver
+                dados_persistentes = {
+                    k: v for k, v in contexto.items() if k in REGISTRATION_ORDER or k in [
+                        "localizacao", "registros_estoque", "registros_animais", "registros_vacinacao",
+                        "registros_vermifugacao", "simulacoes_passadas"
+                    ]
+                }
+                contexto.clear()
+                contexto.update(dados_persistentes)
+                resposta = f"Entendido, {nome}. Estou finalizando nossa conversa. Até a próxima! 👋"
+                save_conversation_context(participant_number, contexto)
+                send_whatsapp_message(numero, resposta)
+                return jsonify({"status": "sucesso", "resposta": resposta}), 200
+
             # Handle explicit "voltar" or "menu" command
             if ("voltar" in mensagem_recebida or "menu" in mensagem_recebida or "opções" in mensagem_recebida):
                 print(
@@ -1052,38 +1120,40 @@ def webhook_route():
                     f"Ok, retornando ao menu principal. 👋\n\n"
                     f"Escolha uma das opções abaixo para começarmos, {nome}:\n"
                     f"1. Previsão Climática ☁️\n"
-                    f"2. Controle de Estoque 📦\n"
-                    f"3. Gestão de Rebanho 🐄\n"
-                    f"4. Simulação de Safra 🌾\n"
-                    f"5. {cadastro_opcao_texto} 📝\n"
-                    f"6. Alertas de Pragas 🐛\n"
-                    f"7. Análise de Mercado 📈\n"
-                    f"8. Localização 📍\n"
-                    f"9. Outras Informações 💡"
+                    f"2. Conversar com a Iagro 🤖\n"
+                    f"3. Controle de Estoque 📦\n"
+                    f"4. Gestão de Rebanho 🐄\n"
+                    f"5. Simulação de Safra 🌾\n"
+                    f"6. {cadastro_opcao_texto} 📝\n"
+                    f"7. Alertas de Pragas 🐛\n"
+                    f"8. Análise de Mercado 📈\n"
+                    f"9. Localização 📍\n"
+                    f"10. Outras Informações 💡"
                 )
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
             # Verificação de usuário cadastrado para pular o fluxo de boas-vindas
             if usuario_cadastrado and initial_greeting_step != "completed":
                 print(
-                    f"DEBUG_REGISTERED_USER: Usuário {numero} já cadastrado. Pulando fluxo de saudação inicial.")
+                    f"DEBUG_REGISTERED_USER: Usuário {participant_number} já cadastrado. Pulando fluxo de saudação inicial.")
                 contexto["initial_greeting_step"] = "completed"
                 resposta = (
                     f"Olá, {nome}! 👋 Bem-vindo de volta ao Campo Inteligente! Estou aqui para ajudar você com sua produção agrícola.\n\n"
                     f"Escolha uma das opções abaixo para começarmos:\n"
                     f"1. Previsão Climática ☁️\n"
-                    f"2. Controle de Estoque 📦\n"
-                    f"3. Gestão de Rebanho 🐄\n"
-                    f"4. Simulação de Safra 🌾\n"
-                    f"5. {cadastro_opcao_texto} 📝\n"
-                    f"6. Alertas de Pragas 🐛\n"
-                    f"7. Análise de Mercado 📈\n"
-                    f"8. Localização 📍\n"
-                    f"9. Outras Informações 💡"
+                    f"2. Conversar com a Iagro 🤖\n"
+                    f"3. Controle de Estoque 📦\n"
+                    f"4. Gestão de Rebanho 🐄\n"
+                    f"5. Simulação de Safra 🌾\n"
+                    f"6. {cadastro_opcao_texto} 📝\n"
+                    f"7. Alertas de Pragas 🐛\n"
+                    f"8. Análise de Mercado 📈\n"
+                    f"9. Localização 📍\n"
+                    f"10. Outras Informações 💡"
                 )
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1099,7 +1169,7 @@ def webhook_route():
                     contexto["initial_greeting_step"] = "awaiting_end_conversation"
                 else:
                     resposta = "Não entendi. Por favor, diga '1' para começar ou '2' para encerrar. 🤔"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1110,7 +1180,7 @@ def webhook_route():
                 nome = contexto["nome_completo"]
                 resposta = f"Prazer em te conhecer, {nome}! 👋 Poderia me falar de qual cidade você está falando? Você pode digitar o nome ou compartilhar sua localização. 📍"
                 contexto["initial_greeting_step"] = 3
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1134,7 +1204,7 @@ def webhook_route():
                     contexto["initial_greeting_step"] = 4
                 else:
                     resposta = f"Não consegui confirmar a cidade '{cidade_input}', {nome}. Por favor, digite o nome da sua cidade novamente ou compartilhe sua localização. 🤔"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1161,7 +1231,7 @@ def webhook_route():
                     contexto["initial_greeting_step"] = "awaiting_end_conversation"
                 else:
                     resposta = f"Não entendi, {nome}. Por favor, diga '1' para continuar o cadastro ou '2' para encerrar. 🤔"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1177,19 +1247,65 @@ def webhook_route():
                         f"Ok, {nome}! Estou aqui para ajudar você com sua produção agrícola! 👋\n\n"
                         f"Escolha uma das opções abaixo para começarmos:\n"
                         f"1. Previsão Climática ☁️\n"
-                        f"2. Controle de Estoque 📦\n"
-                        f"3. Gestão de Rebanho 🐄\n"
-                        f"4. Simulação de Safra 🌾\n"
-                        f"5. {cadastro_opcao_texto} 📝\n"
-                        f"6. Alertas de Pragas 🐛\n"
-                        f"7. Análise de Mercado 📈\n"
-                        f"8. Localização 📍\n"
-                        f"9. Outras Informações 💡"
+                        f"2. Conversar com a Iagro 🤖\n"
+                        f"3. Controle de Estoque 📦\n"
+                        f"4. Gestão de Rebanho 🐄\n"
+                        f"5. Simulação de Safra 🌾\n"
+                        f"6. {cadastro_opcao_texto} 📝\n"
+                        f"7. Alertas de Pragas 🐛\n"
+                        f"8. Análise de Mercado 📈\n"
+                        f"9. Localização 📍\n"
+                        f"10. Outras Informações 💡"
                     )
                     contexto["initial_greeting_step"] = "completed"
                 else:
                     resposta = f"Não entendi, {nome}. Por favor, diga '1' para encerrar ou '2' para ver as opções. 🤔"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
+                send_whatsapp_message(numero, resposta)
+                return jsonify({"status": "sucesso", "resposta": resposta}), 200
+
+            # NOVO: Modo de conversa com a Iagro (LLM)
+            elif conversational_mode_active:
+                print(f"DEBUG_FLOW: Fluxo: conversational_mode_active")
+                # A verificação de 'voltar' e 'menu' já é feita no início, então aqui tratamos a conversa
+                send_typing_indicator(numero)
+
+                # Monta o prompt para o LLM
+                clima_info = "Não disponível"
+                if localizacao and localizacao.get("cidade"):
+                    clima_atual = obter_previsao_tempo(
+                        localizacao["cidade"], localizacao.get("pais", "BR"))
+                    if "erro" not in clima_atual:
+                        clima_info = f"Temperatura: {clima_atual['temperatura']:.1f}°C, Descrição: {clima_atual['descricao']}"
+
+                prompt_para_ia = (
+                    f"Você é a Iagro, uma assistente de IA super amigável e especialista em agricultura da 'Campo Inteligente'. "
+                    f"Use muitos emojis para deixar a conversa leve e divertida! 🌱🚜☀️\n"
+                    f"O usuário se chama {nome} e está em {localizacao.get('cidade', 'local não informado')}, {localizacao.get('estado', '')}.\n"
+                    f"As condições climáticas atuais na região são: {clima_info}.\n"
+                    f"O usuário perguntou: '{mensagem_recebida}'.\n\n"
+                    f"Sua tarefa é responder à pergunta do usuário de forma clara, útil e encorajadora. "
+                    f"Use as informações de localização e clima para dar conselhos personalizados sobre plantio, "
+                    f"melhores culturas, manejo do solo, controle de pragas, ou qualquer outra dúvida agrícola. "
+                    f"Seja criativa e proativa nas suas sugestões! Lembre o usuário que ele pode digitar 'menu' para voltar às opções principais."
+                )
+
+                try:
+                    response = openai.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[{"role": "user", "content": prompt_para_ia}],
+                        max_tokens=400,
+                        temperature=0.5,
+                    )
+                    resposta = response.choices[0].message.content.strip()
+                except openai.APIError as e:
+                    print(f"DEBUG_OPENAI_ERROR: Erro na API do OpenAI: {e}")
+                    resposta = "Ops! 🤖 Parece que meus circuitos estão um pouco sobrecarregados agora. Tente novamente em um instante!"
+                except Exception as e:
+                    print(f"DEBUG_OPENAI_ERROR: Erro ao chamar OpenAI: {e}")
+                    resposta = "Desculpe, tive um pequeno problema para processar sua pergunta. Poderia tentar de novo? 🤔"
+
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1204,7 +1320,7 @@ def webhook_route():
                     resposta = f"Ok, {nome}, o cadastro foi cancelado. Posso ajudar com mais alguma coisa? 👋"
                 else:
                     resposta = f"Por favor, {nome}, diga 'continuar' para retomar o cadastro ou 'sair' para cancelá-lo."
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1220,16 +1336,17 @@ def webhook_route():
                         f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                         f"Escolha uma das opções abaixo para começarmos:\n"
                         f"1. Previsão Climática ☁️\n"
-                        f"2. Controle de Estoque 📦\n"
-                        f"3. Gestão de Rebanho 🐄\n"
-                        f"4. Simulação de Safra 🌾\n"
-                        f"5. {cadastro_opcao_texto} 📝\n"
-                        f"6. Alertas de Pragas 🐛\n"
-                        f"7. Análise de Mercado 📈\n"
-                        f"8. Localização 📍\n"
-                        f"9. Outras Informações 💡"
+                        f"2. Conversar com a Iagro 🤖\n"
+                        f"3. Controle de Estoque 📦\n"
+                        f"4. Gestão de Rebanho 🐄\n"
+                        f"5. Simulação de Safra 🌾\n"
+                        f"6. {cadastro_opcao_texto} 📝\n"
+                        f"7. Alertas de Pragas 🐛\n"
+                        f"8. Análise de Mercado 📈\n"
+                        f"9. Localização 📍\n"
+                        f"10. Outras Informações 💡"
                     )
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1241,21 +1358,22 @@ def webhook_route():
                         f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                         f"Escolha uma das opções abaixo para começarmos:\n"
                         f"1. Previsão Climática ☁️\n"
-                        f"2. Controle de Estoque 📦\n"
-                        f"3. Gestão de Rebanho 🐄\n"
-                        f"4. Simulação de Safra 🌾\n"
-                        f"5. {cadastro_opcao_texto} 📝\n"
-                        f"6. Alertas de Pragas 🐛\n"
-                        f"7. Análise de Mercado 📈\n"
-                        f"8. Localização 📍\n"
-                        f"9. Outras Informações 💡"
+                        f"2. Conversar com a Iagro 🤖\n"
+                        f"3. Controle de Estoque 📦\n"
+                        f"4. Gestão de Rebanho 🐄\n"
+                        f"5. Simulação de Safra 🌾\n"
+                        f"6. {cadastro_opcao_texto} 📝\n"
+                        f"7. Alertas de Pragas 🐛\n"
+                        f"8. Análise de Mercado 📈\n"
+                        f"9. Localização 📍\n"
+                        f"10. Outras Informações 💡"
                     )
                 elif "não" in mensagem_recebida or "nao" in mensagem_recebida:
                     contexto["awaiting_menu_return_prompt"] = False
                     resposta = f"Ok, {nome}! Posso ajudar com mais alguma coisa? 👋"
                 else:
                     resposta = f"Não entendi, {nome}. Por favor, responda 'sim' ou 'não'"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1325,16 +1443,17 @@ def webhook_route():
                             f"Ok, {nome}! Estou aqui para ajudar você com sua produção agrícola! 👋\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
                             f"1. Previsão Climática ☁️\n"
-                            f"2. Controle de Estoque 📦\n"
-                            f"3. Gestão de Rebanho 🐄\n"
-                            f"4. Simulação de Safra 🌾\n"
-                            f"5. {cadastro_opcao_texto} 📝\n"
-                            f"6. Alertas de Pragas 🐛\n"
-                            f"7. Análise de Mercado 📈\n"
-                            f"8. Localização 📍\n"
-                            f"9. Outras Informações 💡"
+                            f"2. Conversar com a Iagro 🤖\n"
+                            f"3. Controle de Estoque 📦\n"
+                            f"4. Gestão de Rebanho 🐄\n"
+                            f"5. Simulação de Safra 🌾\n"
+                            f"6. {cadastro_opcao_texto} 📝\n"
+                            f"7. Alertas de Pragas 🐛\n"
+                            f"8. Análise de Mercado 📈\n"
+                            f"9. Localização 📍\n"
+                            f"10. Outras Informações 💡"
                         )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
                 elif "não" in mensagem_recebida or "nao" in mensagem_recebida:
@@ -1343,21 +1462,22 @@ def webhook_route():
                         f"Ok, {nome}! Estou aqui para ajudar você com sua produção agrícola! 👋\n\n"
                         f"Escolha uma das opções abaixo para começarmos:\n"
                         f"1. Previsão Climática ☁️\n"
-                        f"2. Controle de Estoque 📦\n"
-                        f"3. Gestão de Rebanho 🐄\n"
-                        f"4. Simulação de Safra 🌾\n"
-                        f"5. {cadastro_opcao_texto} 📝\n"
-                        f"6. Alertas de Pragas 🐛\n"
-                        f"7. Análise de Mercado 📈\n"
-                        f"8. Localização 📍\n"
-                        f"9. Outras Informações 💡"
+                        f"2. Conversar com a Iagro 🤖\n"
+                        f"3. Controle de Estoque 📦\n"
+                        f"4. Gestão de Rebanho 🐄\n"
+                        f"5. Simulação de Safra 🌾\n"
+                        f"6. {cadastro_opcao_texto} 📝\n"
+                        f"7. Alertas de Pragas 🐛\n"
+                        f"8. Análise de Mercado 📈\n"
+                        f"9. Localização 📍\n"
+                        f"10. Outras Informações 💡"
                     )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
                 else:
                     resposta = f"Não entendi, {nome}. Por favor, responda 'sim' ou 'não'."
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1384,14 +1504,15 @@ def webhook_route():
                             f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
                             f"1. Previsão Climática ☁️\n"
-                            f"2. Controle de Estoque 📦\n"
-                            f"3. Gestão de Rebanho 🐄\n"
-                            f"4. Simulação de Safra 🌾\n"
-                            f"5. {cadastro_opcao_texto} 📝\n"
-                            f"6. Alertas de Pragas 🐛\n"
-                            f"7. Análise de Mercado 📈\n"
-                            f"8. Localização 📍\n"
-                            f"9. Outras Informações 💡"
+                            f"2. Conversar com a Iagro 🤖\n"
+                            f"3. Controle de Estoque 📦\n"
+                            f"4. Gestão de Rebanho 🐄\n"
+                            f"5. Simulação de Safra 🌾\n"
+                            f"6. {cadastro_opcao_texto} 📝\n"
+                            f"7. Alertas de Pragas 🐛\n"
+                            f"8. Análise de Mercado 📈\n"
+                            f"9. Localização 📍\n"
+                            f"10. Outras Informações 💡"
                         )
                     else:
                         contexto["etapa_simulacao"] -= 1
@@ -1401,18 +1522,19 @@ def webhook_route():
                                 f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                                 f"Escolha uma das opções abaixo para começarmos:\n"
                                 f"1. Previsão Climática ☁️\n"
-                                f"2. Controle de Estoque 📦\n"
-                                f"3. Gestão de Rebanho 🐄\n"
-                                f"4. Simulação de Safra 🌾\n"
-                                f"5. {cadastro_opcao_texto} 📝\n"
-                                f"6. Alertas de Pragas 🐛\n"
-                                f"7. Análise de Mercado 📈\n"
-                                f"8. Localização 📍\n"
-                                f"9. Outras Informações 💡"
+                                f"2. Conversar com a Iagro 🤖\n"
+                                f"3. Controle de Estoque 📦\n"
+                                f"4. Gestão de Rebanho 🐄\n"
+                                f"5. Simulação de Safra 🌾\n"
+                                f"6. {cadastro_opcao_texto} 📝\n"
+                                f"7. Alertas de Pragas 🐛\n"
+                                f"8. Análise de Mercado 📈\n"
+                                f"9. Localização 📍\n"
+                                f"10. Outras Informações 💡"
                             )
                         else:
                             resposta = f"Ok, {nome}, voltando. Por favor, responda novamente a pergunta anterior sobre a simulação.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1477,7 +1599,7 @@ def webhook_route():
                             "3. Gerar Relatório\n"
                             "Ou 'voltar' para o menu principal."
                         )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1486,7 +1608,7 @@ def webhook_route():
                         dados["cultura"] = mensagem_recebida
                         contexto["etapa_simulacao"] = 2
                         contexto["dados_simulacao"] = dados
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         resposta = f"✅ Ótimo, {nome}! Agora, informe a área de plantio em hectares (ha): 🌱\nEx.: 50 ha\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                     elif etapa == 2:
                         try:
@@ -1503,7 +1625,8 @@ def webhook_route():
                             dados["area"] = area
                             contexto["etapa_simulacao"] = 3
                             contexto["dados_simulacao"] = dados
-                            save_conversation_context(numero, contexto)
+                            save_conversation_context(
+                                participant_number, contexto)
                             resposta = f"✅ Perfeito, {nome}! Qual o tipo de solo predominante? ⛰️\nEx.: arenoso, argiloso, misto, etc.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         except ValueError:
                             resposta = f"Por favor, {nome}, informe a área em hectares usando um número válido (ex: 50, 100.5).\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
@@ -1513,13 +1636,13 @@ def webhook_route():
                         dados["tipo_solo"] = mensagem_recebida
                         contexto["etapa_simulacao"] = 4
                         contexto["dados_simulacao"] = dados
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         resposta = f"✅ E quais são as condições climáticas previstas, {nome}? ☀️🌧️\nEx.: seca, chuva moderada, excesso de chuva, clima ideal...\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                     elif etapa == 4:
                         dados["condicoes_climaticas"] = mensagem_recebida
                         contexto["etapa_simulacao"] = 5
                         contexto["dados_simulacao"] = dados
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         resposta = f"✅ Por fim, {nome}, qual é a variedade ou o ciclo da cultura? ⏳\nEx.: ciclo precoce, médio ou tardio?\n(Se não souber, pode digitar \"não sei\")\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                     elif etapa == 5:
                         dados["ciclo_cultura"] = mensagem_recebida
@@ -1530,7 +1653,7 @@ def webhook_route():
                         contexto["simulacao_sub_fluxo"] = None
                         contexto["dados_simulacao"] = {}
                         contexto["gerar_relatorio_simulacao_ativo"] = False
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
 
                         send_whatsapp_message(
                             numero, "🚜 Processando a simulação da sua safra... \n\n🔄 Isso pode levar alguns segundos...")
@@ -1542,13 +1665,13 @@ def webhook_route():
                         send_whatsapp_message(numero, resposta_resultado)
 
                         contexto["awaiting_safra_finalizacao"] = True
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         resposta = f"✅ Deseja realizar **outra simulação**, {nome}, ou **finalizar**? 🤔\n\n1. Nova simulação\n2. Sair\n(Ou 'voltar' para o menu principal)"
                     else:
                         resposta = f"Ocorreu um erro no fluxo da simulação, {nome}. Por favor, digite '4' para iniciar uma nova simulação ou 'menu' para voltar ao menu principal."
                         reset_all_flow_flags(contexto)
                         contexto["simulacao_safra_ativa"] = True
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1556,7 +1679,7 @@ def webhook_route():
                     resposta = f"Ocorreu um erro no fluxo de Simulação de Safra, {nome}. Por favor, digite '4' para voltar ao menu de Simulação de Safra ou 'menu' para voltar ao menu principal."
                     reset_all_flow_flags(contexto)
                     contexto["simulacao_safra_ativa"] = True
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1569,7 +1692,7 @@ def webhook_route():
                     contexto["awaiting_safra_finalizacao"] = False
                     contexto["simulacao_sub_fluxo"] = 1
                     contexto["gerar_relatorio_simulacao_ativo"] = False
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     resposta_nova_simulacao = f"Ok, {nome}, vamos iniciar uma nova simulação. 🌱\n\n👉 Qual é a cultura que deseja simular?\nEx.: soja, milho, trigo, café, etc.\n(Ou 'voltar' para o menu principal)"
                     send_whatsapp_message(numero, resposta_nova_simulacao)
                     return jsonify({"status": "sucesso", "resposta": resposta_nova_simulacao}), 200
@@ -1579,16 +1702,17 @@ def webhook_route():
                         f"Ok, {nome}, obrigado por utilizar a simulação de safra! 👋 Posso ajudar com mais alguma coisa?\n\n"
                         f"Escolha uma das opções abaixo para começarmos:\n"
                         f"1. Previsão Climática ☁️\n"
-                        f"2. Controle de Estoque 📦\n"
-                        f"3. Gestão de Rebanho 🐄\n"
-                        f"4. Simulação de Safra 🌾\n"
-                        f"5. {cadastro_opcao_texto} 📝\n"
-                        f"6. Alertas de Pragas 🐛\n"
-                        f"7. Análise de Mercado 📈\n"
-                        f"8. Localização 📍\n"
-                        f"9. Outras Informações 💡"
+                        f"2. Conversar com a Iagro 🤖\n"
+                        f"3. Controle de Estoque 📦\n"
+                        f"4. Gestão de Rebanho 🐄\n"
+                        f"5. Simulação de Safra 🌾\n"
+                        f"6. {cadastro_opcao_texto} 📝\n"
+                        f"7. Alertas de Pragas 🐛\n"
+                        f"8. Análise de Mercado 📈\n"
+                        f"9. Localização 📍\n"
+                        f"10. Outras Informações 💡"
                     )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta_sair)
                     return jsonify({"status": "sucesso", "resposta": resposta_sair}), 200
                 else:
@@ -1625,16 +1749,17 @@ def webhook_route():
                             f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
                             f"1. Previsão Climática ☁️\n"
-                            f"2. Controle de Estoque 📦\n"
-                            f"3. Gestão de Rebanho 🐄\n"
-                            f"4. Simulação de Safra 🌾\n"
-                            f"5. {cadastro_opcao_texto} 📝\n"
-                            f"6. Alertas de Pragas 🐛\n"
-                            f"7. Análise de Mercado 📈\n"
-                            f"8. Localização 📍\n"
-                            f"9. Outras Informações 💡"
+                            f"2. Conversar com a Iagro 🤖\n"
+                            f"3. Controle de Estoque 📦\n"
+                            f"4. Gestão de Rebanho 🐄\n"
+                            f"5. Simulação de Safra 🌾\n"
+                            f"6. {cadastro_opcao_texto} 📝\n"
+                            f"7. Alertas de Pragas 🐛\n"
+                            f"8. Análise de Mercado 📈\n"
+                            f"9. Localização 📍\n"
+                            f"10. Outras Informações 💡"
                         )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1719,7 +1844,7 @@ def webhook_route():
                             "5. Gerar Relatório\n"
                             "Ou 'voltar' para o menu principal."
                         )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1737,7 +1862,8 @@ def webhook_route():
                     elif registro_entrada_estoque_etapa == 3:
                         if not is_valid_date(mensagem_recebida):
                             resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024). 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                            save_conversation_context(numero, contexto)
+                            save_conversation_context(
+                                participant_number, contexto)
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "erro", "resposta": resposta}), 200
                         dados_entrada_estoque_registro["data_entrada"] = mensagem_recebida
@@ -1747,7 +1873,8 @@ def webhook_route():
                         data_fabricacao = mensagem_recebida
                         if data_fabricacao != "não" and not is_valid_date(data_fabricacao):
                             resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024) ou responda 'não'. 🗓️\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                            save_conversation_context(numero, contexto)
+                            save_conversation_context(
+                                participant_number, contexto)
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "erro", "resposta": resposta}), 200
                         dados_entrada_estoque_registro[
@@ -1758,7 +1885,8 @@ def webhook_route():
                         data_vencimento = mensagem_recebida
                         if data_vencimento != "não" and not is_valid_date(data_vencimento):
                             resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024) ou responda 'não'. ⏳\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                            save_conversation_context(numero, contexto)
+                            save_conversation_context(
+                                participant_number, contexto)
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "erro", "resposta": resposta}), 200
                         dados_entrada_estoque_registro[
@@ -1787,7 +1915,7 @@ Número de Lote: {dados_entrada_estoque_registro.get("numero_lote", "N/A")}
 
                         resposta += f"\n\nO que você gostaria de fazer agora no Controle de Estoque, {nome}? 📦\n\nDigite:\n1. Registrar Entrada de Insumos/Produtos\n2. Registrar Saída de Insumos/Produtos\n3. Consultar Estoque\n4. Avisos de estoque baixo\n5. Gerar Relatório\nOu 'voltar' para o menu principal."
                         contexto["awaiting_post_completion_response"] = True
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1809,7 +1937,8 @@ Número de Lote: {dados_entrada_estoque_registro.get("numero_lote", "N/A")}
                             resposta = f"✅ Qual a quantidade de '{item_nome_saida.capitalize()}' que está saindo, {nome}? (Disponível: {item_encontrado.get('quantidade', 'N/A')}) 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                         else:
                             resposta = f"O item '{item_nome_saida.capitalize()}' não foi encontrado no seu estoque, {nome}. Por favor, verifique o nome e tente novamente.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                            save_conversation_context(numero, contexto)
+                            save_conversation_context(
+                                participant_number, contexto)
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "erro", "resposta": resposta}), 200
                     elif registro_saida_estoque_etapa == 2:
@@ -1838,7 +1967,7 @@ Número de Lote: {dados_entrada_estoque_registro.get("numero_lote", "N/A")}
                                 if quantidade_saida > quantidade_disponivel:
                                     resposta = f"A quantidade de saída ({quantidade_saida}) é maior que a disponível ({quantidade_disponivel}), {nome}. Por favor, digite uma quantidade válida. 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                     save_conversation_context(
-                                        numero, contexto)
+                                        participant_number, contexto)
                                     send_whatsapp_message(numero, resposta)
                                     return jsonify({"status": "erro", "resposta": resposta}), 200
                                 else:
@@ -1850,18 +1979,21 @@ Número de Lote: {dados_entrada_estoque_registro.get("numero_lote", "N/A")}
                                     resposta = f"✅ Qual a data de saída do item, {nome}? (dd/mm/aaaa) 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                             else:
                                 resposta = f"Ocorreu um erro ao encontrar o item no estoque para atualização de quantidade, {nome}. Por favor, tente novamente.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                                save_conversation_context(numero, contexto)
+                                save_conversation_context(
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                         except ValueError:
                             resposta = f"Por favor, {nome}, informe a quantidade em números. 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                            save_conversation_context(numero, contexto)
+                            save_conversation_context(
+                                participant_number, contexto)
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "erro", "resposta": resposta}), 200
                     elif registro_saida_estoque_etapa == 3:
                         if not is_valid_date(mensagem_recebida):
                             resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024). 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
-                            save_conversation_context(numero, contexto)
+                            save_conversation_context(
+                                participant_number, contexto)
                             send_whatsapp_message(numero, resposta)
                             return jsonify({"status": "erro", "resposta": resposta}), 200
                         dados_saida_estoque_registro["data_saida"] = mensagem_recebida
@@ -1878,7 +2010,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
 
                         resposta += f"\n\nO que você gostaria de fazer agora no Controle de Estoque, {nome}? 📦\n\nDigite:\n1. Registrar Entrada de Insumos/Produtos\n2. Registrar Saída de Insumos/Produtos\n3. Consultar Estoque\n4. Avisos de estoque baixo\n5. Gerar Relatório\nOu 'voltar' para o menu principal."
                         contexto["awaiting_post_completion_response"] = True
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1886,7 +2018,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     resposta = f"Ocorreu um erro no fluxo de Controle de Estoque, {nome}. Por favor, digite '2' para voltar ao menu de Controle de Estoque ou 'menu' para voltar ao menu principal."
                     reset_all_flow_flags(contexto)
                     contexto["controle_estoque_ativo"] = True
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -1933,16 +2065,17 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
                             f"1. Previsão Climática ☁️\n"
-                            f"2. Controle de Estoque 📦\n"
-                            f"3. Gestão de Rebanho 🐄\n"
-                            f"4. Simulação de Safra 🌾\n"
-                            f"5. {cadastro_opcao_texto} 📝\n"
-                            f"6. Alertas de Pragas 🐛\n"
-                            f"7. Análise de Mercado 📈\n"
-                            f"8. Localização 📍\n"
-                            f"9. Outras Informações 💡"
+                            f"2. Conversar com a Iagro 🤖\n"
+                            f"3. Controle de Estoque 📦\n"
+                            f"4. Gestão de Rebanho 🐄\n"
+                            f"5. Simulação de Safra 🌾\n"
+                            f"6. {cadastro_opcao_texto} 📝\n"
+                            f"7. Alertas de Pragas 🐛\n"
+                            f"8. Análise de Mercado 📈\n"
+                            f"9. Localização 📍\n"
+                            f"10. Outras Informações 💡"
                         )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2040,7 +2173,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             "6. Gerar Relatório\n"
                             "Ou 'voltar' para o menu principal."
                         )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2063,7 +2196,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             "6. Gerar Relatório\n"
                             "Ou 'voltar' para o menu principal."
                         )
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2080,7 +2213,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 dados_animal_registro)
                             resposta = f"✅ Animal '{dados_animal_registro['animal_id'].capitalize()}' cadastrado com sucesso, {nome}! 🎉"
                             resposta += f"\n\nO que você gostaria de fazer agora na Gestão de Rebanho, {nome}? 🐄\n\nDigite:\n1. Cadastrar novo animal\n2. Controle de vacinação e vermifugação\n3. Controle reprodutivo\n4. Histórico de pesagens\n5. Consultar Animais\n6. Gerar Relatório\nOu 'voltar' para o menu principal."
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2125,7 +2258,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 "6. Gerar Relatório\n"
                                 "Ou 'voltar' para o menu principal."
                             )
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2165,7 +2298,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                                 "5. Receber lembretes futuros\n"
                                 "Ou 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal."
                             )
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2178,7 +2311,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not any(animal.get("animal_id", "").lower() == animal_id_vac.lower() for animal in contexto["registros_animais"]):
                                 resposta = f"O animal '{animal_id_vac.capitalize()}' não está cadastrado, {nome}. Por favor, cadastre o animal primeiro ou informe um animal já cadastrado.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             dados_vacinacao_registro["animal_id"] = animal_id_vac
@@ -2192,7 +2325,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not is_valid_date(mensagem_recebida):
                                 resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024). 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             dados_vacinacao_registro["data_vacinacao"] = mensagem_recebida
@@ -2203,7 +2336,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if proxima_dose != "não" and not is_valid_date(proxima_dose):
                                 resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024) ou responda 'não'. 🗓️\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             dados_vacinacao_registro["proxima_dose"] = proxima_dose if proxima_dose != "não" else "Não informado"
@@ -2233,7 +2366,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             resposta += f"\n\nO que deseja fazer agora na seção de Vacinação e Vermifugação, {nome}? 💉🐛\nDigite:\n1. Registrar outra vacinação\n2. Consultar vacinação\n3. Registrar vermifugação\n4. Consultar vermifugação\n5. Receber lembretes futuros\nOu 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal."
                             contexto["awaiting_post_completion_response"] = True
 
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2245,7 +2378,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not any(animal.get("animal_id", "").lower() == animal_id_consulta.lower() for animal in contexto["registros_animais"]):
                                 resposta = f"O animal '{animal_id_consulta.capitalize()}' não está cadastrado, {nome}. Por favor, cadastre o animal primeiro ou informe um animal já cadastrado.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
 
@@ -2273,7 +2406,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             contexto["vacinacao_vermifugacao_opcao"] = None
                             contexto["awaiting_post_completion_response"] = True
 
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2286,7 +2419,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not any(animal.get("animal_id", "").lower() == animal_id_verm.lower() for animal in contexto["registros_animais"]):
                                 resposta = f"O animal '{animal_id_verm.capitalize()}' não está cadastrado, {nome}. Por favor, cadastre o animal primeiro ou informe um animal já cadastrado.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             dados_vermifugacao_registro["animal_id"] = animal_id_verm
@@ -2300,7 +2433,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not is_valid_date(mensagem_recebida):
                                 resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024). 📅\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             dados_vermifugacao_registro["data_vermifugacao"] = mensagem_recebida
@@ -2311,7 +2444,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if proxima_dose_verm != "não" and not is_valid_date(proxima_dose_verm):
                                 resposta = f"Data inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2024) ou responda 'não'. 🗓️\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             dados_vermifugacao_registro["proxima_dose"] = proxima_dose_verm if proxima_dose_verm != "não" else "Não informado"
@@ -2339,7 +2472,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
 
                             resposta += f"\n\nO que deseja fazer agora na seção de Vacinação e Vermifugação, {nome}? 💉🐛\nDigite:\n1. Registrar vacinação\n2. Consultar vacinação\n3. Registrar vermifugação\n4. Consultar vermifugação\n5. Receber lembretes futuros\nOu 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal."
                             contexto["awaiting_post_completion_response"] = True
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2351,7 +2484,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not any(animal.get("animal_id", "").lower() == animal_id_consulta.lower() for animal in contexto["registros_animais"]):
                                 resposta = f"O animal '{animal_id_consulta.capitalize()}' não está cadastrado, {nome}. Por favor, cadastre o animal primeiro ou informe um animal já cadastrado.\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
 
@@ -2379,7 +2512,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             contexto["vacinacao_vermifugacao_opcao"] = None
                             contexto["awaiting_post_completion_response"] = True
 
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2396,7 +2529,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             resposta += f"\n\nO que deseja fazer agora na seção de Vacinação e Vermifugação, {nome}? 💉🐛\nDigite:\n1. Registrar vacinação\n2. Consultar vacinação\n3. Registrar vermifugação\n4. Consultar vermifugação\n5. Receber lembretes futuros\nOu 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal."
                             contexto["awaiting_post_completion_response"] = True
 
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2404,7 +2537,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         resposta = f"Ocorreu um erro no fluxo de vacinação/vermifugação, {nome}. Por favor, digite '2' para voltar ao menu de Vacinação e Vermifugação ou 'menu' para voltar ao menu principal."
                         contexto["vacinacao_vermifugacao_ativo"] = True
                         contexto["vacinacao_vermifugacao_opcao"] = None
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2426,12 +2559,12 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             "6. Gerar Relatório\n"
                             "Ou 'voltar' para o menu principal."
                         )
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
                     resposta = f"Você está no fluxo de Controle Reprodutivo, {nome}. Em breve teremos mais funcionalidades aqui! 🤰\n\nDeseja voltar ao menu de Gestão de Rebanho? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal)"
                     contexto["awaiting_post_completion_response"] = True
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2453,12 +2586,12 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             "6. Gerar Relatório\n"
                             "Ou 'voltar' para o menu principal."
                         )
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
                     resposta = f"Você está no fluxo de Histórico de Pesagens, {nome}. Em breve teremos mais funcionalidades aqui! ⚖️\n\nDeseja voltar ao menu de Gestão de Rebanho? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal)"
                     contexto["awaiting_post_completion_response"] = True
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2466,7 +2599,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     resposta = f"Ocorreu um erro no fluxo de Gestão de Rebanho, {nome}. Por favor, digite '3' para iniciar a Gestão de Rebanho ou 'menu' para voltar ao menu principal."
                     reset_all_flow_flags(contexto)
                     contexto["gestao_rebanho_ativo"] = True
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2486,16 +2619,17 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             f"Ok, {nome}, o cadastro foi cancelado. Retornando ao menu principal. 👋\n\n"
                             f"Escolha uma das opções abaixo para começarmos:\n"
                             f"1. Previsão Climática ☁️\n"
-                            f"2. Controle de Estoque 📦\n"
-                            f"3. Gestão de Rebanho 🐄\n"
-                            f"4. Simulação de Safra 🌾\n"
-                            f"5. {cadastro_opcao_texto} 📝\n"
-                            f"6. Alertas de Pragas 🐛\n"
-                            f"7. Análise de Mercado 📈\n"
-                            f"8. Localização 📍\n"
-                            f"9. Outras Informações 💡"
+                            f"2. Conversar com a Iagro 🤖\n"
+                            f"3. Controle de Estoque 📦\n"
+                            f"4. Gestão de Rebanho 🐄\n"
+                            f"5. Simulação de Safra 🌾\n"
+                            f"6. {cadastro_opcao_texto} 📝\n"
+                            f"7. Alertas de Pragas 🐛\n"
+                            f"8. Análise de Mercado 📈\n"
+                            f"9. Localização 📍\n"
+                            f"10. Outras Informações 💡"
                         )
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2543,7 +2677,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             resposta = f"Edição de cadastro concluída, {nome}! 🎉 Posso ajudar com mais alguma coisa? (Responda 'sim' ou 'não')"
                         else:
                             resposta = f"Não entendi qual campo você deseja editar, {nome}. Por favor, diga o nome do campo (ex: 'nome completo', 'cpf', 'email') ou diga 'meus dados' para ver o que já está preenchido. 🤔\n(Ou 'voltar' para o menu principal)"
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2553,7 +2687,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not is_valid_cpf(mensagem_recebida):
                                 resposta = f"CPF inválido, {nome}. Por favor, digite um CPF válido (apenas 11 números). 🔢\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             else:
@@ -2563,7 +2697,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not is_valid_rg(mensagem_recebida):
                                 resposta = f"RG inválido, {nome}. Por favor, digite um RG válido. 🆔\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             else:
@@ -2572,7 +2706,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             if not is_valid_date(mensagem_recebida):
                                 resposta = f"Data de nascimento inválida, {nome}. Por favor, digite a data no formato dd/mm/aaaa (ex: 01/01/2000). 🎂\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                             else:
@@ -2586,7 +2720,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             else:
                                 resposta = f"Opção inválida, {nome}. Por favor, escolha uma das opções para estado civil:\n1. Casado 💍\n2. Solteiro 🧍\n3. Viúvo 💔\n4. Divorciado 💔\n(Ou 'voltar' para o menu anterior, ou 'menu' para o principal)"
                                 save_conversation_context(
-                                    numero, contexto)
+                                    participant_number, contexto)
                                 send_whatsapp_message(numero, resposta)
                                 return jsonify({"status": "erro", "resposta": resposta}), 200
                         else:
@@ -2594,7 +2728,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
 
                         contexto["current_editing_field"] = None
                         contexto["awaiting_field_to_edit"] = True
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
 
                         question_text = REGISTRATION_QUESTIONS[field_to_update].splitlines()[
                             0]
@@ -2619,7 +2753,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
                     else:
                         contexto["awaiting_field_to_edit"] = True
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         resposta = f"Qual campo você gostaria de editar, {nome}? (Ex: 'nome completo', 'cpf', 'endereço', etc.) 📝\n\nSe preferir, posso te mostrar seus dados atuais. Diga 'meus dados'.\n(Ou 'voltar' para o menu principal)"
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
@@ -2645,7 +2779,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             resposta = f"Cadastro concluído com sucesso, {nome}! 🎉 Posso ajudar com mais alguma coisa? (Responda 'sim' ou 'não')"
                     else:
                         resposta = "Não entendi. Por favor, diga '1' para Sim ou '2' para Não."
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2667,7 +2801,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         contexto["registration_step"] = None
                         contexto["awaiting_post_completion_response"] = True
                         resposta = f"Cadastro concluído com sucesso, {nome}! 🎉 Posso ajudar com mais alguma coisa? (Responda 'sim' ou 'não')"
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2692,7 +2826,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             resposta = f"Cadastro concluído com sucesso, {nome}! 🎉 Posso ajudar com mais alguma coisa? (Responda 'sim' ou 'não')"
                     else:
                         resposta = "Não entendi. Por favor, diga '1' para Sim ou '2' para Não."
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2708,7 +2842,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         contexto["registration_step"] = None
                         contexto["awaiting_post_completion_response"] = True
                         resposta = f"Cadastro concluído com sucesso, {nome}! 🎉 Posso ajudar com mais alguma coisa? (Responda 'sim' ou 'não')"
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2771,7 +2905,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     else:
                         contexto[current_question_key] = mensagem_recebida
 
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     next_question_key = get_next_registration_question_key(
                         contexto)
 
@@ -2783,13 +2917,13 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                             resposta = REGISTRATION_QUESTIONS["ponto_referencia"]
                         else:
                             resposta = REGISTRATION_QUESTIONS[next_question_key]
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         send_whatsapp_message(numero, resposta)
                         return jsonify({"status": "sucesso", "resposta": resposta}), 200
                     else:
                         reset_all_flow_flags(contexto)
                         contexto["awaiting_post_completion_response"] = True
-                        save_conversation_context(numero, contexto)
+                        save_conversation_context(participant_number, contexto)
                         resposta = f"Cadastro concluído com sucesso, {nome}! 🎉 Posso ajudar com mais alguma coisa? (Responda 'sim' ou 'não')"
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
@@ -2815,12 +2949,12 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     contexto["awaiting_weather_follow_up_choice"] = True
                     contexto["localizacao"] = {
                         "cidade": cidade_solicitada_from_message, "estado": "", "pais": pais_solicitado}
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta_clima)
                     return jsonify({"status": "sucesso", "resposta": resposta_clima}), 200
                 else:
                     resposta = f"Não entendi, {nome}. Por favor, me diga o nome da cidade (ex: 'São Paulo') ou compartilhe sua localização atual pelo WhatsApp. 📍\n(Ou 'voltar' para o menu principal)"
-                    save_conversation_context(numero, contexto)
+                    save_conversation_context(participant_number, contexto)
                     send_whatsapp_message(numero, resposta)
                     return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2838,13 +2972,26 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                 else:
                     resposta = f"Para qual cidade você gostaria da previsão climática, {nome}? Você também pode compartilhar sua localização. 📍\n(Ou 'voltar' para o menu principal)"
                     contexto["awaiting_weather_location"] = True
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-            elif mensagem_recebida == "2" or "controle de estoque" in mensagem_recebida or "estoque" in mensagem_recebida:
+            elif mensagem_recebida == "2" or "conversar com a iagro" in mensagem_recebida:
+                print(f"DEBUG_MAIN_MENU: Opção 2 - Conversar com a Iagro selecionada.")
+                reset_all_flow_flags(contexto)
+                contexto["conversational_mode_active"] = True
+                resposta = (
+                    f"Olá, {nome}! Que bom conversar com você. 😊\n"
+                    f"Pode me perguntar qualquer coisa sobre sua lavoura, o clima, melhores culturas para sua região ou qualquer outra dúvida agrícola. Estou aqui para ajudar! 👨‍🌾\n\n"
+                    f"Para voltar ao menu de opções, é só digitar 'menu' a qualquer momento."
+                )
+                save_conversation_context(participant_number, contexto)
+                send_whatsapp_message(numero, resposta)
+                return jsonify({"status": "sucesso", "resposta": resposta}), 200
+
+            elif mensagem_recebida == "3" or "controle de estoque" in mensagem_recebida or "estoque" in mensagem_recebida:
                 print(
-                    f"DEBUG_MAIN_MENU: Opção 2 - Controle de Estoque selecionada.")
+                    f"DEBUG_MAIN_MENU: Opção 3 - Controle de Estoque selecionada.")
                 reset_all_flow_flags(contexto)
                 contexto["controle_estoque_ativo"] = True
                 resposta = (
@@ -2857,13 +3004,13 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     "5. Gerar Relatório\n"
                     "Ou 'voltar' para o menu principal."
                 )
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-            elif mensagem_recebida == "3" or "gestão de rebanho" in mensagem_recebida or "gestao de rebanho" in mensagem_recebida or "rebanho" in mensagem_recebida:
+            elif mensagem_recebida == "4" or "gestão de rebanho" in mensagem_recebida or "gestao de rebanho" in mensagem_recebida or "rebanho" in mensagem_recebida:
                 print(
-                    f"DEBUG_MAIN_MENU: Opção 3 - Gestão de Rebanho selecionada.")
+                    f"DEBUG_MAIN_MENU: Opção 4 - Gestão de Rebanho selecionada.")
                 reset_all_flow_flags(contexto)
                 contexto["gestao_rebanho_ativo"] = True
                 resposta = (
@@ -2878,13 +3025,13 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     "6. Gerar Relatório\n"
                     "Ou 'voltar' para o menu principal."
                 )
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-            elif mensagem_recebida == "4" or "simulação de safra" in mensagem_recebida or "safra" in mensagem_recebida:
+            elif mensagem_recebida == "5" or "simulação de safra" in mensagem_recebida or "safra" in mensagem_recebida:
                 print(
-                    f"DEBUG_MAIN_MENU: Opção 4 - Simulação de Safra selecionada.")
+                    f"DEBUG_MAIN_MENU: Opção 5 - Simulação de Safra selecionada.")
                 reset_all_flow_flags(contexto)
                 contexto["simulacao_safra_ativa"] = True
                 resposta = (
@@ -2895,13 +3042,13 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     "3. Gerar Relatório\n"
                     "Ou 'voltar' para o menu principal."
                 )
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-            elif mensagem_recebida == "5" or "cadastro" in mensagem_recebida or "cadastra-se" in mensagem_recebida or "editar dados" in mensagem_recebida:
+            elif mensagem_recebida == "6" or "cadastro" in mensagem_recebida or "cadastra-se" in mensagem_recebida or "editar dados" in mensagem_recebida:
                 print(
-                    f"DEBUG_MAIN_MENU: Opção 5 - Cadastro/Editar selecionada.")
+                    f"DEBUG_MAIN_MENU: Opção 6 - Cadastro/Editar selecionada.")
                 reset_all_flow_flags(contexto)
                 if usuario_cadastrado:
                     contexto["registration_step"] = "nome_completo"
@@ -2910,33 +3057,33 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                 else:
                     contexto["registration_step"] = REGISTRATION_ORDER[0]
                     resposta = f"Ótimo, {nome}! Vamos começar seu cadastro. {REGISTRATION_QUESTIONS[contexto['registration_step']]}\n(Ou 'voltar' para cancelar o cadastro, ou 'menu' para o principal)"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-            elif mensagem_recebida == "6" or "alertas" in mensagem_recebida or "pragas" in mensagem_recebida:
+            elif mensagem_recebida == "7" or "alertas" in mensagem_recebida or "pragas" in mensagem_recebida:
                 print(
-                    f"DEBUG_MAIN_MENU: Opção 6 - Alertas de Pragas selecionada.")
+                    f"DEBUG_MAIN_MENU: Opção 7 - Alertas de Pragas selecionada.")
                 reset_all_flow_flags(contexto)
                 contexto["awaiting_menu_return_prompt"] = True
                 resposta = f"Em breve teremos alertas de pragas para a sua região, {nome}! Fique ligado! 🐛\nDeseja voltar ao menu principal? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu principal)"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-            elif mensagem_recebida == "7" or "análise de mercado" in mensagem_recebida or "mercado" in mensagem_recebida:
+            elif mensagem_recebida == "8" or "análise de mercado" in mensagem_recebida or "mercado" in mensagem_recebida:
                 print(
-                    f"DEBUG_MAIN_MENU: Opção 7 - Análise de Mercado selecionada.")
+                    f"DEBUG_MAIN_MENU: Opção 8 - Análise de Mercado selecionada.")
                 reset_all_flow_flags(contexto)
                 contexto["awaiting_menu_return_prompt"] = True
                 resposta = f"Em breve teremos análises de mercado para te ajudar a tomar as melhores decisões, {nome}! Aguarde! 📈\nDeseja voltar ao menu principal? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu principal)"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-            elif mensagem_recebida == "8" or "localização" in mensagem_recebida or "minha localização" in mensagem_recebida or "onde estou" in mensagem_recebida:
+            elif mensagem_recebida == "9" or "localização" in mensagem_recebida or "minha localização" in mensagem_recebida or "onde estou" in mensagem_recebida:
                 print(
-                    f"DEBUG_MAIN_MENU: Opção 8 - Localização selecionada.")
+                    f"DEBUG_MAIN_MENU: Opção 9 - Localização selecionada.")
                 reset_all_flow_flags(contexto)
                 local = obter_localizacao_via_ip()
                 if "erro" in local:
@@ -2948,17 +3095,17 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     pais = local.get("pais", "N/A")
                     resposta = f"Sua localização atual é: {cidade}, {estado}, {pais}. 🌍\n\nDeseja voltar ao menu principal? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu principal)"
                     contexto["awaiting_menu_return_prompt"] = True
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
-            elif mensagem_recebida == "9" or "outras informações" in mensagem_recebida or "outras informacoes" in mensagem_recebida:
+            elif mensagem_recebida == "10" or "outras informações" in mensagem_recebida or "outras informacoes" in mensagem_recebida:
                 print(
-                    f"DEBUG_MAIN_MENU: Opção 9 - Outras Informações selecionada.")
+                    f"DEBUG_MAIN_MENU: Opção 10 - Outras Informações selecionada.")
                 reset_all_flow_flags(contexto)
                 contexto["awaiting_menu_return_prompt"] = True
                 resposta = f"Para outras informações, você pode visitar nosso site em www.campointeligente.com.br ou entrar em contato com nosso suporte técnico. 💡\n\nDeseja voltar ao menu principal? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu principal)"
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
@@ -2969,22 +3116,23 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                     f"Desculpe, {nome}, não entendi sua mensagem. 🤔\n"
                     f"Por favor, escolha uma das opções do menu principal ou diga 'menu' para vê-las novamente:\n"
                     f"1. Previsão Climática ☁️\n"
-                    f"2. Controle de Estoque 📦\n"
-                    f"3. Gestão de Rebanho 🐄\n"
-                    f"4. Simulação de Safra 🌾\n"
-                    f"5. {cadastro_opcao_texto} 📝\n"
-                    f"6. Alertas de Pragas 🐛\n"
-                    f"7. Análise de Mercado 📈\n"
-                    f"8. Localização 📍\n"
-                    f"9. Outras Informações 💡"
+                    f"2. Conversar com a Iagro 🤖\n"
+                    f"3. Controle de Estoque 📦\n"
+                    f"4. Gestão de Rebanho 🐄\n"
+                    f"5. Simulação de Safra 🌾\n"
+                    f"6. {cadastro_opcao_texto} 📝\n"
+                    f"7. Alertas de Pragas 🐛\n"
+                    f"8. Análise de Mercado 📈\n"
+                    f"9. Localização 📍\n"
+                    f"10. Outras Informações 💡"
                 )
-                save_conversation_context(numero, contexto)
+                save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
                 return jsonify({"status": "sucesso", "resposta": resposta}), 200
 
         else:
             print(
-                f"DEBUG_WEBHOOK_END: Nenhum tipo de mensagem suportado ou mensagem vazia para {numero}.")
+                f"DEBUG_WEBHOOK_END: Nenhum tipo de mensagem suportado ou mensagem vazia para {participant_number}.")
             return jsonify({"status": "erro", "mensagem": "Nenhum tipo de mensagem suportado ou mensagem vazia."}), 400
 
     except Exception as e:
