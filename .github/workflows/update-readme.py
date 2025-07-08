@@ -132,7 +132,7 @@ def gerar_readme(versao, data_hora):
         readme.write("## ℹ️ Importante \n\n")
         readme.write("ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN \n\n")
         readme.write("```\n")
-        readme.write(f"Repositório..........: FRONT-END\n")
+        readme.write(f"Repositório..........: BACK-END\n")
         readme.write(f"Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)\n")
         readme.write(f"Versão...............: {versao} (AUTO-INCREMENTO)\n")
         readme.write(f"URL..................: https://www.campointeligente.agr.br/\n")
