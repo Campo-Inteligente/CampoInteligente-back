@@ -33,8 +33,8 @@ DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_PORT = os.getenv("DB_PORT", 5432)
 
-# Tempo de inatividade da conversa em segundos (ex: 3 minutos)
-CONVERSATION_TIMEOUT_SECONDS = 180
+# Tempo de inatividade da conversa em segundos (15 minutos)
+CONVERSATION_TIMEOUT_SECONDS = 900
 
 # Inicializando a API do OpenAI
 openai.api_key = OPENAI_API_KEY
@@ -46,8 +46,8 @@ conversa_contextos = {}
 
 # Definição das perguntas de cadastro e as chaves correspondentes no contexto
 REGISTRATION_QUESTIONS = {
-    "nome_completo": "Qual é seu nome completo? 👤",
-    "cpf": "Qual é seu CPF? (apenas números, por favor) �",
+    "nome_completo": "Qual é seu nome completo? �",
+    "cpf": "Qual é seu CPF? (apenas números, por favor) ?",
     "rg": "Qual é seu RG? (apenas números, se possível) 🆔",
     "data_nascimento": "Qual sua data de nascimento? (dd/mm/aaaa) �",
     "sexo": "Qual seu sexo? (Masculino ♂️, Feminino ♀️ ou Outro) �",
