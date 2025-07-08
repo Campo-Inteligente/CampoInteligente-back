@@ -1,38 +1,27 @@
-# .github/workflows/deploy.yml
-
 name: Deploy on main push
 
 on:
   push:
     branches:
-      - main  # Dispara somente em commits na branch main
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Ambiente Ubuntu para rodar o job
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout do repositório
-      uses: actions/checkout@v3
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
 
-    - name: Verificar se a chave SSH foi carregada
-      run: |
-        if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
-          echo "❌ ERRO: A chave SSH está vazia ou não foi definida como secret!"
-          exit 1
-        else
-          echo "✅ Chave SSH detectada com sucesso."
-        fi
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Setup SSH agent
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Deploy para o servidor
-      run: |
-        ssh -p 21022 marcosmorais@campointeligente.ddns.com.br '
-          cd /var/www/campointeligente-back &&
-          git fetch origin &&
-          git reset --hard origin/main
-        '
+      - name: Deploy para o servidor
+        run: |
+          ssh -p 21022 marcosmorais@campointeligente.ddns.com.br '
+            set -e
+            cd /var/www/campointeligente-back
+            ./atualizar-campo.sh
+          '
