@@ -1,0 +1,73 @@
+name: Executar update-readme.py
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '*/30 * * * *'  # Executa a cada 30 minutos
+  workflow_dispatch:         # Permite execução manual
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # Permite fazer push no repositório
+
+    steps:
+      # Passo 1: Fazer checkout do código
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+
+      # Passo 2: Configurar ambiente Python
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # Passo 3: Ajustar timezone para Brasília
+      - name: Ajustar fuso horário para Brasília
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tzdata
+          sudo ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+          sudo dpkg-reconfigure -f noninteractive tzdata
+
+      # Passo 4: Instalar dependências
+      - name: Instalar pytz
+        run: pip install pytz
+
+      # Passo 5: Executar o script Python
+      - name: Executar update-readme.py
+        run: python .github/workflows/update-readme.py
+
+      # Passo 6: Configurar Git
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Passo 7: Commit e push se houver mudanças
+      - name: Commit e push do README.md e versao.txt
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo '✅ Nenhuma mudança detectada. Nada a fazer.'
+          else
+            echo '🚀 Mudanças detectadas. Comitando arquivos...'
+
+            # Adiciona todos os arquivos modificados
+            git add .
+
+            git commit -m '📄 Atualização automática do README.md via GitHub Actions'
+
+            echo "🔄 Tentando rebase antes do push..."
+            git pull --rebase origin main || {
+              echo '⚠️ Conflito detectado. Abortando rebase e ignorando commit.'
+              git rebase --abort || true
+              exit 0
+            }
+
+            git push
+            echo '✅ Push realizado com sucesso.'
+          fi
