@@ -1,4 +1,5 @@
-# Workflow para fazer deploy automático ao dar push na branch main
+# .github/workflows/deploy.yml
+
 name: Deploy on main push
 
 on:
@@ -11,17 +12,25 @@ jobs:
     runs-on: ubuntu-latest  # Ambiente Ubuntu para rodar o job
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3  # Faz o checkout do código do repositório
+    - name: Checkout do repositório
+      uses: actions/checkout@v3
 
-    - name: Setup SSH
+    - name: Verificar se a chave SSH foi carregada
+      run: |
+        if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+          echo "❌ ERRO: A chave SSH está vazia ou não foi definida como secret!"
+          exit 1
+        else
+          echo "✅ Chave SSH detectada com sucesso."
+        fi
+
+    - name: Setup SSH agent
       uses: webfactory/ssh-agent@v0.5.4
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Chave privada SSH para autenticação no servidor remoto
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to server
+    - name: Deploy para o servidor
       run: |
-        # Conecta no servidor via SSH na porta 21022 e atualiza o repositório local
         ssh -p 21022 marcosmorais@campointeligente.ddns.com.br '
           cd /var/www/campointeligente-back &&
           git fetch origin &&
