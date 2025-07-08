@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 576 (AUTO-INCREMENTO)
+Versão...............: 577 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 08/07/2025 19:40:58
+Data de Atualização..: 08/07/2025 20:09:39
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
