@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 537 (AUTO-INCREMENTO)
+Versão...............: 538 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 07/07/2025 22:52:51
+Data de Atualização..: 07/07/2025 22:57:38
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -68,7 +68,7 @@ Descrição das tecnologias:
 ├── 📄 Dockerfile
 ├── 📄 OBSERVAÇÕES SOBRE OS CODIGOS
 ├── 📄 README.md
-├── 📄 atualizar-campo.sh
+├── 📄 atualizar-back.sh
 ├── 🗂️ db
 ├── 📂 documentos
 │   ├── 📄 LICENSE
