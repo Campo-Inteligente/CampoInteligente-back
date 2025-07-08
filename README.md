@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 533 (AUTO-INCREMENTO)
+Versão...............: 534 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 07/07/2025 22:34:37
+Data de Atualização..: 07/07/2025 22:35:55
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -56,7 +56,8 @@ Descrição das tecnologias:
 ├── 📄 README.md
 ├── 📄 requirements.txt
 ├── 📂 teste
-│   └── 📄 teste.txt
+│   ├── 📄 teste.txt
+│   └── 📄 teste2.txt
 ├── 📄 update-readme.py-bkp
 └── 📄 versao.txt
 ```
@@ -74,7 +75,8 @@ Descrição das tecnologias:
 │   ├── 📄 README.md
 │   ├── 📄 requirements.txt
 │   ├── 📂 teste
-│   │   └── 📄 teste.txt
+│   │   ├── 📄 teste.txt
+│   │   └── 📄 teste2.txt
 │   ├── 📄 update-readme.py-bkp
 │   └── 📄 versao.txt
 ├── 📄 index.html
