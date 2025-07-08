@@ -20,8 +20,8 @@ jobs:
 
       - name: Deploy para o servidor
         run: |
-          ssh -p 21022 marcosmorais@campointeligente.ddns.com.br '
+          ssh -p 21022 marcosmorais@campointeligente.ddns.com.br << 'EOF'
             set -e
             cd /var/www/campointeligente-back
             ./atualizar-campo.sh
-          '
+          EOF
