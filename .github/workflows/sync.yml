@@ -1,13 +1,12 @@
-
 name: Sync to CampoInteligente
 
 on:
-  push: # Gatilho para executar ao receber commits
+  push:
     branches:
-      - main # Executa apenas se o push for na branch main
+      - main
   schedule:
-    - cron: "*/30 * * * *" # Executa a cada 30 minutos
-  workflow_dispatch: # Permite execução manual
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
 
 jobs:
   mirror:
@@ -18,9 +17,15 @@ jobs:
         run: |
           git config --global user.name "Marcos Morais"
           git config --global user.email "marcosmoraisjr@users.noreply.github.com"
-      - name: Clonar repositório de origem
+
+      - name: Configurar ssh-agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Clonar repositório de origem via SSH
         run: |
-          git clone https://marcosmoraisjr:${{ secrets.GH_PAT }}@github.com/restic36/startup-campo-inteligente-back.git source
+          git clone git@github.com:restic36/startup-campo-inteligente-back.git source
           cd source
-          git remote add destino https://marcosmoraisjr:${{ secrets.GH_PAT }}@github.com/marcosmoraisjr/CampoInteligente-back.git
+          git remote add destino git@github.com:marcosmoraisjr/CampoInteligente-back.git
           git push --force destino main
