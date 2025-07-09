@@ -1,4 +1,3 @@
-from flask import Flask, request, jsonify
 from datetime import datetime, timedelta, timezone
 import locale
 import os
@@ -10,6 +9,10 @@ import re
 import json
 import psycopg2
 import time
+from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
+from flask import redirect
+from flasgger import Swagge
 
 # Carregando variáveis de ambiente
 load_dotenv()
@@ -38,7 +41,9 @@ CONVERSATION_TIMEOUT_SECONDS = 180
 
 # Inicializando a API do OpenAI
 openai.api_key = OPENAI_API_KEY
+# 🔧 Inicializa o app Flask e o Swagger
 app = Flask(__name__)
+swagger = Swagger(app)
 
 # Dicionário para armazenar o contexto da conversa por número de telefone
 conversa_contextos = {}
@@ -3123,7 +3128,41 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
         print(f"DEBUG_WEBHOOK_ERROR: Erro inesperado no webhook: {e}")
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
+@app.route("/")
+def index():
+    return "🌐 API do Chatbot está no ar! Acesse /apidocs para a documentação Swagger."
 
+
+
+
+# 📦 Função para inicializar o banco de dados
+def init_db():
+    # ... sua lógica de inicialização ...
+    pass
+
+# 🧠 Rota de exemplo com documentação Swagger
+@app.route("/responder", methods=["POST"])
+def responder():
+    """
+    Endpoint que responde a uma pergunta enviada pelo usuário.
+    ---
+    parameters:
+      - name: pergunta
+        in: formData
+        type: string
+        required: true
+        description: A pergunta feita pelo usuário
+    responses:
+      200:
+        description: Resposta do chatbot
+        examples:
+          application/json: { "resposta": "Olá! Como posso ajudar?" }
+    """
+    pergunta = request.form.get("pergunta")
+    resposta = f"Você perguntou: {pergunta}"
+    return jsonify(resposta=resposta)
+
+# 🚀 Início da aplicação
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
