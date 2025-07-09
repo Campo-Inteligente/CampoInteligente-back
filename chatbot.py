@@ -10,10 +10,12 @@ import json
 import psycopg2
 import time
 from flask import render_template
+from flask import redirect
 from flask import Flask, jsonify, request
 from flask import Flask, request, jsonify
-from flask import redirect
-from flasgger import Swagge
+from flask import Flask
+from flasgger import Swagger
+
 
 # Carregando variáveis de ambiente
 load_dotenv()
