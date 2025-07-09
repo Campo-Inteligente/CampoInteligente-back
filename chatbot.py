@@ -3130,10 +3130,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
 
 @app.route("/")
 def index():
-    return "🌐 API do Chatbot está no ar! Acesse /apidocs para a documentação Swagger."
-
-
-
+    return "🌐 API do Chatbot está no ar! Acesse /docs para a documentação Swagger."
 
 # 📦 Função para inicializar o banco de dados
 def init_db():
