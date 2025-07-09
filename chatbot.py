@@ -3129,9 +3129,13 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
         print(f"DEBUG_WEBHOOK_ERROR: Erro inesperado no webhook: {e}")
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
+#@app.route("/")
+#def index():
+#    return "🌐 API do Chatbot está no ar! Acesse /apidocs para a documentação Swagger."
+
 @app.route("/")
 def index():
-    return "🌐 API do Chatbot está no ar! Acesse /apidocs para a documentação Swagger."
+    return render_template("index.html")
 
 @app.route("/apidocs")
 def redirect_to_apidocs():
