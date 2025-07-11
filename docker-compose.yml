@@ -32,7 +32,7 @@ services:
       - "5050:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_USER}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PWS}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
