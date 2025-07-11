@@ -1,4 +1,4 @@
-name: Sync to CampoInteligente
+name: Sync to CampoInteligente-Back
 
 on:
   push:
