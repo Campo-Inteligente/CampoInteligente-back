@@ -1,4 +1,4 @@
-name: Executar update-readme.py
+name: Executar Executar update-readme.py
 
 on:
   push:
