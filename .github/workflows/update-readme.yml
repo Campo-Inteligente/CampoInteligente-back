@@ -3,17 +3,15 @@ name: Executar update-readme.py
 on:
   push:
     branches:
-      - main
-  schedule:
-    - cron: '*/30 * * * *'  # Executa a cada 30 minutos
-  workflow_dispatch:         # Permite execução manual
+      - main  # Executa automaticamente apenas com push na branch main
+  workflow_dispatch:  # Permite execução manual via botão no GitHub Actions
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write  # Permite fazer push no repositório
+      contents: write  # Permite escrever no repositório (necessário para o push)
 
     steps:
       # Passo 1: Fazer checkout do código
@@ -26,7 +24,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Passo 3: Ajustar timezone para Brasília
+      # Passo 3: Ajustar fuso horário para Brasília
       - name: Ajustar fuso horário para Brasília
         run: |
           sudo apt-get update
@@ -34,7 +32,7 @@ jobs:
           sudo ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
           sudo dpkg-reconfigure -f noninteractive tzdata
 
-      # Passo 4: Instalar dependências
+      # Passo 4: Instalar dependências necessárias para o script
       - name: Instalar pytz
         run: pip install pytz
 
@@ -42,23 +40,20 @@ jobs:
       - name: Executar update-readme.py
         run: python .github/workflows/update-readme.py
 
-      # Passo 6: Configurar Git
+      # Passo 6: Configurar Git para commit automático
       - name: Configurar Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Passo 7: Commit e push se houver mudanças
+      # Passo 7: Fazer commit e push apenas se houver mudanças reais
       - name: Commit e push do README.md e versao.txt
         run: |
           if [ -z "$(git status --porcelain)" ]; then
             echo '✅ Nenhuma mudança detectada. Nada a fazer.'
           else
             echo '🚀 Mudanças detectadas. Comitando arquivos...'
-
-            # Adiciona todos os arquivos modificados
             git add .
-
             git commit -m '📄 Atualização automática do README.md via GitHub Actions'
 
             echo "🔄 Tentando rebase antes do push..."
