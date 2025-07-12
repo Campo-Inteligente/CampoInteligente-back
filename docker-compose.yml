@@ -10,9 +10,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD_BD}
       POSTGRES_DB: ${DB_NAME_BD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./initdb:/docker-entrypoint-initdb.d:z
-
+      - ./initdb:/docker-entrypoint-initdb.d     #---- executar manualmente ./import-schema.sh
+      - ./data/postgres:/var/lib/postgresql/data
 
   evolution-api:
     container_name: evolution-api
