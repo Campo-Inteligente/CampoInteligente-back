@@ -22,7 +22,7 @@ services:
     image: atendai/evolution-api:v1.8.2
     restart: always
     ports:
-      - "8085:8080"
+      - "21085:8080"
     env_file:
       - .env
     volumes:
@@ -49,3 +49,4 @@ volumes:
   postgres_data:
   evolution_instances:
   pgadmin_data:
+
