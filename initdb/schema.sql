@@ -1,3 +1,4 @@
+
 -- =======================
 -- TABELA DE ORGANIZAÇÕES
 -- =======================
@@ -18,8 +19,6 @@ CREATE TABLE IF NOT EXISTS tb_administradores (
     email VARCHAR(255) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
     cargo VARCHAR(50),
-    data_cadastro TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    ativo CHAR(1) DEFAULT 'S' CHECK (ativo IN ('S', 'N')),
     CONSTRAINT fk_admin_org FOREIGN KEY (organizacao_id)
         REFERENCES tb_organizacoes (id) ON DELETE CASCADE
 );
@@ -38,7 +37,6 @@ CREATE TABLE IF NOT EXISTS tb_usuarios (
     estado VARCHAR(2),
     data_cadastro TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     ultima_atividade TIMESTAMPTZ,
-    ativo CHAR(1) DEFAULT 'S' CHECK (ativo IN ('S', 'N')),
     CONSTRAINT fk_usuario_org FOREIGN KEY (organizacao_id)
         REFERENCES tb_organizacoes (id) ON DELETE CASCADE
 );
@@ -131,6 +129,18 @@ CREATE TABLE IF NOT EXISTS tb_conversation_contexts (
     last_updated TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- =============================
+-- TABELA DE CONTROLE DE VERSÃO DO SCHEMA
+-- =============================
+CREATE TABLE IF NOT EXISTS tb_versoes_schema (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    data_hora TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    tipo_operacao VARCHAR(20) NOT NULL CHECK (tipo_operacao IN ('CREATE', 'ALTER', 'DROP', 'MIGRATION', 'HOTFIX')),
+    tabelas_afetadas TEXT NOT NULL,
+    descricao TEXT
+);
+
 -- ===================
 -- ÍNDICES RECOMENDADOS
 -- ===================
@@ -143,3 +153,4 @@ CREATE INDEX IF NOT EXISTS idx_interacoes_agricultor ON tb_interacoes (agriculto
 -- VERSÃO: 2025-07-16 09:00 - MARCOSMORAIS
 -- VERSÃO: 2025-07-16 10:30 - ABIMAELUANDERSON
 -- VERSÃO: 2025-07-16 11:30 - MARCOSMORAIS
+-- VERSÃO: 2025-07-16 18:47 - MARCOSMORAIS
