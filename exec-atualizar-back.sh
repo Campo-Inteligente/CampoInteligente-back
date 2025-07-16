@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "📦 Atualizando repositório..."
+echo "📦 Pegando atualizações no github.com..."
 
 # Garante que estamos no diretório correto
 cd "$(dirname "$0")" || {
@@ -14,5 +14,5 @@ git fetch origin
 # Reseta forçadamente para o estado mais recente da branch main
 git reset --hard origin/main
 
-echo "✅ Projeto atualizado com sucesso!"
+echo "✅ Projeto local atualizado com sucesso!"
 

@@ -1,5 +1,6 @@
 
 echo "Enviando atualizações locais para o github.com/restic36..."
+
 # Adiciona todos os arquivos modificados
 git add .
 
@@ -13,5 +14,4 @@ git commit -m "Salvando alterações antes do pull"
 git push origin main
 
 git status
-
-echo "Procedimento concluído!"
+echo "Processo finalizado!"
