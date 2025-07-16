@@ -48,28 +48,28 @@ conversa_contextos = {}
 
 # Definição das perguntas de cadastro e as chaves correspondentes no contexto
 REGISTRATION_QUESTIONS = {
-  "nome_completo": "Qual é o seu nome completo?",
-  "cpf": "Informe seu CPF (apenas números, por favor).",
-  "rg": "Informe seu RG (apenas números, se possível).",
-  "data_nascimento": "Qual é a sua data de nascimento? (formato: dd/mm/aaaa)",
-  "sexo": "Qual é o seu sexo? (Masculino, Feminino ou Outro)",
-  "estado_civil": "Qual é o seu estado civil? Escolha uma opção:\n1. Casado\n2. Solteiro\n3. Viúvo\n4. Divorciado",
-  "telefone_contato": "Informe um número de telefone para contato (com DDD, sem espaços ou traços).",
-  "email": "Deseja informar um endereço de e-mail para contato?\n1. Sim\n2. Não",
-  "endereco_tipo": "Seu endereço está localizado em área rural ou urbana?\n1. Rural\n2. Urbana",
-  "nome_propriedade": "Qual é o nome da propriedade rural (caso exista)?",
-  "comunidade_bairro": "Qual é o nome da comunidade ou bairro?",
-  "municipio": "Em qual município está localizada a propriedade?",
-  "estado_propriedade": "Em qual estado está localizada a propriedade? (Ex: BA, SP, MG...)",
-  "cep": "Qual é o CEP da propriedade?",
-  "ponto_referencia": "Deseja informar um ponto de referência para ajudar na localização?\n1. Sim\n2. Não",
-  "dap_caf": "Você possui DAP ou CAF? Se sim, informe o número.",
-  "tipo_producao": "Sua produção é de qual tipo?\n1. Familiar\n2. Empresarial",
-  "producao_organica": "Sua produção é orgânica? (Responda Sim ou Não)",
-  "utiliza_irrigacao": "Você utiliza irrigação na produção? (Responda Sim ou Não)",
-  "area_total_propriedade": "Qual é a área total da propriedade (em hectares)?",
-  "area_cultivada": "Qual é a área atualmente cultivada (em hectares)?",
-  "culturas_produzidas": "Quais são as culturas produzidas? (Informe todas, separadas por vírgula, ex: milho, feijão, mandioca)"
+    "nome_completo": "Qual é seu nome completo? 👤",
+    "cpf": "Qual é seu CPF? (apenas números, por favor) 🔢",
+    "rg": "Qual é seu RG? (apenas números, se possível) 🆔",
+    "data_nascimento": "Qual sua data de nascimento? (dd/mm/aaaa) 🎂",
+    "sexo": "Qual seu sexo? (Masculino ♂️, Feminino ♀️ ou Outro) ⚧️",
+    "estado_civil": "Qual seu estado civil? Escolha uma opção:\n1. Casado 💍\n2. Solteiro 🧍\n3. Viúvo 💔\n4. Divorciado 💔",
+    "telefone_contato": "Qual seu telefone para contato? (Ex: 11987654321, com DDD e sem espaços ou traços) 📱",
+    "email": "Você deseja adicionar um endereço de e-mail ao seu cadastro? 📧\n1. Sim\n2. Não",
+    "endereco_tipo": "Seu endereço é rural ou urbano? 🏡🏙️\n1. Rural\n2. Urbano",
+    "nome_propriedade": "Qual o nome da propriedade (se houver)? �",
+    "comunidade_bairro": "Qual a comunidade ou bairro? 🏘️",
+    "municipio": "Qual o município? 📍",
+    "estado_propriedade": "Qual o estado? (ex: BA, SP, MG...) 🇧🇷",
+    "cep": "Qual o CEP? ✉️",
+    "ponto_referencia": "Você deseja adicionar um ponto de referência? 🗺️\n1. Sim\n2. Não",
+    "dap_caf": "Possui DAP ou CAF? Se sim, informe o número. 📄",
+    "tipo_producao": "Sua produção é de que tipo? 🧑‍🌾🏢\n1. Familiar\n2. Empresarial",
+    "producao_organica": "Sua produção é orgânica? (Sim ou Não) ✅❌",
+    "utiliza_irrigacao": "Utiliza irrigação? (Sim ou Não) 💧",
+    "area_total_propriedade": "Qual a área total da propriedade (em hectares)? 📏",
+    "area_cultivada": "Qual a área cultivada (em hectares)? 🌱",
+    "culturas_produzidas": "Quais culturas você produz? (Você pode informar várias, ex: milho, feijão, mandioca...) 🌽🥔"
 }
 
 # Ordem das perguntas para o fluxo de cadastro
@@ -1009,11 +1009,22 @@ def webhook_route():
             mensagem_recebida = mensagem_recebida_bruta.lower()
             nome = contexto.get("nome_completo", "Usuário")
 
+        # *** INÍCIO DA CORREÇÃO ***
+        # Garante que as listas de registros existam no contexto para novos usuários
+        list_keys_to_initialize = [
+            "simulacoes_passadas", "registros_estoque", "registros_animais",
+            "registros_vacinacao", "registros_vermifugacao"
+        ]
+        for key in list_keys_to_initialize:
+            if key not in contexto:
+                contexto[key] = []
+        # *** FIM DA CORREÇÃO ***
+
         current_time = datetime.now().timestamp()
         last_interaction_time = contexto.get("last_interaction_time", 0)
 
         # CORREÇÃO: Lógica de timeout mais robusta e mensagem melhorada
-        if contexto and last_interaction_time < current_time and (current_time - last_interaction_time) > CONVERSATION_TIMEOUT_SECONDS:
+        if contexto and last_interaction_time != 0 and (current_time - last_interaction_time) > CONVERSATION_TIMEOUT_SECONDS:
             print(
                 f"DEBUG_SESSION: Timeout detectado para {participant_number}. Reiniciando o fluxo da conversa.")
             dados_persistentes = {
@@ -1269,7 +1280,7 @@ def webhook_route():
                     f"3. Gerenciar meu Estoque 📦\n"
                     f"4. Cuidar do meu Rebanho 🐄\n"
                     f"5. Fazer Simulação de Safra 🌾\n"
-                    f"6. {cadastro_opcao_texto} �\n"
+                    f"6. {cadastro_opcao_texto} 📝\n"
                     f"7. Alertas de Pragas e Doenças 🐛\n"
                     f"8. Análise de Mercado 📈\n"
                     f"9. Saber minha Localização 📍\n"
@@ -1460,17 +1471,16 @@ def webhook_route():
                     resposta = (
                         f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                         f"Como posso te ajudar agora?\n\n"
-                        f"Como posso te ajudar agora?\n\n"
-                        f"1️⃣. Ver a Previsão do Tempo\n"
-                        f"2️⃣. Bater um papo com a Iagro\n"
-                        f"3️⃣. Gerenciar meu Estoque\n"
-                        f"4️⃣. Cuidar do meu Rebanho\n"
-                        f"5️⃣. Fazer Simulação de Safra\n"
-                        f"6️⃣. {cadastro_opcao_texto}\n"
-                        f"7️⃣. Alertas de Pragas e Doenças\n"
-                        f"8️⃣. Análise de Mercado \n"
-                        f"9️⃣. Saber minha Localização 📍\n"
-                        f"🔟. Outras Informações"
+                        f"1. Ver a Previsão do Tempo ☁️\n"
+                        f"2. Bater um papo com a Iagro 🤖\n"
+                        f"3. Gerenciar meu Estoque 📦\n"
+                        f"4. Cuidar do meu Rebanho 🐄\n"
+                        f"5. Fazer Simulação de Safra 🌾\n"
+                        f"6. {cadastro_opcao_texto} 📝\n"
+                        f"7. Alertas de Pragas e Doenças 🐛\n"
+                        f"8. Análise de Mercado 📈\n"
+                        f"9. Saber minha Localização 📍\n"
+                        f"10. Outras Informações 💡"
                     )
                 save_conversation_context(participant_number, contexto)
                 send_whatsapp_message(numero, resposta)
@@ -1483,16 +1493,16 @@ def webhook_route():
                     resposta = (
                         f"Ok, {nome}, retornando ao menu principal. 👋\n\n"
                         f"Como posso te ajudar agora?\n\n"
-                        f"1️⃣. Ver a Previsão do Tempo \n"
-                        f"2️⃣. Bater um papo com a Iagro\n"
-                        f"3️⃣. Gerenciar meu Estoque \n"
-                        f"4️⃣. Cuidar do meu Rebanho \n"
-                        f"5️⃣. Fazer Simulação de Safra \n"
-                        f"6️⃣. {cadastro_opcao_texto} \n"
-                        f"7️⃣. Alertas de Pragas e Doenças \n"
-                        f"8️⃣. Análise de Mercado \n"
-                        f"9️⃣. Saber minha Localização \n"
-                        f"🔟. Outras Informações."
+                        f"1. Ver a Previsão do Tempo ☁️\n"
+                        f"2. Bater um papo com a Iagro 🤖\n"
+                        f"3. Gerenciar meu Estoque 📦\n"
+                        f"4. Cuidar do meu Rebanho 🐄\n"
+                        f"5. Fazer Simulação de Safra 🌾\n"
+                        f"6. {cadastro_opcao_texto} 📝\n"
+                        f"7. Alertas de Pragas e Doenças 🐛\n"
+                        f"8. Análise de Mercado 📈\n"
+                        f"9. Saber minha Localização 📍\n"
+                        f"10. Outras Informações 💡"
                     )
                 elif "não" in mensagem_recebida or "nao" in mensagem_recebida:
                     contexto["awaiting_menu_return_prompt"] = False
