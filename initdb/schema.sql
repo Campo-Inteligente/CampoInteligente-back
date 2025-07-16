@@ -141,6 +141,22 @@ CREATE TABLE IF NOT EXISTS tb_versoes_schema (
     descricao TEXT
 );
 
+-- ================================
+-- VIEW PARA HISTÓRICO DE VERSÕES
+-- ================================
+CREATE OR REPLACE VIEW vw_historico_versoes_schema AS
+SELECT
+    id,
+    to_char(data_hora, 'YYYY-MM-DD HH24:MI:SS') AS data_hora_fmt,
+    usuario,
+    tipo_operacao,
+    tabelas_afetadas,
+    descricao
+FROM
+    tb_versoes_schema
+ORDER BY
+    data_hora DESC;
+
 -- ===================
 -- ÍNDICES RECOMENDADOS
 -- ===================
