@@ -56,7 +56,7 @@ REGISTRATION_QUESTIONS = {
     "sexo": "Qual seu sexo? (Masculino ♂️, Feminino ♀️ ou Outro) ⚧️",
     "estado_civil": "Qual seu estado civil? Escolha uma opção:\n1. Casado 💍\n2. Solteiro 🧍\n3. Viúvo 💔\n4. Divorciado 💔",
     "telefone_contato": "Qual seu telefone para contato? (Ex: 11987654321, com DDD e sem espaços ou traços) 📱",
-    "email": "Você deseja adicionar um endereço de e-mail ao seu cadastro? 📧\n1. Sim\n2. Não",
+    "email": "Você deseja adicionar um endereço de e-mail ao seu cadastro? �\n1. Sim\n2. Não",
     "endereco_tipo": "Seu endereço é rural ou urbano? 🏡🏙️\n1. Rural\n2. Urbano",
     "nome_propriedade": "Qual o nome da propriedade (se houver)? 🚜",
     "comunidade_bairro": "Qual a comunidade ou bairro? 🏘️",
@@ -2247,7 +2247,6 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         resposta = f"Em breve teremos o histórico de pesagens, {nome}! Aguarde! ⚖️\n\nDeseja voltar ao menu de Gestão de Rebanho? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal)"
                         contexto["awaiting_post_completion_response"] = True
                     elif mensagem_recebida == "5":
-                        contexto["gestao_rebanho_sub_fluxo"] = 5
                         if contexto["registros_animais"]:
                             resposta = "🐄 **Seus Animais Cadastrados:** 🐄\n"
                             for i, animal in enumerate(contexto["registros_animais"]):
