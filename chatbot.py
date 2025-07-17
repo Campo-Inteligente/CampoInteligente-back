@@ -60,7 +60,7 @@ REGISTRATION_QUESTIONS = {
     "endereco_tipo": "Seu endereço é rural ou urbano? 🏡🏙️\n1. Rural\n2. Urbano",
     "nome_propriedade": "Qual o nome da propriedade (se houver)? 🚜",
     "comunidade_bairro": "Qual a comunidade ou bairro? 🏘️",
-    "municipio": "Qual o município? �",
+    "municipio": "Qual o município? 📍",
     "estado_propriedade": "Qual o estado? (ex: BA, SP, MG...) 🇧🇷",
     "cep": "Qual o CEP? ✉️",
     "ponto_referencia": "Você deseja adicionar um ponto de referência? 🗺️\n1. Sim\n2. Não",
