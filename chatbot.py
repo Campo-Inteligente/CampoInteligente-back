@@ -669,6 +669,7 @@ def webchat_route():
             resposta = f"Olá, {nome_usuario}! Que bom te ver por aqui de novo. 😊\nPara facilitar, vamos voltar ao menu principal, ok?\n\n"
             cadastro_opcao_texto = "Atualizar meu cadastro" if is_user_registered(participant_number) else "Fazer meu cadastro"
             resposta += (
+                "Como posso te ajudar agora?<br /><br />"
                 f"Como posso te ajudar agora?\n\n"
                 f"1. Ver a Previsão do Tempo ☁️\n"
                 f"2. Bater um papo com a Iagro 🤖\n"
