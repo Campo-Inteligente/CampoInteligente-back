@@ -12,6 +12,7 @@ import json
 import psycopg2
 import time
 import uuid
+import traceback # Importado para um melhor log de erros
 
 # Carregando variáveis de ambiente
 load_dotenv()
@@ -49,7 +50,7 @@ conversa_contextos = {}
 
 # Definição das perguntas de cadastro e as chaves correspondentes no contexto
 REGISTRATION_QUESTIONS = {
-    "nome_completo": "Qual é seu nome completo? �",
+    "nome_completo": "Qual é seu nome completo? 👤",
     "cpf": "Qual é seu CPF? (apenas números, por favor) 🔢",
     "rg": "Qual é seu RG? (apenas números, se possível) 🆔",
     "data_nascimento": "Qual sua data de nascimento? (dd/mm/aaaa) 🎂",
@@ -918,32 +919,29 @@ def reset_all_flow_flags(contexto):
 # Rota do webhook para receber e responder mensagens
 @app.route("/webhook", methods=["POST"])
 def webhook_route():
+    # *** NOVO *** - Bloco try...except para capturar todos os erros
     try:
+        print("--- ROTA /WEBHOOK ATINGIDA ---") # Log para confirmar que o webhook foi chamado
         data = request.json
-        print(f"--- Webhook recebido ---")
-        print(f"Dados recebidos: {json.dumps(data, indent=2)}")
+        print(f"--- Webhook recebido ---\n{json.dumps(data, indent=2)}")
+        
         event = data.get('event')
-        webhook_data = data.get('data')
-
         if event != 'messages.upsert':
-            print(
-                f"DEBUG_WEBHOOK_IGNORE: Evento '{event}' não é 'messages.upsert', ignorando.")
+            print(f"DEBUG_WEBHOOK_IGNORE: Evento '{event}' não é 'messages.upsert', ignorando.")
             return jsonify({"status": f"Evento {event} ignorado."}), 200
 
+        webhook_data = data.get('data')
         if isinstance(webhook_data, list):
-            print(
-                f"DEBUG_WEBHOOK_IGNORE: 'data' é uma lista, ignorando evento {event}.")
+            print(f"DEBUG_WEBHOOK_IGNORE: 'data' é uma lista, ignorando evento {event}.")
             return jsonify({"status": "ignorado"}), 200
 
         message_data = webhook_data
-
         if message_data.get('key', {}).get('fromMe', False):
             print("DEBUG_WEBHOOK_IGNORE: Ignorando mensagem do próprio bot.")
             return jsonify({"status": "ignorado"}), 200
 
         key = message_data.get('key', {})
         numero = key.get('remoteJid', '')
-
         if not numero:
             print(f"DEBUG_WEBHOOK_END: Número não fornecido.")
             return jsonify({"status": "erro", "mensagem": "Número não fornecido."}), 400
@@ -1049,7 +1047,7 @@ def webhook_route():
                 f"1. Ver a Previsão do Tempo ☁️\n"
                 f"2. Bater um papo com a Iagro 🤖\n"
                 f"3. Gerenciar meu Estoque 📦\n"
-                f"4. Cuidar do meu Rebanho 🐄\n"
+                f"4. Cuidar do meu Rebanho �\n"
                 f"5. Fazer Simulação de Safra 🌾\n"
                 f"6. {cadastro_opcao_texto} 📝\n"
                 f"7. Alertas de Pragas e Doenças 🐛\n"
@@ -3271,6 +3269,8 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
 
     except Exception as e:
         print(f"DEBUG_WEBHOOK_ERROR: Erro inesperado no webhook: {e}")
+        # *** NOVO *** - Log detalhado do erro
+        print(traceback.format_exc())
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 
