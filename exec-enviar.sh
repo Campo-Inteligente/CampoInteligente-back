@@ -1,5 +1,4 @@
 
-echo "Enviando atualizações locais para o github.com/restic36..."
 # Adiciona todos os arquivos modificados
 git add .
 
@@ -7,11 +6,7 @@ git add .
 git commit -m "Salvando alterações antes do pull"
 
 # Atualiza a branch local com a versão remota, reorganizando os commits locais
-#git pull origin main --rebase
+git pull origin main --rebase
 
 # Agora sim! Envia as alterações locais para o repositório remoto
 git push origin main
-
-git status
-
-echo "Procedimento concluído!"
