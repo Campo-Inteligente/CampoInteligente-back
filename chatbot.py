@@ -28,12 +28,12 @@ AUTH_KEY = os.getenv("AUTH_KEY")
 BOT_NUMBER = os.getenv("BOT_NUMBER")
 EVOLUTION_API_URL = "http://campointeligente.ddns.com.br:21085"
 
-# Configurações do Banco de Dados PostgreSQL com as novas variáveis
-DB_NAME = os.getenv("DB_NAME_BD")
-DB_HOST = os.getenv("DB_HOST_BD")
-DB_USER = os.getenv("DB_USER_BD")
-DB_PASSWORD = os.getenv("DB_PASSWORD_BD")
-DB_PORT = os.getenv("DB_PORT_BD", 5432)
+# *** ATUALIZADO *** - Configurações do Banco de Dados PostgreSQL com as variáveis corretas do .env
+DB_NAME = os.getenv("DB_NAME")
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_PORT = os.getenv("DB_PORT", 5432)
 
 
 # Tempo de inatividade da conversa em segundos (3 minutos)
@@ -49,7 +49,7 @@ conversa_contextos = {}
 
 # Definição das perguntas de cadastro e as chaves correspondentes no contexto
 REGISTRATION_QUESTIONS = {
-    "nome_completo": "Qual é seu nome completo? 👤",
+    "nome_completo": "Qual é seu nome completo? �",
     "cpf": "Qual é seu CPF? (apenas números, por favor) 🔢",
     "rg": "Qual é seu RG? (apenas números, se possível) 🆔",
     "data_nascimento": "Qual sua data de nascimento? (dd/mm/aaaa) 🎂",
