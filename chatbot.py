@@ -28,12 +28,13 @@ AUTH_KEY = os.getenv("AUTH_KEY")
 BOT_NUMBER = os.getenv("BOT_NUMBER")
 EVOLUTION_API_URL = "http://campointeligente.ddns.com.br:21085"
 
-# Configurações do Banco de Dados PostgreSQL
-DB_NAME = os.getenv("DB_NAME")
-DB_HOST = os.getenv("DB_HOST")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_PORT = os.getenv("DB_PORT", 5432)
+# Configurações do Banco de Dados PostgreSQL com as novas variáveis
+DB_NAME = os.getenv("DB_NAME_BD")
+DB_HOST = os.getenv("DB_HOST_BD")
+DB_USER = os.getenv("DB_USER_BD")
+DB_PASSWORD = os.getenv("DB_PASSWORD_BD")
+DB_PORT = os.getenv("DB_PORT_BD", 5432)
+
 
 # Tempo de inatividade da conversa em segundos (3 minutos)
 CONVERSATION_TIMEOUT_SECONDS = 180
@@ -57,7 +58,7 @@ REGISTRATION_QUESTIONS = {
     "telefone_contato": "Qual seu telefone para contato? (Ex: 11987654321, com DDD e sem espaços ou traços) 📱",
     "email": "Você deseja adicionar um endereço de e-mail ao seu cadastro? 📧\n1. Sim\n2. Não",
     "endereco_tipo": "Seu endereço é rural ou urbano? 🏡🏙️\n1. Rural\n2. Urbano",
-    "nome_propriedade": "Qual o nome da propriedade (se houver)? �",
+    "nome_propriedade": "Qual o nome da propriedade (se houver)? 🚜",
     "comunidade_bairro": "Qual a comunidade ou bairro? 🏘️",
     "municipio": "Qual o município? 📍",
     "estado_propriedade": "Qual o estado? (ex: BA, SP, MG...) 🇧🇷",
@@ -133,7 +134,7 @@ def get_db_connection():
             password=DB_PASSWORD,
             host=DB_HOST,
             port=DB_PORT,
-            sslmode='require'
+            sslmode='prefer'
         )
         print("DEBUG_DB_CONNECT: Conexão ao PostgreSQL estabelecida com sucesso.")
         return conn
@@ -142,25 +143,24 @@ def get_db_connection():
             f"DEBUG_DB_CONNECT_ERROR: Erro ao conectar ao banco de dados PostgreSQL: {e}")
         return None
 
-# Função para inicializar a tabela de contexto de conversas no banco de dados
-
-
+# *** ATUALIZADO *** - Função para inicializar a tabela de contexto de conversas no banco de dados
 def init_db():
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
+            # Alinhado com o novo schema: tb_conversation_contexts e whatsapp_id
             cur.execute("""
-                CREATE TABLE IF NOT EXISTS conversation_contexts (
-                    phone_number VARCHAR(255) PRIMARY KEY,
+                CREATE TABLE IF NOT EXISTS tb_conversation_contexts (
+                    whatsapp_id VARCHAR(50) PRIMARY KEY,
                     context JSONB,
-                    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    last_updated TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                 );
             """)
             conn.commit()
             cur.close()
             print(
-                "DEBUG_DB_INIT: Tabela 'conversation_contexts' verificada/criada com sucesso.")
+                "DEBUG_DB_INIT: Tabela 'tb_conversation_contexts' verificada/criada com sucesso.")
         except psycopg2.Error as e:
             print(
                 f"DEBUG_DB_INIT_ERROR: Erro ao inicializar o banco de dados: {e}")
@@ -168,66 +168,64 @@ def init_db():
             if conn:
                 conn.close()
 
-# Função para carregar o contexto da conversa do banco de dados
-
-
-def load_conversation_context(phone_number):
+# *** ATUALIZADO *** - Função para carregar o contexto da conversa do banco de dados
+def load_conversation_context(whatsapp_id):
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
+            # Alinhado com o novo schema: tb_conversation_contexts e whatsapp_id
             cur.execute(
-                "SELECT context FROM conversation_contexts WHERE phone_number = %s;", (phone_number,))
+                "SELECT context FROM tb_conversation_contexts WHERE whatsapp_id = %s;", (whatsapp_id,))
             result = cur.fetchone()
             cur.close()
             if result:
                 loaded_context = result[0]
                 print(
-                    f"DEBUG_DB_LOAD: Contexto carregado do DB para {phone_number}: {loaded_context}")
+                    f"DEBUG_DB_LOAD: Contexto carregado do DB para {whatsapp_id}: {loaded_context}")
                 return loaded_context
             print(
-                f"DEBUG_DB_LOAD: Nenhum contexto encontrado no DB para {phone_number}. Retornando vazio.")
+                f"DEBUG_DB_LOAD: Nenhum contexto encontrado no DB para {whatsapp_id}. Retornando vazio.")
             return {}
         except psycopg2.Error as e:
             print(
-                f"DEBUG_DB_LOAD_ERROR: Erro ao carregar contexto da conversa do banco de dados para {phone_number}: {e}")
+                f"DEBUG_DB_LOAD_ERROR: Erro ao carregar contexto da conversa do banco de dados para {whatsapp_id}: {e}")
             return {}
         finally:
             if conn:
                 conn.close()
     print(
-        f"DEBUG_DB_LOAD_ERROR: Conexão ao DB falhou ao carregar contexto para {phone_number}.")
+        f"DEBUG_DB_LOAD_ERROR: Conexão ao DB falhou ao carregar contexto para {whatsapp_id}.")
     return {}
 
-# Função para salvar o contexto da conversa no banco de dados
-
-
-def save_conversation_context(phone_number, context):
+# *** ATUALIZADO *** - Função para salvar o contexto da conversa no banco de dados
+def save_conversation_context(whatsapp_id, context):
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
             context_json = json.dumps(context)
+            # Alinhado com o novo schema: tb_conversation_contexts e whatsapp_id
             cur.execute("""
-                INSERT INTO conversation_contexts (phone_number, context)
+                INSERT INTO tb_conversation_contexts (whatsapp_id, context)
                 VALUES (%s, %s)
-                ON CONFLICT (phone_number) DO UPDATE
+                ON CONFLICT (whatsapp_id) DO UPDATE
                 SET context = EXCLUDED.context, last_updated = CURRENT_TIMESTAMP;
-            """, (phone_number, context_json))
+            """, (whatsapp_id, context_json))
             conn.commit()
             cur.close()
             print(
-                f"DEBUG_DB_SAVE: Contexto para {phone_number} salvo/atualizado no DB: {context}")
+                f"DEBUG_DB_SAVE: Contexto para {whatsapp_id} salvo/atualizado no DB.")
         except psycopg2.Error as e:
             print(
-                f"DEBUG_DB_SAVE_ERROR: Erro ao salvar contexto da conversa no banco de dados para {phone_number}: {e}")
+                f"DEBUG_DB_SAVE_ERROR: Erro ao salvar contexto da conversa no banco de dados para {whatsapp_id}: {e}")
             raise
         finally:
             if conn:
                 conn.close()
     else:
         print(
-            f"DEBUG_DB_SAVE_ERROR: Conexão ao DB falhou ao salvar contexto para {phone_number}.")
+            f"DEBUG_DB_SAVE_ERROR: Conexão ao DB falhou ao salvar contexto para {whatsapp_id}.")
         raise Exception(
             "Falha na conexão com o banco de dados ao tentar salvar o contexto.")
 
@@ -739,16 +737,17 @@ def home():
     return "API Campo Inteligente está online!"
 
 
-# Função para verificar se o usuário está cadastrado no banco de dados
-def is_user_registered(phone_number):
+# *** ATUALIZADO *** - Função para verificar se o usuário está cadastrado no banco de dados
+def is_user_registered(whatsapp_id):
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
             where_clauses = [
                 f"context->>'{field}' IS NOT NULL" for field in MANDATORY_REGISTRATION_FIELDS]
-            query = f"SELECT 1 FROM conversation_contexts WHERE phone_number = %s AND {' AND '.join(where_clauses)};"
-            cur.execute(query, (phone_number,))
+            # Alinhado com o novo schema: tb_conversation_contexts e whatsapp_id
+            query = f"SELECT 1 FROM tb_conversation_contexts WHERE whatsapp_id = %s AND {' AND '.join(where_clauses)};"
+            cur.execute(query, (whatsapp_id,))
             result = cur.fetchone()
             cur.close()
             return result is not None
