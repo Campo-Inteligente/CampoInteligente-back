@@ -12,7 +12,6 @@ import json
 import psycopg2
 import time
 import uuid
-import traceback # Importado para um melhor log de erros
 
 # Carregando variáveis de ambiente
 load_dotenv()
@@ -29,12 +28,12 @@ AUTH_KEY = os.getenv("AUTH_KEY")
 BOT_NUMBER = os.getenv("BOT_NUMBER")
 EVOLUTION_API_URL = "http://campointeligente.ddns.com.br:21085"
 
-# *** ATUALIZADO *** - Configurações do Banco de Dados PostgreSQL com as variáveis corretas do .env
-DB_NAME = os.getenv("DB_NAME")
-DB_HOST = os.getenv("DB_HOST")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_PORT = os.getenv("DB_PORT", 5432)
+# Configurações do Banco de Dados PostgreSQL com as novas variáveis
+DB_NAME = os.getenv("DB_NAME_BD")
+DB_HOST = os.getenv("DB_HOST_BD")
+DB_USER = os.getenv("DB_USER_BD")
+DB_PASSWORD = os.getenv("DB_PASSWORD_BD")
+DB_PORT = os.getenv("DB_PORT_BD", 5432)
 
 
 # Tempo de inatividade da conversa em segundos (3 minutos)
@@ -919,29 +918,32 @@ def reset_all_flow_flags(contexto):
 # Rota do webhook para receber e responder mensagens
 @app.route("/webhook", methods=["POST"])
 def webhook_route():
-    # *** NOVO *** - Bloco try...except para capturar todos os erros
     try:
-        print("--- ROTA /WEBHOOK ATINGIDA ---") # Log para confirmar que o webhook foi chamado
         data = request.json
-        print(f"--- Webhook recebido ---\n{json.dumps(data, indent=2)}")
-        
+        print(f"--- Webhook recebido ---")
+        print(f"Dados recebidos: {json.dumps(data, indent=2)}")
         event = data.get('event')
+        webhook_data = data.get('data')
+
         if event != 'messages.upsert':
-            print(f"DEBUG_WEBHOOK_IGNORE: Evento '{event}' não é 'messages.upsert', ignorando.")
+            print(
+                f"DEBUG_WEBHOOK_IGNORE: Evento '{event}' não é 'messages.upsert', ignorando.")
             return jsonify({"status": f"Evento {event} ignorado."}), 200
 
-        webhook_data = data.get('data')
         if isinstance(webhook_data, list):
-            print(f"DEBUG_WEBHOOK_IGNORE: 'data' é uma lista, ignorando evento {event}.")
+            print(
+                f"DEBUG_WEBHOOK_IGNORE: 'data' é uma lista, ignorando evento {event}.")
             return jsonify({"status": "ignorado"}), 200
 
         message_data = webhook_data
+
         if message_data.get('key', {}).get('fromMe', False):
             print("DEBUG_WEBHOOK_IGNORE: Ignorando mensagem do próprio bot.")
             return jsonify({"status": "ignorado"}), 200
 
         key = message_data.get('key', {})
         numero = key.get('remoteJid', '')
+
         if not numero:
             print(f"DEBUG_WEBHOOK_END: Número não fornecido.")
             return jsonify({"status": "erro", "mensagem": "Número não fornecido."}), 400
@@ -1047,8 +1049,8 @@ def webhook_route():
                 f"1. Ver a Previsão do Tempo ☁️\n"
                 f"2. Bater um papo com a Iagro 🤖\n"
                 f"3. Gerenciar meu Estoque 📦\n"
-                f"4. Cuidar do meu Rebanho �\n"
-                f"5. Fazer Simulação de Safra 🌾\n"
+                f"4. Cuidar do meu Rebanho 🐄\n"
+                f"5. Fazer Simulação de Safra �\n"
                 f"6. {cadastro_opcao_texto} 📝\n"
                 f"7. Alertas de Pragas e Doenças 🐛\n"
                 f"8. Análise de Mercado 📈\n"
@@ -2245,6 +2247,7 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
                         resposta = f"Em breve teremos o histórico de pesagens, {nome}! Aguarde! ⚖️\n\nDeseja voltar ao menu de Gestão de Rebanho? (Responda 'sim' ou 'não')\n(Ou 'voltar' para o menu de Gestão de Rebanho, ou 'menu' para o principal)"
                         contexto["awaiting_post_completion_response"] = True
                     elif mensagem_recebida == "5":
+                        contexto["gestao_rebanho_sub_fluxo"] = 5
                         if contexto["registros_animais"]:
                             resposta = "🐄 **Seus Animais Cadastrados:** 🐄\n"
                             for i, animal in enumerate(contexto["registros_animais"]):
@@ -3269,8 +3272,6 @@ Data de Saída: {dados_saida_estoque_registro.get("data_saida", "N/A")}
 
     except Exception as e:
         print(f"DEBUG_WEBHOOK_ERROR: Erro inesperado no webhook: {e}")
-        # *** NOVO *** - Log detalhado do erro
-        print(traceback.format_exc())
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 
