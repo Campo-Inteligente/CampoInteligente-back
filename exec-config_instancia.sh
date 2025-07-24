@@ -1,66 +1,51 @@
 #!/bin/bash
 
-# ==============================================================================
-# Script para configurar a instância da Evolution API após um reinício.
-# Este script define o webhook, os eventos e os comportamentos desejados.
-# ==============================================================================
+# Script para configurar a instância 'campointeligente1' da Evolution API
 
-# --- VARIÁVEIS DE CONFIGURAÇÃO (Altere se necessário) ---
-INSTANCE_NAME="campointeligente1"
-API_KEY="juan1403" # A sua chave de API
-WEBHOOK_URL="http://45.236.199.2:5000/webhook"
-API_URL="http://localhost:21085"
+echo "⚙️  A configurar a instância: campointeligente1..."
+echo ""
 
-# --- JSON de Configuração ---
-# Aqui definimos todas as configurações que queremos aplicar.
-# Baseado na sua interface gráfica e necessidades.
-CONFIG_JSON=$(cat <<EOF
-{
-  "webhook": "${WEBHOOK_URL}",
-  "settings": {
-    "reject_call": true,
-    "groups_ignore": true,
+# --- Passo 1: Aplicando configurações de COMPORTAMENTO ---
+# Usando o endpoint correto 'settings/set' que encontramos na documentação.
+echo "-> A aplicar configurações de Comportamento..."
+curl -X POST http://localhost:21085/settings/set/campointeligente1 \
+-H "apikey: juan1403" \
+-H "Content-Type: application/json" \
+--data '{
     "always_online": true,
     "read_messages": true,
     "read_status": true,
-    "sync_full_history": true
-  },
-  "events": [
-    "APPLICATION_STARTUP",
-    "QRCODE_UPDATED",
-    "MESSAGES_SET",
-    "MESSAGES_UPSERT",
-    "MESSAGES_UPDATE",
-    "SEND_MESSAGE",
-    "CONTACTS_SET",
-    "CONTACTS_UPSERT",
-    "CONTACTS_UPDATE",
-    "CHATS_SET",
-    "CHATS_DELETE",
-    "CHATS_UPDATE",
-    "GROUPS_UPSERT",
-    "GROUP_UPDATE",
-    "GROUP_PARTICIPANTS_UPDATE",
-    "CALL"
-  ]
-}
-EOF
-)
+    "groups_ignore": false,
+    "reject_call": false,
+    "sync_full_history": false
+}'
 
-# --- Execução do Comando ---
-echo "⚙️  A configurar a instância: ${INSTANCE_NAME}..."
+echo ""
+echo ""
 
-curl -X POST "${API_URL}/instance/update/${INSTANCE_NAME}" \
--H "apikey: ${API_KEY}" \
+# --- Passo 2: Aplicando configurações de WEBHOOK ---
+# Usando o endpoint para configurar o webhook.
+# NOTA: Se este passo falhar, o endpoint '/webhook/set/' pode estar incorreto.
+# Verifique o endpoint correto na documentação da API em http://localhost:21085/docs
+echo "-> A aplicar configurações de Webhook..."
+curl -X POST http://localhost:21085/webhook/set/campointeligente1 \
+-H "apikey: juan1403" \
 -H "Content-Type: application/json" \
--d "${CONFIG_JSON}"
+--data '{
+    "enabled": true,
+    "url": "http://45.236.189.2:5000/webhook",
+    "webhook_by_events": true,
+    "events": [
+        "APPLICATION_STARTUP", "QRCODE_UPDATED", "MESSAGES_SET", "MESSAGES_UPSERT",
+        "MESSAGES_UPDATE", "MESSAGES_DELETE", "SEND_MESSAGE", "CONTACTS_UPSERT",
+        "CONTACTS_SET", "PRESENCE_UPDATE", "CHATS_SET", "CHATS_UPSERT", "CHATS_UPDATE",
+        "CHATS_DELETE", "GROUPS_UPSERT", "GROUP_UPDATE", "GROUP_PARTICIPANTS_UPDATE",
+        "CONNECTION_UPDATE", "CALL"
+    ]
+}'
 
-echo -e "\n✅ Configuração enviada. A reiniciar a instância para aplicar as alterações..."
-
-# --- Reiniciar a Instância para Garantir que as Alterações sejam Aplicadas ---
-curl -X POST "${API_URL}/instance/restart/${INSTANCE_NAME}" \
--H "apikey: ${API_KEY}" \
--H "Content-Length: 0"
-
-echo -e "\n✨ Instância ${INSTANCE_NAME} configurada e a reiniciar. Verifique o estado em breve."
+echo ""
+echo ""
+echo "✨ Script finalizado. As configurações foram enviadas para a instância campointeligente1."
+echo "As alterações geralmente são aplicadas instantaneamente, sem necessidade de reiniciar."
 
