@@ -35,7 +35,7 @@ sudo systemctl status chatbot.service --no-pager
 echo "📖 Acompanhando logs do serviço (CTRL+C para sair)..."
 #sudo journalctl -u chatbot.service -f
 
-# CONFIGURANDO INSTANCIAS #------------------------------------------------
+# INICIO CONFIGURANDO INSTANCIAS #------------------------------------------------
 
 # --- Passo 1: Aplicando configurações de COMPORTAMENTO ---
 # Usando o endpoint correto 'settings/set' que encontramos na documentação.
@@ -78,7 +78,7 @@ curl -X POST http://localhost:21085/webhook/set/campointeligente1 \
 echo "✅ Script finalizado. As configurações foram enviadas para a instância campointeligente1."
 echo "ℹ️ As alterações geralmente são aplicadas instantaneamente, sem necessidade de reiniciar."
 
-# CONFIGURANDO INSTANCIAS #------------------------------------------------
+# FIM CONFIGURANDO INSTANCIAS #------------------------------------------------
 
 echo ""
 echo "✅ Projeto atualizado e rodando localmente na porta 3000"
