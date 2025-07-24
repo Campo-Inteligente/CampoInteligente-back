@@ -32,7 +32,7 @@ echo "🩺 Verificando status do serviço chatbot.service..."
 sudo systemctl status chatbot.service --no-pager
 
 # Logs em tempo real
-echo "📖 Acompanhando logs do serviço (CTRL+C para sair)..."
+#echo "📖 Acompanhando logs do serviço (CTRL+C para sair)..."
 #sudo journalctl -u chatbot.service -f
 
 # INICIO CONFIGURANDO INSTANCIAS #------------------------------------------------
