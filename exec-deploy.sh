@@ -35,6 +35,50 @@ sudo systemctl status chatbot.service --no-pager
 echo "📖 Acompanhando logs do serviço (CTRL+C para sair)..."
 sudo journalctl -u chatbot.service -f
 
+# CONFIGURANDO INSTANCIAS #------------------------------------------------
+
+# --- Passo 1: Aplicando configurações de COMPORTAMENTO ---
+# Usando o endpoint correto 'settings/set' que encontramos na documentação.
+echo "Aplicando configurações de Comportamento..."
+curl -X POST http://localhost:21085/settings/set/campointeligente1 \
+-H "apikey: juan1403" \
+-H "Content-Type: application/json" \
+--data '{
+    "always_online": true,
+    "read_messages": true,
+    "read_status": true,
+    "groups_ignore": false,
+    "reject_call": false,
+    "sync_full_history": false
+}'
+
+echo ""
+
+# --- Passo 2: Aplicando configurações de WEBHOOK ---
+# Usando o endpoint para configurar o webhook.
+# NOTA: Se este passo falhar, o endpoint '/webhook/set/' pode estar incorreto.
+# Verifique o endpoint correto na documentação da API em http://localhost:21085/docs
+echo "Aplicando configurações de Webhook..."
+curl -X POST http://localhost:21085/webhook/set/campointeligente1 \
+-H "apikey: juan1403" \
+-H "Content-Type: application/json" \
+--data '{
+    "enabled": true,
+    "url": "http://45.236.189.2:5000/webhook",
+    "webhook_by_events": true,
+    "events": [
+        "APPLICATION_STARTUP", "QRCODE_UPDATED", "MESSAGES_SET", "MESSAGES_UPSERT",
+        "MESSAGES_UPDATE", "MESSAGES_DELETE", "SEND_MESSAGE", "CONTACTS_UPSERT",
+        "CONTACTS_SET", "PRESENCE_UPDATE", "CHATS_SET", "CHATS_UPSERT", "CHATS_UPDATE",
+        "CHATS_DELETE", "GROUPS_UPSERT", "GROUP_UPDATE", "GROUP_PARTICIPANTS_UPDATE",
+        "CONNECTION_UPDATE", "CALL"
+    ]
+}'
+
+echo "✅ Script finalizado. As configurações foram enviadas para a instância campointeligente1."
+echo "ℹ️ As alterações geralmente são aplicadas instantaneamente, sem necessidade de reiniciar."
+
+# CONFIGURANDO INSTANCIAS #------------------------------------------------
 
 echo ""
 echo "✅ Projeto atualizado e rodando localmente na porta 3000"
@@ -43,4 +87,4 @@ echo "✅http://campointeligente.ddns.com.br:21081/ <------- website"
 echo "✅http://campointeligente.ddns.com.br:21082/ <------- back"
 echo "✅http://campointeligente.ddns.com.br:21050/ <------- pgadmin"
 echo "✅http://campointeligente.ddns.com.br:21085/docs <--- API"
-echo "  https://www.campointeligente.agr.br/ <------------- Produção"
+echo "✅https://www.campointeligente.agr.br/ <------------- Produção"
