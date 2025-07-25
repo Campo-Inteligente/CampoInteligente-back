@@ -222,10 +222,16 @@ create index if not exists idx_interacoes_agricultor on
 -- TABELAS PADRÃO DO DJANGO PARA AUTENTICAÇÃO
 -- =============================================
 
+-- =====================================================
+-- TABELAS PADRÃO DO DJANGO PARA AUTENTICAÇÃO
+-- PADRÃO CORPORATIVO PERSONALIZADO: PREFIXO "tb_auth_"
+-- COMPATÍVEL COM ORM DO DJANGO SE USAR Meta.db_table
+-- =====================================================
+
 -- ================================
 -- TABELA DE TIPOS DE CONTEÚDO
 -- ================================
-create table if not exists tb_django_content_type (
+create table if not exists tb_auth_content_type (
    id        integer
       generated always as identity
    primary key,
@@ -248,7 +254,7 @@ create table if not exists tb_auth_permission (
    unique ( content_type_id,
             codename ),
    constraint fk_permission_content_type foreign key ( content_type_id )
-      references tb_django_content_type ( id )
+      references tb_auth_content_type ( id )
          on delete cascade
 );
 
@@ -339,18 +345,18 @@ create table if not exists tb_auth_user_permissions (
 );
 
 -- ================================
--- TABELA DE SESSÕES DJANGO
+-- TABELA DE SESSÕES (SESSIONS)
 -- ================================
-create table if not exists tb_django_session (
+create table if not exists tb_auth_session (
    session_key  varchar(40) primary key,
    session_data text not null,
    expire_date  timestamptz not null
 );
 
 -- ================================
--- TABELA DE LOG DE AÇÕES
+-- TABELA DE LOG DE AÇÕES (ADMIN)
 -- ================================
-create table if not exists tb_django_admin_log (
+create table if not exists tb_auth_admin_log (
    id              integer
       generated always as identity
    primary key,
@@ -362,7 +368,7 @@ create table if not exists tb_django_admin_log (
    content_type_id integer,
    user_id         integer not null,
    constraint fk_adminlog_content_type foreign key ( content_type_id )
-      references tb_django_content_type ( id )
+      references tb_auth_content_type ( id )
          on delete set null,
    constraint fk_adminlog_user foreign key ( user_id )
       references tb_auth_user ( id )
@@ -370,20 +376,24 @@ create table if not exists tb_django_admin_log (
 );
 
 -- ================================
--- ÍNDICES RECOMENDADOS DJANGO
+-- ÍNDICES RECOMENDADOS
 -- ================================
-create index if not exists idx_permission_codename on
+create index if not exists idx_tb_auth_permission_codename on
    tb_auth_permission (
       codename
    );
-create index if not exists idx_user_username on
+
+create index if not exists idx_tb_auth_user_username on
    tb_auth_user (
       username
    );
-create index if not exists idx_session_expire_date on
-   tb_django_session (
+
+create index if not exists idx_tb_auth_session_expire_date on
+   tb_auth_session (
       expire_date
    );
 
-
--- VERSÃO: 2025-07-24 - INCLUÍDA TABELAS PADRÃO DO DJANGO PARA AUTENTICAÇÃO - AUTOR: MARCOS MORAIS
+-- =====================================================
+-- AUTOR..: Marcos Morais
+-- NOTA...: Padronizado com prefixo "tb_a_
+-- VERSÃO.: 2025-07-24 - INCLUÍDA TABELAS PADRÃO DO DJANGO PARA AUTENTICAÇÃO - AUTOR: MARCOS MORAIS
