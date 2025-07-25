@@ -1,172 +1,389 @@
-
 -- =======================
 -- TABELA DE ORGANIZAÇÕES
 -- =======================
-CREATE TABLE IF NOT EXISTS tb_organizacoes (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL UNIQUE,
-    cnpj VARCHAR(18) UNIQUE,
-    data_criacao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+create table if not exists tb_organizacoes (
+   id           integer
+      generated always as identity
+   primary key,
+   nome         varchar(255) not null unique,
+   cnpj         varchar(18) unique,
+   data_criacao timestamptz default current_timestamp
 );
 
 -- =========================
 -- TABELA DE ADMINISTRADORES
 -- =========================
-CREATE TABLE IF NOT EXISTS tb_administradores (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    organizacao_id INTEGER NOT NULL,
-    nome VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    senha_hash VARCHAR(255) NOT NULL,
-    cargo VARCHAR(50),
-    CONSTRAINT fk_admin_org FOREIGN KEY (organizacao_id)
-        REFERENCES tb_organizacoes (id) ON DELETE CASCADE
+create table if not exists tb_administradores (
+   id             integer
+      generated always as identity
+   primary key,
+   organizacao_id integer not null,
+   nome           varchar(255) not null,
+   email          varchar(255) not null unique,
+   senha_hash     varchar(255) not null,
+   cargo          varchar(50),
+   constraint fk_admin_org foreign key ( organizacao_id )
+      references tb_organizacoes ( id )
+         on delete cascade
 );
 
 -- ========================
 -- TABELA DE USUÁRIOS (AGRICULTORES)
 -- ========================
-CREATE TABLE IF NOT EXISTS tb_usuarios (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    organizacao_id INTEGER NOT NULL,
-    nome VARCHAR(255) NOT NULL,
-    whatsapp_id VARCHAR(50) UNIQUE NOT NULL,
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8),
-    cidade VARCHAR(100),
-    estado VARCHAR(2),
-    data_cadastro TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    ultima_atividade TIMESTAMPTZ,
-    CONSTRAINT fk_usuario_org FOREIGN KEY (organizacao_id)
-        REFERENCES tb_organizacoes (id) ON DELETE CASCADE
+create table if not exists tb_usuarios (
+   id               integer
+      generated always as identity
+   primary key,
+   organizacao_id   integer not null,
+   nome             varchar(255) not null,
+   whatsapp_id      varchar(50) unique not null,
+   latitude         decimal(10,8),
+   longitude        decimal(11,8),
+   cidade           varchar(100),
+   estado           varchar(2),
+   data_cadastro    timestamptz default current_timestamp,
+   ultima_atividade timestamptz,
+   constraint fk_usuario_org foreign key ( organizacao_id )
+      references tb_organizacoes ( id )
+         on delete cascade
 );
 
 -- ================
 -- TABELA DE SAFRAS
 -- ================
-CREATE TABLE IF NOT EXISTS tb_safras (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    agricultor_id INTEGER NOT NULL,
-    cultura VARCHAR(255) NOT NULL,
-    ano_safra VARCHAR(10),
-    area_plantada_ha DECIMAL(10, 2),
-    produtividade DECIMAL(10, 2),
-    unidade_medida VARCHAR(20),
-    CONSTRAINT fk_safra_agricultor FOREIGN KEY (agricultor_id)
-        REFERENCES tb_usuarios (id) ON DELETE CASCADE
+create table if not exists tb_safras (
+   id               integer
+      generated always as identity
+   primary key,
+   agricultor_id    integer not null,
+   cultura          varchar(255) not null,
+   ano_safra        varchar(10),
+   area_plantada_ha decimal(10,2),
+   produtividade    decimal(10,2),
+   unidade_medida   varchar(20),
+   constraint fk_safra_agricultor foreign key ( agricultor_id )
+      references tb_usuarios ( id )
+         on delete cascade
 );
 
 -- ============================
 -- TABELA DE PRODUTOS EM ESTOQUE
 -- ============================
-CREATE TABLE IF NOT EXISTS tb_produtos_estoque (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    agricultor_id INTEGER NOT NULL,
-    nome VARCHAR(255) NOT NULL,
-    tipo_produto VARCHAR(50) NOT NULL,
-    unidade_medida VARCHAR(20) NOT NULL,
-    saldo_atual DECIMAL(10, 2) NOT NULL,
-    CONSTRAINT fk_produto_agricultor FOREIGN KEY (agricultor_id)
-        REFERENCES tb_usuarios (id) ON DELETE CASCADE
+create table if not exists tb_produtos_estoque (
+   id             integer
+      generated always as identity
+   primary key,
+   agricultor_id  integer not null,
+   nome           varchar(255) not null,
+   tipo_produto   varchar(50) not null,
+   unidade_medida varchar(20) not null,
+   saldo_atual    decimal(10,2) not null,
+   constraint fk_produto_agricultor foreign key ( agricultor_id )
+      references tb_usuarios ( id )
+         on delete cascade
 );
 
 -- =====================================
 -- TABELA DE MOVIMENTAÇÕES DE ESTOQUE
 -- =====================================
-CREATE TABLE IF NOT EXISTS tb_movimentacoes_estoque (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    produto_id INTEGER NOT NULL,
-    tipo_movimentacao VARCHAR(10) NOT NULL CHECK (tipo_movimentacao IN ('entrada', 'saida')),
-    quantidade DECIMAL(10, 2) NOT NULL,
-    data_movimentacao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    observacao VARCHAR(1000),
-    CONSTRAINT fk_movimentacao_produto FOREIGN KEY (produto_id)
-        REFERENCES tb_produtos_estoque (id) ON DELETE CASCADE
+create table if not exists tb_movimentacoes_estoque (
+   id                integer
+      generated always as identity
+   primary key,
+   produto_id        integer not null,
+   tipo_movimentacao varchar(10) not null check ( tipo_movimentacao in ( 'entrada',
+                                                                         'saida' ) ),
+   quantidade        decimal(10,2) not null,
+   data_movimentacao timestamptz default current_timestamp,
+   observacao        varchar(1000),
+   constraint fk_movimentacao_produto foreign key ( produto_id )
+      references tb_produtos_estoque ( id )
+         on delete cascade
 );
 
 -- ========================
 -- TABELA DE INTERAÇÕES
 -- ========================
-CREATE TABLE IF NOT EXISTS tb_interacoes (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    agricultor_id INTEGER NOT NULL,
-    mensagem_usuario VARCHAR(1000),
-    resposta_chatbot VARCHAR(1000),
-    entidades JSONB,
-    timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_interacao_agricultor FOREIGN KEY (agricultor_id)
-        REFERENCES tb_usuarios (id) ON DELETE CASCADE
+create table if not exists tb_interacoes (
+   id               integer
+      generated always as identity
+   primary key,
+   agricultor_id    integer not null,
+   mensagem_usuario varchar(1000),
+   resposta_chatbot varchar(1000),
+   entidades        jsonb,
+   timestamp        timestamptz default current_timestamp,
+   constraint fk_interacao_agricultor foreign key ( agricultor_id )
+      references tb_usuarios ( id )
+         on delete cascade
 );
 
 -- =============================
 -- TABELA DICIONÁRIO DE INTENÇÕES
 -- =============================
-CREATE TABLE IF NOT EXISTS tb_intencoes (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nome_intencao VARCHAR(100) NOT NULL UNIQUE,
-    descricao VARCHAR(500)
+create table if not exists tb_intencoes (
+   id            integer
+      generated always as identity
+   primary key,
+   nome_intencao varchar(100) not null unique,
+   descricao     varchar(500)
 );
 
 -- =========================================
 -- TABELA DE LIGAÇÃO: INTERAÇÕES X INTENÇÕES
 -- =========================================
-CREATE TABLE IF NOT EXISTS tb_interacoes_intencoes (
-    interacao_id INTEGER NOT NULL,
-    intencao_id INTEGER NOT NULL,
-    PRIMARY KEY (interacao_id, intencao_id),
-    CONSTRAINT fk_interacao FOREIGN KEY (interacao_id)
-        REFERENCES tb_interacoes (id) ON DELETE CASCADE,
-    CONSTRAINT fk_intencao FOREIGN KEY (intencao_id)
-        REFERENCES tb_intencoes (id) ON DELETE CASCADE
+create table if not exists tb_interacoes_intencoes (
+   interacao_id integer not null,
+   intencao_id  integer not null,
+   primary key ( interacao_id,
+                 intencao_id ),
+   constraint fk_interacao foreign key ( interacao_id )
+      references tb_interacoes ( id )
+         on delete cascade,
+   constraint fk_intencao foreign key ( intencao_id )
+      references tb_intencoes ( id )
+         on delete cascade
 );
 
 -- ======================================
 -- TABELA DE CONTEXTO TEMPORÁRIO DE CONVERSAS
 -- ======================================
-CREATE TABLE IF NOT EXISTS tb_conversation_contexts (
-    whatsapp_id VARCHAR(50) PRIMARY KEY,
-    context JSONB,
-    last_updated TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+create table if not exists tb_conversation_contexts (
+   whatsapp_id  varchar(50) primary key,
+   context      jsonb,
+   last_updated timestamptz default current_timestamp
 );
 
 -- =============================
 -- TABELA DE CONTROLE DE VERSÃO DO SCHEMA
 -- =============================
-CREATE TABLE IF NOT EXISTS tb_versoes_schema (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    data_hora TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NOT NULL,
-    tipo_operacao VARCHAR(20) NOT NULL CHECK (tipo_operacao IN ('CREATE', 'ALTER', 'DROP', 'MIGRATION', 'HOTFIX')),
-    tabelas_afetadas TEXT NOT NULL,
-    descricao TEXT
+create table if not exists tb_versoes_schema (
+   id               integer
+      generated always as identity
+   primary key,
+   data_hora        timestamptz default current_timestamp,
+   usuario          varchar(100) not null,
+   tipo_operacao    varchar(20) not null check ( tipo_operacao in ( 'CREATE',
+                                                                 'ALTER',
+                                                                 'DROP',
+                                                                 'MIGRATION',
+                                                                 'HOTFIX' ) ),
+   tabelas_afetadas text not null,
+   descricao        text
 );
 
 -- ================================
 -- VIEW PARA HISTÓRICO DE VERSÕES
 -- ================================
-CREATE OR REPLACE VIEW vw_historico_versoes_schema AS
-SELECT
-    id,
-    to_char(data_hora, 'YYYY-MM-DD HH24:MI:SS') AS data_hora_fmt,
-    usuario,
-    tipo_operacao,
-    tabelas_afetadas,
-    descricao
-FROM
-    tb_versoes_schema
-ORDER BY
-    data_hora DESC;
+create or replace view vw_historico_versoes_schema as
+   select id,
+          to_char(
+             data_hora,
+             'YYYY-MM-DD HH24:MI:SS'
+          ) as data_hora_fmt,
+          usuario,
+          tipo_operacao,
+          tabelas_afetadas,
+          descricao
+     from tb_versoes_schema
+    order by data_hora desc;
 
 -- ===================
 -- ÍNDICES RECOMENDADOS
 -- ===================
-CREATE INDEX IF NOT EXISTS idx_usuarios_organizacao ON tb_usuarios (organizacao_id);
-CREATE INDEX IF NOT EXISTS idx_safras_agricultor ON tb_safras (agricultor_id);
-CREATE INDEX IF NOT EXISTS idx_produtos_agricultor ON tb_produtos_estoque (agricultor_id);
-CREATE INDEX IF NOT EXISTS idx_movimentacoes_produto_data ON tb_movimentacoes_estoque (produto_id, data_movimentacao DESC);
-CREATE INDEX IF NOT EXISTS idx_interacoes_agricultor ON tb_interacoes (agricultor_id);
+create index if not exists idx_usuarios_organizacao on
+   tb_usuarios (
+      organizacao_id
+   );
+create index if not exists idx_safras_agricultor on
+   tb_safras (
+      agricultor_id
+   );
+create index if not exists idx_produtos_agricultor on
+   tb_produtos_estoque (
+      agricultor_id
+   );
+create index if not exists idx_movimentacoes_produto_data on
+   tb_movimentacoes_estoque (
+      produto_id,
+      data_movimentacao
+   desc );
+create index if not exists idx_interacoes_agricultor on
+   tb_interacoes (
+      agricultor_id
+   );
 
 -- VERSÃO: 2025-07-16 09:00 - MARCOSMORAIS
 -- VERSÃO: 2025-07-16 10:30 - ABIMAELUANDERSON
 -- VERSÃO: 2025-07-16 11:30 - MARCOSMORAIS
 -- VERSÃO: 2025-07-16 18:47 - MARCOSMORAIS
+
+-- =============================================
+-- TABELAS PADRÃO DO DJANGO PARA AUTENTICAÇÃO
+-- =============================================
+
+-- ================================
+-- TABELA DE TIPOS DE CONTEÚDO
+-- ================================
+create table if not exists tb_django_content_type (
+   id        integer
+      generated always as identity
+   primary key,
+   app_label varchar(100) not null,
+   model     varchar(100) not null,
+   unique ( app_label,
+            model )
+);
+
+-- ================================
+-- TABELA DE PERMISSÕES
+-- ================================
+create table if not exists tb_auth_permission (
+   id              integer
+      generated always as identity
+   primary key,
+   name            varchar(255) not null,
+   content_type_id integer not null,
+   codename        varchar(100) not null,
+   unique ( content_type_id,
+            codename ),
+   constraint fk_permission_content_type foreign key ( content_type_id )
+      references tb_django_content_type ( id )
+         on delete cascade
+);
+
+-- ================================
+-- TABELA DE GRUPOS
+-- ================================
+create table if not exists tb_auth_group (
+   id   integer
+      generated always as identity
+   primary key,
+   name varchar(150) not null unique
+);
+
+-- =======================================
+-- TABELA DE PERMISSÕES POR GRUPO
+-- =======================================
+create table if not exists tb_auth_group_permissions (
+   id            integer
+      generated always as identity
+   primary key,
+   group_id      integer not null,
+   permission_id integer not null,
+   unique ( group_id,
+            permission_id ),
+   constraint fk_group_perm_group foreign key ( group_id )
+      references tb_auth_group ( id )
+         on delete cascade,
+   constraint fk_group_perm_permission foreign key ( permission_id )
+      references tb_auth_permission ( id )
+         on delete cascade
+);
+
+-- ================================
+-- TABELA DE USUÁRIOS
+-- ================================
+create table if not exists tb_auth_user (
+   id           integer
+      generated always as identity
+   primary key,
+   password     varchar(128) not null,
+   last_login   timestamptz,
+   is_superuser boolean not null,
+   username     varchar(150) not null unique,
+   first_name   varchar(150) not null,
+   last_name    varchar(150) not null,
+   email        varchar(254) not null,
+   is_staff     boolean not null,
+   is_active    boolean not null,
+   date_joined  timestamptz not null
+);
+
+-- ======================================
+-- TABELA DE GRUPOS ATRIBUÍDOS A USUÁRIOS
+-- ======================================
+create table if not exists tb_auth_user_groups (
+   id       integer
+      generated always as identity
+   primary key,
+   user_id  integer not null,
+   group_id integer not null,
+   unique ( user_id,
+            group_id ),
+   constraint fk_user_group_user foreign key ( user_id )
+      references tb_auth_user ( id )
+         on delete cascade,
+   constraint fk_user_group_group foreign key ( group_id )
+      references tb_auth_group ( id )
+         on delete cascade
+);
+
+-- ==============================================
+-- TABELA DE PERMISSÕES ATRIBUÍDAS AOS USUÁRIOS
+-- ==============================================
+create table if not exists tb_auth_user_permissions (
+   id            integer
+      generated always as identity
+   primary key,
+   user_id       integer not null,
+   permission_id integer not null,
+   unique ( user_id,
+            permission_id ),
+   constraint fk_user_perm_user foreign key ( user_id )
+      references tb_auth_user ( id )
+         on delete cascade,
+   constraint fk_user_perm_permission foreign key ( permission_id )
+      references tb_auth_permission ( id )
+         on delete cascade
+);
+
+-- ================================
+-- TABELA DE SESSÕES DJANGO
+-- ================================
+create table if not exists tb_django_session (
+   session_key  varchar(40) primary key,
+   session_data text not null,
+   expire_date  timestamptz not null
+);
+
+-- ================================
+-- TABELA DE LOG DE AÇÕES
+-- ================================
+create table if not exists tb_django_admin_log (
+   id              integer
+      generated always as identity
+   primary key,
+   action_time     timestamptz not null,
+   object_id       text,
+   object_repr     varchar(200) not null,
+   action_flag     integer not null,
+   change_message  text not null,
+   content_type_id integer,
+   user_id         integer not null,
+   constraint fk_adminlog_content_type foreign key ( content_type_id )
+      references tb_django_content_type ( id )
+         on delete set null,
+   constraint fk_adminlog_user foreign key ( user_id )
+      references tb_auth_user ( id )
+         on delete cascade
+);
+
+-- ================================
+-- ÍNDICES RECOMENDADOS DJANGO
+-- ================================
+create index if not exists idx_permission_codename on
+   tb_auth_permission (
+      codename
+   );
+create index if not exists idx_user_username on
+   tb_auth_user (
+      username
+   );
+create index if not exists idx_session_expire_date on
+   tb_django_session (
+      expire_date
+   );
+
+
+-- VERSÃO: 2025-07-24 - INCLUÍDA TABELAS PADRÃO DO DJANGO PARA AUTENTICAÇÃO - AUTOR: MARCOS MORAIS
