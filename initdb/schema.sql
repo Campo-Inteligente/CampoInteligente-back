@@ -392,7 +392,19 @@ create index if not exists idx_tb_auth_session_expire_date on
    tb_auth_session (
       expire_date
    );
-
+--------------------------------------------------------
+-- ✅ Tabelas Criadas no Script tb_auth_
+-- Nº Nome da Tabela	               Função
+-- 1	tb_auth_content_type	         Armazena tipos de modelos (Django ContentType).
+-- 2	tb_auth_permission	         Define permissões (ligadas a um tipo de conteúdo).
+-- 3	tb_auth_group	               Grupos de usuários.
+-- 4	tb_auth_group_permissions	   Liga grupos a permissões.
+-- 5	tb_auth_user	               Usuários do sistema (equivalente ao modelo User padrão).
+-- 6	tb_auth_user_groups	         Liga usuários a grupos.
+-- 7	tb_auth_user_permissions	   Liga usuários a permissões individuais.
+-- 8	tb_auth_session	            Armazena sessões de usuários autenticados.
+-- 9	tb_auth_admin_log	            Registro de ações administrativas (log do admin).
+-- 10	tb_auth_content_type	         (já listado) usado em permissões e logs.
 -- =====================================================
 -- AUTOR..: Marcos Morais
 -- NOTA...: Padronizado com prefixo "tb_a_
