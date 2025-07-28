@@ -10,6 +10,7 @@ venv/
 *.env # Ignora o arquivo .env com suas chaves
 .pytest_cache/
 .mypy_cache/
+.env
 
 # Django
 db.sqlite3 # Banco de dados SQLite local

@@ -12,7 +12,7 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['d60fa466aac5.ngrok-free.app']
+ALLOWED_HOSTS = ['d60fa466aac5.ngrok-free.app', '127.0.0.1', 'localhost']
 APPEND_SLASH = False
 
 # --- Aplicações Instaladas ---
