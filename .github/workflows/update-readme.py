@@ -192,6 +192,11 @@ def gerar_readme(versao, data_hora):
         readme.write("- **psycopg2-binary** (conector PostgreSQL)\n\n")
         readme.write("- **GitHub**: Controle de versão e colaboração no código.\n\n")
 
+        readme.write("## 🌱 Prepare seu ambiente para reproduzir este repositório\n\n")
+        readme.write("<p align='center'>\n")
+        readme.write("  📘 <a href='documentos/TUTORIAL.md'><strong>Tutorial para Rodar o Repositório</strong></a>\n")
+        readme.write("</p>\n\n")
+        
         readme.write("## 📂 Documentos\n\n")
         readme.write("```\n")
         readme.write(gerar_arvore(os.path.join(BASE_DIR, "documentos"), OCULTA_DIR))

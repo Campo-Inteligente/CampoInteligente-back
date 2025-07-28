@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 552 (AUTO-INCREMENTO)
+Versão...............: 553 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 28/07/2025 17:31:21
+Data de Atualização..: 28/07/2025 17:34:34
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -76,12 +76,19 @@ Descrição das tecnologias:
 
 - **GitHub**: Controle de versão e colaboração no código.
 
+## 🌱 Prepare seu ambiente para reproduzir este repositório
+
+<p align='center'>
+  📘 <a href='documentos/TUTORIAL.md'><strong>Tutorial para Rodar o Repositório</strong></a>
+</p>
+
 ## 📂 Documentos
 
 ```
 📂 documentos
 ├── 📄 LICENSE
 ├── 📄 README.md
+├── 📄 TUTORIAL.md
 ├── 📄 diagram_er.pdf
 ├── 📄 identidade_visual.pdf
 ├── 📄 requirements.txt
@@ -93,7 +100,6 @@ Descrição das tecnologias:
 📂 startup-campo-inteligente-back
 ├── 📄 LICENSE
 ├── 📄 README.md
-├── 📄 TUTORIAL.md
 ├── 📂 campointeligente
 │   └── 📂 __pycache__
 │       ├── 📄 __init__.cpython-312.pyc
@@ -122,6 +128,7 @@ Descrição das tecnologias:
 ├── 📂 documentos
 │   ├── 📄 LICENSE
 │   ├── 📄 README.md
+│   ├── 📄 TUTORIAL.md
 │   ├── 📄 diagram_er.pdf
 │   ├── 📄 identidade_visual.pdf
 │   ├── 📄 requirements.txt
