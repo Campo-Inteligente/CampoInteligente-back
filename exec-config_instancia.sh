@@ -2,12 +2,15 @@
 
 # Script para configurar a instância 'campointeligente1' da Evolution API
 
-echo "⚙️  A configurar a instância: campointeligente1..."
-echo ""
+echo "CONFIGURAÇÃO DE INSTÂNCIA: campointeligente1..."
+echo "---------------------------------------------"
 
 # --- Passo 1: Aplicando configurações de COMPORTAMENTO ---
 # Usando o endpoint correto 'settings/set' que encontramos na documentação.
-echo "-> A aplicar configurações de Comportamento..."
+echo ""
+echo "----------------------------------------------------------"
+echo "✅ APLICANDO CONFIGURAÇÕES DE COMPORRTAMENTO..."
+
 curl -X POST http://localhost:21085/settings/set/campointeligente1 \
 -H "apikey: juan1403" \
 -H "Content-Type: application/json" \
@@ -20,14 +23,14 @@ curl -X POST http://localhost:21085/settings/set/campointeligente1 \
     "sync_full_history": false
 }'
 
-echo ""
-echo ""
-
 # --- Passo 2: Aplicando configurações de WEBHOOK ---
 # Usando o endpoint para configurar o webhook.
 # NOTA: Se este passo falhar, o endpoint '/webhook/set/' pode estar incorreto.
 # Verifique o endpoint correto na documentação da API em http://localhost:21085/docs
-echo "-> A aplicar configurações de Webhook..."
+echo ""
+echo "-------------------------------------------------------"
+echo "✅ APLICANDO CONFIGURAÇÕES DE WEBHOOK..."
+echo "🤖 Um webhook é uma forma de comunicação entre sistemas que permite o envio automático de informações quando um evento específico acontece. Em vez de um sistema ficar perguntando constantemente se algo mudou (como acontece com APIs tradicionais), o webhook envia uma notificação instantânea assim que o evento ocorre."
 curl -X POST http://localhost:21085/webhook/set/campointeligente1 \
 -H "apikey: juan1403" \
 -H "Content-Type: application/json" \
@@ -43,9 +46,9 @@ curl -X POST http://localhost:21085/webhook/set/campointeligente1 \
         "CONNECTION_UPDATE", "CALL"
     ]
 }'
-
 echo ""
-echo ""
-echo "✨ Script finalizado. As configurações foram enviadas para a instância campointeligente1."
+echo "----------------------------------------------------"
+echo "✅ PROCESSO CONCLUÍDO"
+echo "As configurações foram enviadas para a instância campointeligente1."
 echo "As alterações geralmente são aplicadas instantaneamente, sem necessidade de reiniciar."
 
