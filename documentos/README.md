@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 550 (AUTO-INCREMENTO)
+Versão...............: 551 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 28/07/2025 17:27:08
+Data de Atualização..: 28/07/2025 17:29:42
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -43,9 +43,28 @@ Responsável..........: Marcos Morais
 
 Descrição das tecnologias:
 
-- **Next.js**: Framework React para criação de aplicações web escaláveis e de alto desempenho.
-- **React**: Biblioteca JavaScript para construção de interfaces de usuário interativas.
-- **Tailwind CSS**: Framework CSS para estilização rápida e personalizada.
+- **Python 3.8+**
+
+- **Django** + **Django REST Framework**
+
+- **Django Channels** + **ASGI** (suporte a WebSockets)
+
+- **PostgreSQL**
+
+- **Uvicorn** + **Daphne** (servidores assíncronos)
+
+- **httpx** (requisições HTTP assíncronas)
+
+- **python-dotenv** (variáveis de ambiente)
+
+- **openai** (integração com GPT)
+
+- **drf-yasg** (documentação Swagger/OpenAPI)
+
+- **django-cors-headers** (suporte a CORS)
+
+- **psycopg2-binary** (conector PostgreSQL)
+
 - **GitHub**: Controle de versão e colaboração no código.
 
 ## 📂 Documentos
