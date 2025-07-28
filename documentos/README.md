@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 551 (AUTO-INCREMENTO)
+Versão...............: 552 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 28/07/2025 17:29:42
+Data de Atualização..: 28/07/2025 17:31:21
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -34,11 +34,20 @@ Responsável..........: Marcos Morais
 ## 🧩 Tecnologias Utilizadas
 
 <p align='left'>
-  <img src='https://img.shields.io/badge/Figma-F24E1E?logo=figma&logoColor=white' alt='Figma' />
-  <img src='https://img.shields.io/badge/Next.js-13.x-black?logo=next.js&logoColor=white' alt='Next.js' />
-  <img src='https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=white' alt='React' />
-  <img src='https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?logo=tailwindcss&logoColor=white' alt='Tailwind CSS' />
-  <img src='https://img.shields.io/badge/GitHub-100000?logo=github&logoColor=white&style=flat' alt='GitHub' />
+  <img src='https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white' alt='Python' />
+  <img src='https://img.shields.io/badge/Django-3.x-092E20?logo=django&logoColor=white' alt='Django' />
+  <img src='https://img.shields.io/badge/DRF-REST_Framework-red?logo=django&logoColor=white' alt='Django REST Framework' />
+  <img src='https://img.shields.io/badge/Django_Channels-ASGI-44B78B?logo=django&logoColor=white' alt='Django Channels' />
+  <img src='https://img.shields.io/badge/PostgreSQL-13+-4169E1?logo=postgresql&logoColor=white' alt='PostgreSQL' />
+  <img src='https://img.shields.io/badge/Uvicorn-ASGI-121212?logo=fastapi&logoColor=white' alt='Uvicorn' />
+  <img src='https://img.shields.io/badge/Daphne-ASGI-11B5AF?logoColor=white' alt='Daphne' />
+  <img src='https://img.shields.io/badge/httpx-Async-0e83cd?logo=python&logoColor=white' alt='httpx' />
+  <img src='https://img.shields.io/badge/python--dotenv-.env-ffc107?logo=python&logoColor=black' alt='python-dotenv' />
+  <img src='https://img.shields.io/badge/OpenAI-GPT-412991?logo=openai&logoColor=white' alt='OpenAI' />
+  <img src='https://img.shields.io/badge/drf--yasg-Swagger_Integration-6DB33F?logo=swagger&logoColor=white' alt='drf-yasg' />
+  <img src='https://img.shields.io/badge/CORS-django--cors--headers-orange?logo=django&logoColor=white' alt='django-cors-headers' />
+  <img src='https://img.shields.io/badge/psycopg2--binary-PostgreSQL-blue?logo=postgresql&logoColor=white' alt='psycopg2-binary' />
+  <img src='https://img.shields.io/badge/GitHub-Repo-181717?logo=github&logoColor=white' alt='GitHub' />
 </p>
 
 Descrição das tecnologias:
