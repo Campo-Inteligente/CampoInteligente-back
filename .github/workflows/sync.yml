@@ -1,0 +1,44 @@
+name: Executar Sync to CampoInteligente-Back
+
+on:
+  push:
+    branches:
+      - main  # Executa automaticamente apenas com push na branch main
+  workflow_dispatch:        # Permite execução manual via GitHub Actions
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Configura identidade do Git
+      - name: Configurar Git
+        run: |
+          git config --global user.name "Marcos Morais"
+          git config --global user.email "marcosmoraisjr@users.noreply.github.com"
+
+      # Ativa o ssh-agent para autenticação com chave privada (armazenada nos segredos)
+      - name: Configurar ssh-agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Clona o repositório de origem e compara com o de destino antes de forçar o push
+      - name: Clonar repositório de origem e sincronizar se necessário
+        run: |
+          git clone git@github.com:restic36/startup-campo-inteligente-back.git source
+          cd source
+
+          # Adiciona o repositório de destino
+          git remote add destino git@github.com:marcosmoraisjr/CampoInteligente-back.git
+
+          # Busca o conteúdo atual da main no destino
+          git fetch destino main
+
+          # Verifica se há diferença entre o que está no repositório de origem e o destino
+          if ! git diff --quiet HEAD destino/main; then
+            echo "🚀 Diferenças detectadas. Iniciando sincronização..."
+            git push --force destino main
+          else
+            echo "✅ Nenhuma diferença detectada. Sincronização não necessária."
+          fi
