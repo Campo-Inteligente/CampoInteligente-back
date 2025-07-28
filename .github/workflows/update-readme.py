@@ -193,7 +193,7 @@ def gerar_readme(versao, data_hora):
         readme.write("- **GitHub**: Controle de versão e colaboração no código.\n\n")
 
         readme.write("## 🌱 Prepare seu ambiente para reproduzir este repositório\n\n")
-        readme.write("<p align='center'>\n")
+        readme.write("<p align='left'>\n")
         readme.write("  📘 <a href='documentos/TUTORIAL.md'><strong>Tutorial para Rodar o Repositório</strong></a>\n")
         readme.write("</p>\n\n")
         
