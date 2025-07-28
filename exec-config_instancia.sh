@@ -2,8 +2,8 @@
 
 # Script para configurar a instância 'campointeligente1' da Evolution API
 
-echo "CONFIGURAÇÃO DE INSTÂNCIA: campointeligente1..."
-echo "---------------------------------------------"
+clear
+echo "CONFIGURAÇÃO DE INSTÂNCIA"
 
 # --- Passo 1: Aplicando configurações de COMPORTAMENTO ---
 # Usando o endpoint correto 'settings/set' que encontramos na documentação.
