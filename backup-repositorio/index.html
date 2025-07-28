@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Bem-vindo ao Servidor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="repo-path" content="marcosmoraisjr/CampoInteligente-back">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f8ff;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .welcome-box {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .git-info {
+      font-size: 0.9em;
+      margin-top: 1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="welcome-box">
+    <h1 class="mb-4"><b>🍃 CampoInteligente</b><br><br>👋 Bem-vindo ao Servidor back-end</h1>
+    <p>Deploy teste realizado com sucesso. Pronto para hospedar o back-end.</p>
+    <p class="git-info" id="commit-info">Carregando informações do Git...</p>
+    <p><a href="https://campointeligente.agr.br/">© 2025 Campo Inteligente. Todos os direitos reservados.</a></p>
+  </div>
+
+  <script>
+    const repoPath = document.querySelector('meta[name="repo-path"]').content;
+    fetch(`https://api.github.com/repos/${repoPath}/commits/main`)
+      .then(response => response.json())
+      .then(data => {
+        const date = new Date(data.commit.committer.date);
+        const hash = data.sha.substring(0, 7);
+        document.getElementById("commit-info").innerText =
+          `Último commit: ${hash} em ${date.toLocaleDateString('pt-BR')} às ${date.toLocaleTimeString('pt-BR')}`;
+      })
+      .catch(() => {
+        document.getElementById("commit-info").innerText = "Não foi possível carregar o status do GitHub.";
+      });
+  </script>
+</body>
+</html>

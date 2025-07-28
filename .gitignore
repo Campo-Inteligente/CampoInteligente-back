@@ -1,1 +1,25 @@
+# .gitignore
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
 venv/
+*.env # Ignora o arquivo .env com suas chaves
+.pytest_cache/
+.mypy_cache/
+
+# Django
+db.sqlite3 # Banco de dados SQLite local
+/media/ # Diretório para uploads de mídia (se usar)
+/static_collected/ # Diretório para arquivos estáticos coletados (se usar collectstatic)
+
+# IDEs e editores de texto
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store # macOS
+Thumbs.db # Windows

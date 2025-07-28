@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  # 🐘 PostgreSQL
+  postgres-campoInteligente:
+    container_name: postgres-campoInteligente
+    image: postgres:15
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER_DOCKER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD_DOCKER}
+      - POSTGRES_DB=${DB_NAME_DOCKER}
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    command: -c 'listen_addresses=*'
+
+  # 🧠 API Evolution
+  evolution-api:
+    container_name: evolution-api
+    image: atendai/evolution-api:v1.8.2
+    restart: always
+    ports:
+      - "21085:8080"
+    env_file:
+      - .env
+    volumes:
+      - evolution_instances:/evolution/instances
+
+  # 🐥 PGAdmin
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_USER}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASS}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+# 🗂️ Volumes nomeados para persistência
+volumes:
+  postgres_data:
+  evolution_instances:
+  pgadmin_data:
