@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 549 (AUTO-INCREMENTO)
+Versão...............: 550 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 28/07/2025 17:25:09
+Data de Atualização..: 28/07/2025 17:27:08
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -24,9 +24,9 @@ Responsável..........: Marcos Morais
 <tr><td>JOÃO VICTOR OLIVEIRA SANTOS       </td><td>Ciência de Dados          </td><td><a href='https://www.linkedin.com/in/joão-victor-oliveira-santos-3b8aa1203/'>LinkedIn</a> | <a href='https://instagram.com/jv.osantos'>Instagram</a> | <a href='mailto:joao.osantos27@gmail.com'>Email</a></td></tr>
 <tr><td>JUAN PABLO SÃO PEDRO SAPUCAIA     </td><td>Back-End                  </td><td><a href='https://www.linkedin.com/in/juan-pablo-09a65b2a6/'>LinkedIn</a> | <a href='https://instagram.com/juan_pablosps'>Instagram</a> | <a href='mailto:juan.psapucaia7@gmail.com'>Email</a></td></tr>
 <tr><td>ABIMAEL UANDERSON S. CRISTÓVÃO    </td><td>Back-End                  </td><td><a href='https://www.linkedin.com/in/abimael-uanderson/'>LinkedIn</a> | <a href='https://instagram.com/abimaeluanderson'>Instagram</a> | <a href='mailto:abimael.servicos12dt@gmail.com'>Email</a></td></tr>
+<tr><td>GISELE GOMES OLIVEIRA             </td><td>Front-End                 </td><td><a href='https://www.linkedin.com/in/gisele-gomes-oliveira-037bb1128/'>LinkedIn</a> | <a href='https://instagram.com/belagisa13'>Instagram</a> | <a href='mailto:belagisa14@gmail.com'>Email</a></td></tr>
 <tr><td>FABIO SANTOS FRUTUOSO             </td><td>Front-End                 </td><td><a href='https://www.linkedin.com/in/fabio-santos-frutuoso-1784401b9/'>LinkedIn</a> | <a href='https://instagram.com/gandalfs_800'>Instagram</a> | <a href='mailto:frutuosofabio10@gmail.com'>Email</a></td></tr>
 <tr><td>BRUNA DE QUEIROZ COSTA            </td><td>Publicidade e Processos   </td><td><a href='https://www.linkedin.com/in/bruna-queiroz-5422a7261/'>LinkedIn</a> | <a href='https://instagram.com/brhunaqueiroz'>Instagram</a> | <a href='mailto:qbruna2003@gmail.com'>Email</a></td></tr>
-<tr><td>GISELE GOMES OLIVEIRA             </td><td>Front-End                 </td><td><a href='https://www.linkedin.com/in/gisele-gomes-oliveira-037bb1128/'>LinkedIn</a> | <a href='https://instagram.com/belagisa13'>Instagram</a> | <a href='mailto:belagisa14@gmail.com'>Email</a></td></tr>
 <tr><td>CAMPO INTELIGENTE                 </td><td>Startup                   </td><td><a href='https://instagram.com/startupcampointeligente'>LinkedIn | <a href='https://www.instagram.com/startupcampointeligente'>Instagram</a> | <a href='mailto:startupcampointeligente@gmail.com'>Email</a></td></tr>
 </tbody>
 </table>
