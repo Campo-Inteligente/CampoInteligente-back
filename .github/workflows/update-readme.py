@@ -190,7 +190,7 @@ def gerar_readme(versao, data_hora):
         readme.write("## 🤝 Agradecimentos\n\n")
         readme.write("Contribuições, sugestões e feedbacks são muito bem-vindos! Caso tenha algum comentário ou queira contribuir com o projeto, sinta-se à vontade para abrir uma issue ou enviar um pull request.\n\n")
         readme.write("--- \n\n")
-        readme.write("Desenvolvido com ❤️ pela equipe 12 | [Campo Inteligente](https://www.campointeligente.agr.br/) \n\n")
+        readme.write("Desenvolvido com ❤️ pela equipe 11 | [Campo Inteligente](https://www.campointeligente.agr.br/) \n\n")
 
 
 if __name__ == "__main__":
