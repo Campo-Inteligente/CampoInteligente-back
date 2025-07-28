@@ -153,107 +153,113 @@ class ChatbotService:
             mensagem_usuario=user_message,
             resposta_chatbot=bot_response
         )
+        
+    # Função extra recomendada
+    async def _reset_context_and_show_menu(self, user, context, message="") -> str:
+        user.contexto = {}
+        await self.save_user(user)
+        menu = await self._get_prompt('main_menu_v2')
+        return f"{message}\n\n{menu}" if message else menu
+    
 
     async def process_message(self, user_identifier: str, message_text: str, push_name: str, channel: str, location_data: dict = None) -> str:
-        # 1. Variáveis iniciais
         final_response_text = ""
-        user = None 
-        
+        user = None
+
         try:
-            # 2. Setup inicial: carrega mapas e obtém o usuário
+            # Setup inicial
             await self._load_state_maps_if_needed()
             user, created = await self.get_or_create_user(user_identifier, push_name, channel)
             context = user.contexto or {}
             message_lower = message_text.lower().strip()
-            
+
             now = timezone.now()
             last_interaction_time = await self._get_last_interaction_time(user)
 
-            # 3. Lógica de "Início de Sessão" (Saudação de boas-vindas)
-            show_welcome_message = False
-            if created or not last_interaction_time or (now - last_interaction_time > timedelta(hours=1)) or (last_interaction_time and now.date() != last_interaction_time.date()):
-                show_welcome_message = True
+            # Estado atual na máquina de estados (flag que começa com 'awaiting_')
+            current_state = next((state for state in context if state.startswith('awaiting_')), None)
 
-            if show_welcome_message and user.nome:
+            print(f"[DEBUG] Usuário: {user.nome}, Contexto inicial: {context}, Estado atual: {current_state}, Mensagem recebida: '{message_text}'")
+
+            # Início de sessão para usuários que retornam após 1h ou outro dia
+            if not created and user.nome and (not last_interaction_time or (now - last_interaction_time > timedelta(hours=1)) or (now.date() != last_interaction_time.date())):
                 welcome_template = await self._get_prompt('welcome_first_interaction')
                 menu_text = await self._get_prompt('main_menu_v2')
                 final_response_text = welcome_template.format(user_nome=user.nome.split(' ')[0])
                 user.contexto = self._reset_all_flow_flags(context)
                 final_response_text = f"{final_response_text}\n\n{menu_text}"
-                # Este é o único 'return' antecipado, para uma nova sessão limpa.
-                return final_response_text 
+                await self.save_user(user)
+                print(f"[DEBUG] Início de sessão: resposta enviada e contexto resetado")
+                return final_response_text
 
-            # 4. Processamento principal da conversa (Máquina de Estados)
-            current_state = next((state for state in context if state.startswith('awaiting_')), None)
-
-            # Comando de Reinício
-             # 1. Trata o comando de reinício primeiro
+            # Bloco 1: Comando de Reinício
             if message_lower in ['reiniciar', 'recomeçar', 'inicio']:
                 user.nome = ""
                 user.contexto = {'awaiting_initial_name': True}
                 final_response_text = await self._get_prompt('welcome_ask_name')
+                print(f"[DEBUG] Comando reiniciar recebido. Contexto resetado para onboarding.")
 
-            # 2. Se o utilizador é NOVO (acabou de ser criado), inicia o onboarding
-            elif created or (not user.nome and not current_state):
-                user.contexto = {'awaiting_initial_name': True}
-                final_response_text = await self._get_prompt('welcome_ask_name')
+            # Bloco 2: Onboarding
+            elif created or not user.nome or current_state == 'awaiting_initial_name':
+                if not current_state:
+                    context['awaiting_initial_name'] = True
+                    final_response_text = await self._get_prompt('welcome_ask_name')
+                    print(f"[DEBUG] Início onboarding: solicitando nome.")
+                else:
+                    user.nome = message_text.strip().title()
+                    context.pop('awaiting_initial_name', None)
+                    context['awaiting_location'] = True
+                    prompt_key = 'welcome_ask_location_whatsapp' if channel == 'whatsapp' else 'welcome_ask_location_web'
+                    template = await self._get_prompt(prompt_key)
+                    final_response_text = template.format(user_nome=user.nome)
+                    print(f"[DEBUG] Nome recebido: {user.nome}. Solicitando localização.")
 
-            # 3. Se o bot está AGUARDANDO o nome, processa a resposta
-            elif current_state == 'awaiting_initial_name':
-                user.nome = message_text.strip().title()
-                context.pop('awaiting_initial_name', None)
-                context['awaiting_location'] = True
-                prompt_key = 'welcome_ask_location_whatsapp' if channel == 'whatsapp' else 'welcome_ask_location_web'
-                template = await self._get_prompt(prompt_key)
-                final_response_text = template.format(user_nome=user.nome)
-            
-            # Estado: Aguardando localização
+            # Bloco 3: Máquina de Estados
+
             elif current_state == 'awaiting_location':
-                context.pop('awaiting_location', None)
-                location_processed = False
-                thank_you_message = ""
-                
+                details = None
                 if channel == 'whatsapp' and location_data:
                     details = await self.get_location_details_from_coords(location_data['latitude'], location_data['longitude'])
-                    if details:
-                        user.cidade, user.estado = details.get('city'), details.get('state')
-                        template = await self._get_prompt('location_received_whatsapp')
-                        thank_you_message = template.format(user_nome=user.nome)
-                        location_processed = True
                 elif message_text:
                     details = await self.get_location_details_from_city(await self._parse_city_from_input(message_text))
-                    if details:
-                        user.cidade, user.estado = details.get('city'), details.get('state')
-                        template = await self._get_prompt('location_received_web')
-                        thank_you_message = template.format(cidade=user.cidade, user_nome=user.nome)
-                        location_processed = True
-                    else:
-                        final_response_text = (await self._get_prompt('location_not_found_web')).format(cidade=message_text)
-                
-                if location_processed:
+
+                if details:  # Cidade válida
+                    user.cidade, user.estado = details.get('city'), details.get('state')
+                    context.pop('awaiting_location', None)
+                    context.pop('awaiting_weather_location_choice', None)  # Limpa flag pendente para evitar repetição
+
+                    user.contexto = context
+                    await self.save_user(user)
+                    thank_you_template = await self._get_prompt('location_received_web')
+                    thank_you_message = thank_you_template.format(cidade=user.cidade, user_nome=user.nome)
                     main_menu_text = await self._get_prompt('main_menu_v2')
                     final_response_text = f"{thank_you_message}\n\n{main_menu_text}"
-                elif not final_response_text:
-                    final_response_text = await self._get_prompt('location_error')
-            
-            # Estado: Aguardando escolha no submenu de clima
+                    print(f"[DEBUG] Localização recebida: {user.cidade}, contexto salvo e menu principal mostrado.")
+                else:  # Cidade inválida
+                    final_response_text = (await self._get_prompt('location_not_found')).format(cidade=message_text)
+                    context['awaiting_location'] = True
+                    print(f"[DEBUG] Cidade inválida: {message_text}. Solicitando localização novamente.")
+
             elif current_state == 'awaiting_weather_location_choice':
                 context.pop('awaiting_weather_location_choice', None)
                 if any(s in message_lower for s in ["1", "minha", "atual"]):
                     if user.cidade:
                         final_response_text = await self._format_weather_response(user.cidade)
                         context['awaiting_weather_followup'] = True
+                        print(f"[DEBUG] Usuário escolheu previsão para localização atual: {user.cidade}")
                     else:
                         context['awaiting_location'] = True
                         final_response_text = await self._get_prompt('weather_location_not_found')
+                        print(f"[DEBUG] Usuário não tem localização definida. Solicitando localização.")
                 elif any(s in message_lower for s in ["2", "outra"]):
                     context['awaiting_weather_location'] = True
                     final_response_text = await self._get_prompt('weather_ask_another_city')
+                    print(f"[DEBUG] Usuário escolheu consultar outra cidade.")
                 else:
                     context['awaiting_weather_location_choice'] = True
                     final_response_text = await self._get_prompt('weather_choice_invalid')
+                    print(f"[DEBUG] Resposta inválida no submenu clima.")
 
-            # Estado: Aguardando nome da cidade para o clima
             elif current_state == 'awaiting_weather_location':
                 cidade_limpa = await self._parse_city_from_input(message_text)
                 clima_atual = await self.get_weather_data(cidade_limpa)
@@ -261,6 +267,7 @@ class ChatbotService:
                     prompt_template = await self._get_prompt('weather_city_not_found')
                     final_response_text = prompt_template.format(cidade=cidade_limpa)
                     context['awaiting_weather_location'] = True
+                    print(f"[DEBUG] Cidade para clima não encontrada: {cidade_limpa}. Solicitando nova cidade.")
                 else:
                     prompt_template = await self._get_prompt('weather_dynamic_response')
                     final_response_text = prompt_template.format(
@@ -272,43 +279,54 @@ class ChatbotService:
                     )
                     context.pop('awaiting_weather_location', None)
                     context['awaiting_weather_followup'] = True
+                    print(f"[DEBUG] Clima consultado para {cidade_limpa} e resposta gerada.")
 
-            # Estado: Aguardando resposta de acompanhamento do clima
             elif current_state == 'awaiting_weather_followup':
                 context.pop('awaiting_weather_followup', None)
-                if any(s in message_lower for s in ["sim", "outra", "cidade"]):
+                if any(s in message_lower for s in ["sim", "outra", "cidade", "2"]):
                     context['awaiting_weather_location'] = True
                     final_response_text = await self._get_prompt('weather_ask_another_city')
+                    print(f"[DEBUG] Usuário quer consultar outra cidade.")
+                elif any(s in message_lower for s in ["menu", "voltar", "1"]):
+                    final_response_text = await self._get_prompt('main_menu_v2')
+                    print(f"[DEBUG] Usuário voltou ao menu principal.")
                 else:
                     final_response_text = await self._get_prompt('main_menu_v2')
+                    print(f"[DEBUG] Resposta padrão: exibindo menu principal.")
 
-            # Roteamento de Menu e Fallback final
-            else:
+            # Roteamento de Menu e Fallback (se não há estado ativo)
+            elif not current_state:
                 if any(s in message_lower for s in ["[1]", "1", "clima"]):
                     context['awaiting_weather_location_choice'] = True
                     final_response_text = await self._get_prompt('weather_submenu_choice')
+                    print(f"[DEBUG] Menu principal: usuário escolheu clima. Submenu clima aberto.")
                 elif any(s in message_lower for s in ["[2]", "2", "plantio"]):
                     final_response_text = await self._get_prompt('feature_planting_wip')
+                    print(f"[DEBUG] Menu principal: usuário escolheu plantio (funcionalidade em desenvolvimento).")
                 elif any(s in message_lower for s in ["[3]", "3", "preços"]):
                     final_response_text = await self._get_prompt('feature_prices_wip')
+                    print(f"[DEBUG] Menu principal: usuário escolheu preços (funcionalidade em desenvolvimento).")
                 elif any(s in message_lower for s in ["[4]", "4", "relatórios"]):
                     final_response_text = await self._get_prompt('feature_reports_wip')
+                    print(f"[DEBUG] Menu principal: usuário escolheu relatórios (funcionalidade em desenvolvimento).")
                 elif any(s in message_lower for s in ["[5]", "5", "safra"]):
                     final_response_text = await self._get_prompt('feature_harvest_wip')
+                    print(f"[DEBUG] Menu principal: usuário escolheu cadastrar safra (funcionalidade em desenvolvimento).")
                 else:
                     fallback_template = await self._get_prompt('default_fallback')
                     menu_text = await self._get_prompt('main_menu_v2')
                     final_response_text = f"{fallback_template.format(user_nome=user.nome.split(' ')[0])}\n\n{menu_text}"
-            
-            # 5. Salva o estado do usuário antes de sair do 'try'
+                    print(f"[DEBUG] Resposta padrão: fallback acionado e menu principal exibido.")
+
+            # Salva o estado antes de retornar
             user.contexto = context
             await self.save_user(user)
-            
-            # 6. Ponto de saída único
+
+            print(f"[DEBUG] Resposta final enviada para {user.nome}: {final_response_text}")
+            print(f"[DEBUG] Contexto salvo: {context}")
+
             return final_response_text
 
         finally:
-            # 7. Bloco de Segurança: Salva a Interação no Final
-            # Este código é executado sempre, garantindo que a conversa seja salva.
             if user:
                 await self._log_interaction(user, message_text, final_response_text)
