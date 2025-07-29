@@ -18,6 +18,9 @@ from django.conf.urls.static import static # <-- Adicione esta linha
 
 from django.http import HttpResponse
 
+def teste_view(request):
+    return HttpResponse("Funcionando!")
+
 def home(request):
     return HttpResponse("Olá, Campo Inteligente API está rodando!")
 
@@ -25,6 +28,7 @@ urlpatterns = [
     path('', home),  # rota raiz
     path('admin/', admin.site.urls),
     path('api/v1/chatbot/', include('chatbot.urls')),
+    path('teste/', teste_view),
     # ... restante das rotas
 ]
 
