@@ -115,6 +115,15 @@ python manage.py migrate
 
 echo ""
 echo " Rodar com servidor de produção:"
+echo " Verificando se porta 21083 está em uso..."
+
+PORT=21083
+if lsof -i tcp:$PORT >/dev/null; then
+    echo "⚠️ Porta $PORT está em uso! Finalizando processo antes de subir servidor..."
+    PID=$(lsof -ti tcp:$PORT)
+    kill -9 $PID
+    echo "✅ Processo finalizado (PID: $PID)."
+fi
 
 # Detecta se o projeto usa Django Channels
 if pip freeze | grep -iq "channels"; then
@@ -124,7 +133,6 @@ else
     echo "🐘 Sem Channels instalado. Usando Gunicorn (WSGI)..."
     gunicorn campointeligente.wsgi:application --workers 3 --bind 0.0.0.0:21083
 fi
-
 
 echo " Reiniciando o Django"
 ./exec-restart-django.sh
