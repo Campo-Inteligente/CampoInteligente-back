@@ -12,7 +12,13 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['d60fa466aac5.ngrok-free.app', '127.0.0.1', 'localhost']
+#ALLOWED_HOSTS = ['d60fa466aac5.ngrok-free.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [
+    'd60fa466aac5.ngrok-free.app',
+    '127.0.0.1',
+    'localhost',
+    'campointeligente.ddns.com.br'
+]
 #ALLOWED_HOSTS = ['*'] #para testes
 APPEND_SLASH = False
 
