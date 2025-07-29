@@ -11,6 +11,7 @@ load_dotenv(BASE_DIR / '.env')
 # --- Chave Secreta e Debug ---
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
+print(f"--- The current DEBUG mode is: {DEBUG} ---")
 
 #ALLOWED_HOSTS = ['d60fa466aac5.ngrok-free.app', '127.0.0.1', 'localhost']
 ALLOWED_HOSTS = [
@@ -106,11 +107,16 @@ USE_TZ = True
 # Onde Django vai procurar arquivos estáticos para desenvolvimento.
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
 # Onde Django vai COLETAR arquivos estáticos de todos os apps para deploy/produção.
 # Esta pasta será criada na raiz do seu projeto Django (ao lado de manage.py)
 # quando você executar 'python manage.py collectstatic'.
 STATIC_ROOT = BASE_DIR / 'staticfiles' # <-- Mantenha esta linha AQUI e apenas UMA VEZ.
 
+STATICFILES_DIRS = [
+    # BASE_DIR / "static",
+    ]
 
 # --- Tipo de Campo de Chave Primária Padrão ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
