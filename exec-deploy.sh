@@ -80,8 +80,20 @@ docker compose ps
 echo ""
 echo "🌐 Deploy em Produção (ex: VPS ou nuvem)"
 echo "🧪 Criar ambiente virtual no servidor:"
+
+# Se já houver um ambiente virtual ativo, desativa
+if [[ "$VIRTUAL_ENV" != "" ]]; then
+    deactivate
+fi
+
+# Cria e ativa o novo ambiente virtual
 python3 -m venv venv
-source venv/bin/activate
+
+if [[ -f "venv/bin/activate" ]]; then
+    source venv/bin/activatesource /var/www/campointeligente-back/venv/bin/activate
+else
+    echo "⚠️ Script de ativação não encontrado!"
+fi
 
 echo ""
 echo "📦 Instalar dependências:"
@@ -103,8 +115,8 @@ python manage.py migrate
 
 echo ""
 echo " Rodar com servidor de produção:"
-gunicorn nome_projeto.wsgi:application 
-daphne nome_projeto.asgi:application
+gunicorn campointeligente.wsgi:application
+daphne campointeligente.asgi:application
 
 echo " Reiniciando o Django"
 ./exec-restart-django.sh
