@@ -1,5 +1,6 @@
 #!/bin/bash
 
+clear
 # 📅 Data e hora atual para nomear o arquivo
 DATA_HORA=$(date +%Y%m%d_%H%M%S)
 

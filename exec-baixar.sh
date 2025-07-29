@@ -1,5 +1,6 @@
 #!/bin/bash
 
+clear
 echo "📦 Pegando atualizações no github.com..."
 
 # Garante que estamos no diretório correto

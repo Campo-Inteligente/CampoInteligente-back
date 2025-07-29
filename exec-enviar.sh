@@ -1,4 +1,5 @@
 
+clear
 # Adiciona todos os arquivos modificados
 git add .
 

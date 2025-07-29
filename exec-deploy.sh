@@ -1,5 +1,6 @@
 #!/bin/bash
 
+clear
 set -e  # Para o script parar se qualquer comando falhar
 
 echo "============================================"
@@ -81,10 +82,11 @@ echo "ℹ️ As alterações geralmente são aplicadas instantaneamente, sem nec
 # FIM CONFIGURANDO INSTANCIAS #------------------------------------------------
 
 echo ""
-echo "✅ Projeto atualizado e rodando localmente na porta 3000"
 echo "🌐 Acesso externo:"
 echo "✅http://campointeligente.ddns.com.br:21081/ <------- website"
 echo "✅http://campointeligente.ddns.com.br:21082/ <------- back"
 echo "✅http://campointeligente.ddns.com.br:21050/ <------- pgadmin"
-echo "✅http://campointeligente.ddns.com.br:21085/docs <--- API"
+echo "✅http://campointeligente.ddns.com.br:21085/docs <--- evolutionAPI"
+echo "✅https://www.campointeligente.agr.br:3000 <--------- campointeligenteAPI"
 echo "✅https://www.campointeligente.agr.br/ <------------- Produção"
+echo "✅ Projeto atualizado e rodando localmente."
