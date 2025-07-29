@@ -134,7 +134,7 @@ class ChatbotService:
             temperatura=f"{clima_atual['main']['temp']:.1f}",
             sensacao=f"{clima_atual['main']['feels_like']:.1f}",
             umidade=clima_atual['main']['humidity']
-        )
+        ).replace("\\n", "\n")
         
     @database_sync_to_async
     def _get_last_interaction_time(self, user: Usuario):
@@ -160,14 +160,12 @@ class ChatbotService:
         await self.save_user(user)
         menu = await self._get_prompt('main_menu_v2')
         return f"{message}\n\n{menu}" if message else menu
-    
 
     async def process_message(self, user_identifier: str, message_text: str, push_name: str, channel: str, location_data: dict = None) -> str:
         final_response_text = ""
-        user = None
+        user = None 
 
         try:
-            # Setup inicial
             await self._load_state_maps_if_needed()
             user, created = await self.get_or_create_user(user_identifier, push_name, channel)
             context = user.contexto or {}
@@ -175,14 +173,15 @@ class ChatbotService:
 
             now = timezone.now()
             last_interaction_time = await self._get_last_interaction_time(user)
-
-            # Estado atual na máquina de estados (flag que começa com 'awaiting_')
             current_state = next((state for state in context if state.startswith('awaiting_')), None)
 
             print(f"[DEBUG] Usuário: {user.nome}, Contexto inicial: {context}, Estado atual: {current_state}, Mensagem recebida: '{message_text}'")
 
-            # Início de sessão para usuários que retornam após 1h ou outro dia
-            if not created and user.nome and (not last_interaction_time or (now - last_interaction_time > timedelta(hours=1)) or (now.date() != last_interaction_time.date())):
+            if not created and user.nome and not current_state and (
+                not last_interaction_time or 
+                (now - last_interaction_time > timedelta(hours=1)) or 
+                (now.date() != last_interaction_time.date())
+            ):
                 welcome_template = await self._get_prompt('welcome_first_interaction')
                 menu_text = await self._get_prompt('main_menu_v2')
                 final_response_text = welcome_template.format(user_nome=user.nome.split(' ')[0])
@@ -192,20 +191,16 @@ class ChatbotService:
                 print(f"[DEBUG] Início de sessão: resposta enviada e contexto resetado")
                 return final_response_text
 
-            # Bloco 1: Comando de Reinício
-            if message_lower in ['reiniciar', 'recomeçar', 'inicio']:
-                user.nome = ""
-                user.contexto = {'awaiting_initial_name': True}
-                final_response_text = await self._get_prompt('welcome_ask_name')
-                print(f"[DEBUG] Comando reiniciar recebido. Contexto resetado para onboarding.")
+            # --- Comando global 'menu' ---
+            if message_lower == "menu":
+                user.contexto = self._reset_all_flow_flags(context)
+                final_response_text = await self._get_prompt('main_menu_v2')
+                print(f"[DEBUG] Comando 'menu' recebido. Contexto resetado e menu principal enviado.")
 
-            # Bloco 2: Onboarding
-            elif created or not user.nome or current_state == 'awaiting_initial_name':
-                if not current_state:
-                    context['awaiting_initial_name'] = True
-                    final_response_text = await self._get_prompt('welcome_ask_name')
-                    print(f"[DEBUG] Início onboarding: solicitando nome.")
-                else:
+            elif current_state:
+                # Comando 'menu' dentro de fluxo já tratado acima
+
+                if current_state == 'awaiting_initial_name':
                     user.nome = message_text.strip().title()
                     context.pop('awaiting_initial_name', None)
                     context['awaiting_location'] = True
@@ -214,111 +209,111 @@ class ChatbotService:
                     final_response_text = template.format(user_nome=user.nome)
                     print(f"[DEBUG] Nome recebido: {user.nome}. Solicitando localização.")
 
-            # Bloco 3: Máquina de Estados
+                elif current_state == 'awaiting_location':
+                    details = None
+                    if channel == 'whatsapp' and location_data:
+                        details = await self.get_location_details_from_coords(location_data['latitude'], location_data['longitude'])
+                    elif message_text:
+                        details = await self.get_location_details_from_city(await self._parse_city_from_input(message_text))
 
-            elif current_state == 'awaiting_location':
-                details = None
-                if channel == 'whatsapp' and location_data:
-                    details = await self.get_location_details_from_coords(location_data['latitude'], location_data['longitude'])
-                elif message_text:
-                    details = await self.get_location_details_from_city(await self._parse_city_from_input(message_text))
-
-                if details:  # Cidade válida
-                    user.cidade, user.estado = details.get('city'), details.get('state')
-                    context.pop('awaiting_location', None)
-                    context.pop('awaiting_weather_location_choice', None)  # Limpa flag pendente para evitar repetição
-
-                    user.contexto = context
-                    await self.save_user(user)
-                    thank_you_template = await self._get_prompt('location_received_web')
-                    thank_you_message = thank_you_template.format(cidade=user.cidade, user_nome=user.nome)
-                    main_menu_text = await self._get_prompt('main_menu_v2')
-                    final_response_text = f"{thank_you_message}\n\n{main_menu_text}"
-                    print(f"[DEBUG] Localização recebida: {user.cidade}, contexto salvo e menu principal mostrado.")
-                else:  # Cidade inválida
-                    final_response_text = (await self._get_prompt('location_not_found')).format(cidade=message_text)
-                    context['awaiting_location'] = True
-                    print(f"[DEBUG] Cidade inválida: {message_text}. Solicitando localização novamente.")
-
-            elif current_state == 'awaiting_weather_location_choice':
-                context.pop('awaiting_weather_location_choice', None)
-                if any(s in message_lower for s in ["1", "minha", "atual"]):
-                    if user.cidade:
-                        final_response_text = await self._format_weather_response(user.cidade)
-                        context['awaiting_weather_followup'] = True
-                        print(f"[DEBUG] Usuário escolheu previsão para localização atual: {user.cidade}")
+                    if details:
+                        user.cidade, user.estado = details.get('city'), details.get('state')
+                        context.pop('awaiting_location', None)
+                        thank_you_template = await self._get_prompt('location_received_web')
+                        thank_you_message = thank_you_template.format(cidade=user.cidade, user_nome=user.nome)
+                        main_menu_text = await self._get_prompt('main_menu_v2')
+                        final_response_text = f"{thank_you_message}\n\n{main_menu_text}"
+                        print(f"[DEBUG] Localização recebida: {user.cidade}, contexto salvo e menu principal mostrado.")
                     else:
+                        final_response_text = (await self._get_prompt('location_not_found_web')).format(cidade=message_text)
                         context['awaiting_location'] = True
-                        final_response_text = await self._get_prompt('weather_location_not_found')
-                        print(f"[DEBUG] Usuário não tem localização definida. Solicitando localização.")
-                elif any(s in message_lower for s in ["2", "outra"]):
-                    context['awaiting_weather_location'] = True
-                    final_response_text = await self._get_prompt('weather_ask_another_city')
-                    print(f"[DEBUG] Usuário escolheu consultar outra cidade.")
-                else:
-                    context['awaiting_weather_location_choice'] = True
-                    final_response_text = await self._get_prompt('weather_choice_invalid')
-                    print(f"[DEBUG] Resposta inválida no submenu clima.")
+                        print(f"[DEBUG] Cidade inválida: {message_text}. Solicitando localização novamente.")
 
-            elif current_state == 'awaiting_weather_location':
-                cidade_limpa = await self._parse_city_from_input(message_text)
-                clima_atual = await self.get_weather_data(cidade_limpa)
-                if "error" in clima_atual or clima_atual.get("cod") != 200:
-                    prompt_template = await self._get_prompt('weather_city_not_found')
-                    final_response_text = prompt_template.format(cidade=cidade_limpa)
-                    context['awaiting_weather_location'] = True
-                    print(f"[DEBUG] Cidade para clima não encontrada: {cidade_limpa}. Solicitando nova cidade.")
-                else:
-                    prompt_template = await self._get_prompt('weather_dynamic_response')
-                    final_response_text = prompt_template.format(
-                        cidade=clima_atual.get('name', cidade_limpa),
-                        descricao=clima_atual['weather'][0]['description'].capitalize(),
-                        temperatura=f"{clima_atual['main']['temp']:.1f}",
-                        sensacao=f"{clima_atual['main']['feels_like']:.1f}",
-                        umidade=clima_atual['main']['humidity']
-                    )
-                    context.pop('awaiting_weather_location', None)
-                    context['awaiting_weather_followup'] = True
-                    print(f"[DEBUG] Clima consultado para {cidade_limpa} e resposta gerada.")
+                elif current_state == 'awaiting_weather_location_choice':
+                    context.pop('awaiting_weather_location_choice', None)
+                    if any(s in message_lower for s in ["1", "minha", "atual"]):
+                        if user.cidade:
+                            final_response_text = await self._format_weather_response(user.cidade)
+                            context['awaiting_weather_followup'] = True
+                            print(f"[DEBUG] Usuário escolheu previsão para localização atual: {user.cidade}")
+                        else:
+                            context['awaiting_location'] = True
+                            final_response_text = await self._get_prompt('weather_location_not_found')
+                            print(f"[DEBUG] Usuário não tem localização definida. Solicitando localização.")
+                    elif any(s in message_lower for s in ["2", "outra"]):
+                        context['awaiting_weather_location'] = True
+                        final_response_text = await self._get_prompt('weather_ask_another_city')
+                        print(f"[DEBUG] Usuário escolheu consultar outra cidade.")
+                    else:
+                        context['awaiting_weather_location_choice'] = True
+                        final_response_text = await self._get_prompt('weather_choice_invalid')
+                        print(f"[DEBUG] Resposta inválida no submenu clima.")
 
-            elif current_state == 'awaiting_weather_followup':
-                context.pop('awaiting_weather_followup', None)
-                if any(s in message_lower for s in ["sim", "outra", "cidade", "2"]):
-                    context['awaiting_weather_location'] = True
-                    final_response_text = await self._get_prompt('weather_ask_another_city')
-                    print(f"[DEBUG] Usuário quer consultar outra cidade.")
-                elif any(s in message_lower for s in ["menu", "voltar", "1"]):
-                    final_response_text = await self._get_prompt('main_menu_v2')
-                    print(f"[DEBUG] Usuário voltou ao menu principal.")
-                else:
-                    final_response_text = await self._get_prompt('main_menu_v2')
-                    print(f"[DEBUG] Resposta padrão: exibindo menu principal.")
+                elif current_state == 'awaiting_weather_location':
+                    cidade_limpa = await self._parse_city_from_input(message_text)
+                    clima_atual = await self.get_weather_data(cidade_limpa)
+                    if "error" in clima_atual or clima_atual.get("cod") != 200:
+                        prompt_template = await self._get_prompt('weather_city_not_found')
+                        final_response_text = prompt_template.format(cidade=cidade_limpa)
+                        context['awaiting_weather_location'] = True
+                        print(f"[DEBUG] Cidade para clima não encontrada: {cidade_limpa}. Solicitando nova cidade.")
+                    else:
+                        prompt_template = await self._get_prompt('weather_dynamic_response')
+                        final_response_text = prompt_template.format(
+                            cidade=clima_atual.get('name', cidade_limpa),
+                            descricao=clima_atual['weather'][0]['description'].capitalize(),
+                            temperatura=f"{clima_atual['main']['temp']:.1f}",
+                            sensacao=f"{clima_atual['main']['feels_like']:.1f}",
+                            umidade=clima_atual['main']['humidity']
+                        ).replace("\\n", "\n")
+                        context.pop('awaiting_weather_location', None)
+                        context['awaiting_weather_followup'] = True
+                        print(f"[DEBUG] Clima consultado para {cidade_limpa} e resposta gerada.")
 
-            # Roteamento de Menu e Fallback (se não há estado ativo)
-            elif not current_state:
-                if any(s in message_lower for s in ["[1]", "1", "clima"]):
+                elif current_state == 'awaiting_weather_followup':
+                    context.pop('awaiting_weather_followup', None)
+                    if any(s in message_lower for s in ["1", "sim", "outra", "cidade"]):
+                        context['awaiting_weather_location'] = True
+                        final_response_text = await self._get_prompt('weather_ask_another_city')
+                        print(f"[DEBUG] Usuário quer consultar outra cidade.")
+                    else:  # Trata 2, não, menu etc
+                        user.contexto = self._reset_all_flow_flags(context)
+                        final_response_text = await self._get_prompt('main_menu_v2')
+                        print(f"[DEBUG] Usuário voltou ao menu principal.")
+
+            else:
+                if created or not user.nome:
+                    context['awaiting_initial_name'] = True
+                    final_response_text = await self._get_prompt('welcome_ask_name')
+                    print(f"[DEBUG] Início onboarding: solicitando nome.")
+
+                elif any(s in message_lower for s in ["[1]", "1", "clima"]):
                     context['awaiting_weather_location_choice'] = True
                     final_response_text = await self._get_prompt('weather_submenu_choice')
                     print(f"[DEBUG] Menu principal: usuário escolheu clima. Submenu clima aberto.")
+
                 elif any(s in message_lower for s in ["[2]", "2", "plantio"]):
                     final_response_text = await self._get_prompt('feature_planting_wip')
-                    print(f"[DEBUG] Menu principal: usuário escolheu plantio (funcionalidade em desenvolvimento).")
+                    print(f"[DEBUG] Menu principal: usuário escolheu plantio.")
+
                 elif any(s in message_lower for s in ["[3]", "3", "preços"]):
                     final_response_text = await self._get_prompt('feature_prices_wip')
-                    print(f"[DEBUG] Menu principal: usuário escolheu preços (funcionalidade em desenvolvimento).")
+                    print(f"[DEBUG] Menu principal: usuário escolheu preços.")
+
                 elif any(s in message_lower for s in ["[4]", "4", "relatórios"]):
                     final_response_text = await self._get_prompt('feature_reports_wip')
-                    print(f"[DEBUG] Menu principal: usuário escolheu relatórios (funcionalidade em desenvolvimento).")
+                    print(f"[DEBUG] Menu principal: usuário escolheu relatórios.")
+
                 elif any(s in message_lower for s in ["[5]", "5", "safra"]):
                     final_response_text = await self._get_prompt('feature_harvest_wip')
-                    print(f"[DEBUG] Menu principal: usuário escolheu cadastrar safra (funcionalidade em desenvolvimento).")
+                    print(f"[DEBUG] Menu principal: usuário escolheu cadastrar safra.")
+
                 else:
                     fallback_template = await self._get_prompt('default_fallback')
                     menu_text = await self._get_prompt('main_menu_v2')
                     final_response_text = f"{fallback_template.format(user_nome=user.nome.split(' ')[0])}\n\n{menu_text}"
                     print(f"[DEBUG] Resposta padrão: fallback acionado e menu principal exibido.")
 
-            # Salva o estado antes de retornar
             user.contexto = context
             await self.save_user(user)
 
