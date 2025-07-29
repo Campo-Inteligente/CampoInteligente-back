@@ -79,12 +79,64 @@ curl -X POST http://localhost:21085/webhook/set/campointeligente1 \
 echo "✅ Script finalizado. As configurações foram enviadas para a instância campointeligente1."
 echo "ℹ️ As alterações geralmente são aplicadas instantaneamente, sem necessidade de reiniciar."
 
+# SUBINDO DJANGO #-------------------------------------------------------------
+#✅ Criar ambiente virtual: 
+#python -m venv venv
+#source venv/bin/activate
+
+#📦 Instalar Django:
+#pip install django
+
+#🏗️ Criar projeto:
+#django-admin startproject nome_projeto
+#cd nome_projeto
+
+#🧱 Criar apps e modelos:
+#python manage.py startapp nome_app
+
+#🔄 Migrar banco de dados:
+#python manage.py makemigrations
+#python manage.py migrate
+
+#🧪 Testar localmente:
+#python manage.py runserver 0.0.0.0:21083
+
+echo ""
+echo "🌐 Deploy em Produção (ex: VPS ou nuvem)"
+echo "🧪 Criar ambiente virtual no servidor:"
+python3 -m venv venv
+source venv/bin/activate
+
+echo ""
+echo "📦 Instalar dependências:"
+pip install -r requirements.txt
+
+echo ""
+echo "🛠️ Configurar banco de dados no settings.py"
+echo "🔐 Ajustar ALLOWED_HOSTS e DEBUG = False"
+echo "📁 Coletar arquivos estáticos:"
+python manage.py collectstatic
+
+echo ""
+echo "🔄 Migrar banco:"
+python manage.py migrate
+
+#echo ""
+#echo "🧑‍💻 Criar superusuário (opcional):"
+#python manage.py createsuperuser
+
+echo ""
+echo " Rodar com servidor de produção:"
+gunicorn nome_projeto.wsgi:application 
+daphne nome_projeto.asgi:application
+
 # FIM CONFIGURANDO INSTANCIAS #------------------------------------------------
 
 echo ""
 echo "🌐 Acesso externo:"
 echo "✅http://campointeligente.ddns.com.br:21081/ <------- website"
 echo "✅http://campointeligente.ddns.com.br:21082/ <------- back"
+echo "✅http://campointeligente.ddns.com.br:21083/ <------- django"
 echo "✅http://campointeligente.ddns.com.br:21050/ <------- pgadmin"
 echo "✅http://campointeligente.ddns.com.br:21085/docs <--- evolutionAPI"
 echo "✅https://www.campointeligente.agr.br:3000 <--------- campointeligenteAPI"
