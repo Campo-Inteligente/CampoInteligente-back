@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'campointeligente.asgi.application'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # coloque no topo
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -47,7 +48,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'campointeligente.urls'
@@ -104,7 +104,7 @@ USE_TZ = True
 
 # --- Arquivos Estáticos ---
 # Onde Django vai procurar arquivos estáticos para desenvolvimento.
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Onde Django vai COLETAR arquivos estáticos de todos os apps para deploy/produção.
 # Esta pasta será criada na raiz do seu projeto Django (ao lado de manage.py)
