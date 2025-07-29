@@ -7,7 +7,7 @@ echo "============================================"
 echo "🚀 Iniciando processo de *Deploy Automático*"
 echo "============================================"
 
-PORT=21083
+PORT=21084
 echo ""
 echo "🔍 Verificando se porta $PORT está em uso..."
 if lsof -i tcp:$PORT >/dev/null; then
