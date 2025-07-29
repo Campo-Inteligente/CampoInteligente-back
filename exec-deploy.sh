@@ -130,6 +130,9 @@ echo " Rodar com servidor de produção:"
 gunicorn nome_projeto.wsgi:application 
 daphne nome_projeto.asgi:application
 
+echo " Reiniciando o Django"
+./exec-restart-django.sh
+
 # FIM CONFIGURANDO INSTANCIAS #------------------------------------------------
 
 echo ""
