@@ -1,5 +1,6 @@
 # campointeligente/campointeligente/urls.py
 
+
 from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework import permissions
@@ -14,6 +15,18 @@ from django.conf.urls.static import static # <-- Adicione esta linha
 # se você já está usando permissions.AllowAny na configuração do schema_view.
 # from rest_framework.permissions import AllowAny
 # from rest_framework.authentication import BasicAuthentication
+
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Olá, Campo Inteligente API está rodando!")
+
+urlpatterns = [
+    path('', home),  # rota raiz
+    path('admin/', admin.site.urls),
+    path('api/v1/chatbot/', include('chatbot.urls')),
+    # ... restante das rotas
+]
 
 schema_view = get_schema_view(
     openapi.Info(
