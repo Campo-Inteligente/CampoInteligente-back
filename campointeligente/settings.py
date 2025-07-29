@@ -2,25 +2,23 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# --- Diretório Base ---
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- Leitura direta do arquivo .env ---
+# --- Carregar variáveis do .env ---
 load_dotenv(BASE_DIR / '.env')
 
-# --- Chave Secreta e Debug ---
+# --- Segurança e Debug ---
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
-print(f"--- The current DEBUG mode is: {DEBUG} ---")
 
-#ALLOWED_HOSTS = ['d60fa466aac5.ngrok-free.app', '127.0.0.1', 'localhost']
 ALLOWED_HOSTS = [
     'd60fa466aac5.ngrok-free.app',
     '127.0.0.1',
     'localhost',
     'campointeligente.ddns.com.br'
 ]
-#ALLOWED_HOSTS = ['*'] #para testes
+
 APPEND_SLASH = False
 
 # --- Aplicações Instaladas ---
@@ -35,13 +33,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'chatbot',
     'drf_yasg',
-    'corsheaders'
+    'corsheaders',
 ]
 
+# --- ASGI ---
 ASGI_APPLICATION = 'campointeligente.asgi.application'
 
+# --- Middleware ---
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # coloque no topo
+    'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise logo após CORS
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# --- URLs e Templates ---
 ROOT_URLCONF = 'campointeligente.urls'
 
 TEMPLATES = [
@@ -71,7 +73,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'campointeligente.wsgi.application'
 
-
 # --- Banco de Dados ---
 DATABASES = {
     'default': {
@@ -87,15 +88,13 @@ DATABASES = {
     }
 }
 
-
-# --- Validação de Senha ---
+# --- Validação de Senhas ---
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-
 
 # --- Internacionalização ---
 LANGUAGE_CODE = 'pt-br'
@@ -104,35 +103,26 @@ USE_I18N = True
 USE_TZ = True
 
 # --- Arquivos Estáticos ---
-# Onde Django vai procurar arquivos estáticos para desenvolvimento.
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_DIRS = [BASE_DIR / "static"]
+# WhiteNoise: serve arquivos estáticos em produção
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Onde Django vai COLETAR arquivos estáticos de todos os apps para deploy/produção.
-# Esta pasta será criada na raiz do seu projeto Django (ao lado de manage.py)
-# quando você executar 'python manage.py collectstatic'.
-STATIC_ROOT = BASE_DIR / 'staticfiles' # <-- Mantenha esta linha AQUI e apenas UMA VEZ.
-
-STATICFILES_DIRS = [
-    # BASE_DIR / "static",
-    ]
-
-# --- Tipo de Campo de Chave Primária Padrão ---
+# --- Tipo padrão de campo automático ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# --- CONFIGURAÇÕES PERSONALIZADAS (ADIÇÃO CRÍTICA) ---
-# Lemos as variáveis do .env e as atribuímos a variáveis de configuração do Django.
-# Agora, podemos acedê-las em qualquer lugar com 'from django.conf import settings'.
+# --- Configurações Personalizadas ---
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
 EVOLUTION_API_KEY = os.getenv('EVOLUTION_API_KEY')
 EVOLUTION_API_URL = os.getenv('EVOLUTION_API_URL')
 EVOLUTION_INSTANCE_NAME = os.getenv('EVOLUTION_INSTANCE_NAME')
-CORS_ALLOW_ALL_ORIGINS = True # Mantenha esta linha se estiver usando django-cors-headers
 
-# CONFIGURAÇÕES DE ENVIO DE EMAIL
+# --- CORS ---
+CORS_ALLOW_ALL_ORIGINS = True
+
+# --- Configurações de Email ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
