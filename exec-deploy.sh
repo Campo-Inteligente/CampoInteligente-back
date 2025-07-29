@@ -90,7 +90,7 @@ fi
 python3 -m venv venv
 
 if [[ -f "venv/bin/activate" ]]; then
-    source venv/bin/activatesource /var/www/campointeligente-back/venv/bin/activate
+    source /var/www/campointeligente-back/venv/bin/activate
 else
     echo "⚠️ Script de ativação não encontrado!"
 fi
@@ -115,8 +115,16 @@ python manage.py migrate
 
 echo ""
 echo " Rodar com servidor de produção:"
-gunicorn campointeligente.wsgi:application
-daphne campointeligente.asgi:application
+
+# Detecta se o projeto usa Django Channels
+if pip freeze | grep -iq "channels"; then
+    echo "📡 Detecção: Django Channels encontrado. Usando Daphne (ASGI)..."
+    daphne -b 0.0.0.0 -p 21083 campointeligente.asgi:application
+else
+    echo "🐘 Sem Channels instalado. Usando Gunicorn (WSGI)..."
+    gunicorn campointeligente.wsgi:application --workers 3 --bind 0.0.0.0:21083
+fi
+
 
 echo " Reiniciando o Django"
 ./exec-restart-django.sh
