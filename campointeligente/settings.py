@@ -25,7 +25,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost",
     "http://127.0.0.1",
 ]
-
+# serve para evitar erros 404 quando uma URL não termina com uma barra (/).
 APPEND_SLASH = True
 
 # --- Aplicações Instaladas ---
