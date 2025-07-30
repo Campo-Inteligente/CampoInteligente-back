@@ -30,6 +30,7 @@ APPEND_SLASH = True
 
 # --- Aplicações Instaladas ---
 INSTALLED_APPS = [
+    'grappelli',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,9 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'chatbot',
     'drf_yasg',
     'corsheaders',
+    'chatbot',
 ]
 
 # --- ASGI ---
