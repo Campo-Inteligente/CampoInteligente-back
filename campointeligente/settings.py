@@ -24,7 +24,7 @@ APPEND_SLASH = True
 # --- Aplicações Instaladas ---
 INSTALLED_APPS = [
     #'grappelli',
-    'jazzmin',
+    #'jazzmin',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,14 +43,31 @@ ASGI_APPLICATION = 'campointeligente.asgi.application'
 
 # --- Middleware ---
 MIDDLEWARE = [
+    # 🟢 Gerenciamento de CORS deve vir logo no início
     'corsheaders.middleware.CorsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise logo após CORS
+
+    # ⚪ WhiteNoise para servir arquivos estáticos com performance
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
+    # 🔒 Segurança geral do Django
     'django.middleware.security.SecurityMiddleware',
+
+    # 💾 Gerenciamento de sessões
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    # 📡 Middleware comum (tratamento de requisições)
     'django.middleware.common.CommonMiddleware',
+
+    # 🛡️ Proteção contra CSRF
     'django.middleware.csrf.CsrfViewMiddleware',
+
+    # 🔐 Autenticação do usuário
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    # 💬 Mensagens internas (flash messages etc.)
     'django.contrib.messages.middleware.MessageMiddleware',
+
+    # 🧱 Proteção contra ataques via iframe
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -114,9 +131,9 @@ STATIC_URL = '/static/'
 
 # Informa ao Django onde estão os arquivos estáticos durante o desenvolvimento. 
 # Aqui, ele vai procurar arquivos em BASE_DIR/static.
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+#STATICFILES_DIRS = [
+#    BASE_DIR / "static",
+#]
 
 # WhiteNoise: serve arquivos estáticos em produção
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

@@ -35,7 +35,7 @@ schema_view = get_schema_view(
 urlpatterns = [
 
     #path('grappelli/', include('grappelli.urls')),  # Grappelli URLs
-    path('jazzmin/', include('jazzmin.urls')),  # Jazzmin URLs
+    #path('jazzmin/', include('jazzmin.urls')),  # Jazzmin URLs
     path('', home),  # Rota raiz
     path('admin/', admin.site.urls),
 
