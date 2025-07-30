@@ -23,8 +23,8 @@ APPEND_SLASH = False
 
 # --- Aplicações Instaladas ---
 INSTALLED_APPS = [
-    'grappelli',
-    #'jazzmin',
+    #'grappelli',
+    'jazzmin',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
