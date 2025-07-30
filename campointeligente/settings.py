@@ -5,10 +5,6 @@ from dotenv import load_dotenv
 # --- Diretório Base ---
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
 # --- Carregar variáveis do .env ---
 load_dotenv(BASE_DIR / '.env')
 
@@ -27,6 +23,8 @@ APPEND_SLASH = False
 
 # --- Aplicações Instaladas ---
 INSTALLED_APPS = [
+    'grappelli',
+    #'jazzmin',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -107,8 +105,18 @@ USE_I18N = True
 USE_TZ = True
 
 # --- Arquivos Estáticos ---
-STATIC_URL = '/static/'
+#  Define o diretório onde os arquivos estáticos serão coletados com o comando python manage.py collectstatic.
+#  Em produção, você deve usar um servidor web (como Nginx) para servir os arquivos de STATIC_ROOT
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Define o prefixo da URL para acessar os arquivos estáticos no navegador. Exemplo: /static/css/style.css.
+STATIC_URL = '/static/'
+
+# Informa ao Django onde estão os arquivos estáticos durante o desenvolvimento. 
+# Aqui, ele vai procurar arquivos em BASE_DIR/static.
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # WhiteNoise: serve arquivos estáticos em produção
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -258,7 +266,7 @@ JAZZMIN_SETTINGS = {
     # Whether to link font from fonts.googleapis.com (use custom_css to supply font otherwise)
     "use_google_fonts_cdn": True,
     # Whether to show the UI customizer on the sidebar
-    "show_ui_builder": False,
+    "show_ui_builder": True,
 
     ###############
     # Change view #
