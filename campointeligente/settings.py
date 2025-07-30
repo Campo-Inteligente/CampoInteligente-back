@@ -155,6 +155,7 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
     "navigation_expanded": True,
     "changeform_format": "horizontal_tabs",
+    "show_ui_builder": True,
 }
 
 
@@ -170,4 +171,5 @@ JAZZMIN_UI_TWEAKS = {
     #},
     #"brand_colour": "success",  		# Verde personalizado
 }
+
 
