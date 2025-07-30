@@ -9,6 +9,9 @@
 </head>
 <body>
   <div class="login-container">
+    <div class="logo-box">
+      <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo">
+    </div>
     <form method="post" class="login-form">
       {% csrf_token %}
       {{ form.as_p }}

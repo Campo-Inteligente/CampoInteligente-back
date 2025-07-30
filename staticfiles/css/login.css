@@ -1,56 +1,78 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: "Arial", sans-serif;
+}
+
+/* Fundo com imagem */
 body {
   background-image: url('/static/img/wallpaper.png');
   background-size: cover;
   background-position: center;
-  font-family: Arial, sans-serif;
-  height: 100vh;
-  margin: 0;
-
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/* Caixa do formulário */
 .login-container {
-  background: rgba(255, 255, 255, 0.92);
-  padding: 30px;
+  background: rgba(255, 255, 255, 0.85); /* Translucidez */
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   width: 90%;
   max-width: 400px;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  text-align: center;
 }
 
-.login-container form p {
-  margin-bottom: 1rem;
+/* Logo */
+.logo-box {
+  margin-bottom: 20px;
 }
 
-.login-container label {
-  font-weight: bold;
+.logo {
+  width: 120px;
+  height: auto;
+}
+
+/* Formulário */
+.login-form p {
+  margin-bottom: 1.2rem;
+  text-align: left;
+}
+
+.login-form label {
   display: block;
-  margin-bottom: 0.5rem;
+  font-weight: bold;
+  margin-bottom: 6px;
 }
 
-.login-container input[type="text"],
-.login-container input[type="password"] {
+.login-form input {
   width: 100%;
   padding: 10px;
-  margin-bottom: 1rem;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
 
-.login-container button {
+/* Botão */
+button[type="submit"] {
   width: 100%;
   padding: 12px;
   background-color: #4b6cb7;
   color: white;
+  font-size: 16px;
   border: none;
   border-radius: 6px;
-  font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.login-container button:hover {
+button[type="submit"]:hover {
   background-color: #3a539b;
 }
