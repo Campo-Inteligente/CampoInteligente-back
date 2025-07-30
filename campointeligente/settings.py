@@ -26,8 +26,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1",
 ]
 
-
-APPEND_SLASH = False
+APPEND_SLASH = True
 
 # --- Aplicações Instaladas ---
 INSTALLED_APPS = [
