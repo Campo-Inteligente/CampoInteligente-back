@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
-
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -11,7 +10,7 @@ from django.http import HttpResponse
 
 # Views simples para teste
 def teste_view(request):
-    return HttpResponse("Teste Funcionando!")
+    return HttpResponse("Funcionando!")
 
 def home(request):
     return HttpResponse("Olá, Campo Inteligente API está rodando!")
@@ -33,15 +32,9 @@ schema_view = get_schema_view(
 
 # Todas as URLs reunidas em um único bloco
 urlpatterns = [
-
-    #path('grappelli/', include('grappelli.urls')),  # Grappelli URLs
-    #path('jazzmin/', include('jazzmin.urls')),  # Jazzmin URLs
     path('', home),  # Rota raiz
-    path('admin/', admin.site.urls),
-
-    # O /?$ torna a barra final opcional
-    #re_path(r'^teste/?$', views.teste_view, name='teste'),
     path('teste/', teste_view),  # Teste rápido
+    path('admin/', admin.site.urls),
 
     # APIs principais
     path('api/v1/chatbot/', include('chatbot.urls')),
