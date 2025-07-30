@@ -80,7 +80,7 @@ TEMPLATES = [
     },
 ]
 
-LOGIN_URL = '/accounts/login/'
+#LOGIN_URL = '/accounts/login/'
 
 WSGI_APPLICATION = 'campointeligente.wsgi.application'
 
