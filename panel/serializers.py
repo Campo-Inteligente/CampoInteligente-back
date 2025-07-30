@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from chatbot.models import Organizacao, Administrador
+from chatbot.models import Organizacao, Administrador, Usuario
 
 # --- Serializer para Organizações (usado para Criar, Listar e Atualizar) ---
 
@@ -104,3 +104,14 @@ class AdministradorUpdateSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+    
+class UsuarioSerializer(serializers.ModelSerializer):
+    """
+    Serializer para listar, criar e editar os usuários (agricultores) de uma organização.
+    """
+    class Meta:
+        model = Usuario
+        # Defina os campos que o admin da organização pode ver/editar
+        fields = ['id', 'nome', 'whatsapp_id', 'cidade', 'estado', 'data_cadastro']
+        # A organização será definida automaticamente, então é apenas de leitura, assim como a data.
+        read_only_fields = ['id', 'organizacao', 'data_cadastro']

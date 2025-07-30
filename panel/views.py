@@ -8,8 +8,9 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 
-from chatbot.models import Organizacao, Administrador
-from .serializers import OrganizacaoSerializer, AdministradorCreateSerializer, AdministradorReadOnlySerializer, AdministradorUpdateSerializer
+from chatbot.models import Organizacao, Administrador, Usuario
+from .serializers import OrganizacaoSerializer, AdministradorCreateSerializer, AdministradorReadOnlySerializer, AdministradorUpdateSerializer, UsuarioSerializer
+
 
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
@@ -274,4 +275,67 @@ def administrador_detail_view(request, pk):
         if administrador.user:
             administrador.user.delete()
         administrador.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+@api_view(['GET', 'POST'])
+@authentication_classes([CsrfExemptSessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated]) # Qualquer admin autenticado pode aceder
+def usuarios_org_view(request):
+    """
+    Lista ou cria novos usuários (agricultores) DENTRO da organização
+    do administrador que está logado.
+    """
+    try:
+        # Pega o perfil de administrador do usuário logado
+        admin = request.user.administrador_profile
+        organizacao = admin.organizacao
+    except Administrador.DoesNotExist:
+        return Response({"error": "Apenas administradores de uma organização podem gerir usuários."}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == 'GET':
+        # Filtra para mostrar apenas os usuários da organização do admin
+        usuarios = Usuario.objects.filter(organizacao=organizacao)
+        serializer = UsuarioSerializer(usuarios, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = UsuarioSerializer(data=request.data)
+        if serializer.is_valid():
+            # Ao salvar, a organização é definida automaticamente
+            serializer.save(organizacao=organizacao)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@authentication_classes([CsrfExemptSessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def usuario_org_detail_view(request, pk):
+    """
+    Vê, edita ou apaga um usuário específico, garantindo que ele
+    pertença à organização do administrador logado.
+    """
+    try:
+        admin = request.user.administrador_profile
+        # Garante que o usuário a ser modificado pertence à mesma organização do admin
+        usuario = Usuario.objects.get(pk=pk, organizacao=admin.organizacao)
+    except Administrador.DoesNotExist:
+        return Response({"error": "Apenas administradores de uma organização podem gerir usuários."}, status=status.HTTP_403_FORBIDDEN)
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuário não encontrado nesta organização."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = UsuarioSerializer(usuario)
+        return Response(serializer.data)
+
+    elif request.method in ['PUT', 'PATCH']:
+        serializer = UsuarioSerializer(usuario, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        usuario.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

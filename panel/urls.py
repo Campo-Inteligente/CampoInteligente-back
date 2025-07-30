@@ -24,4 +24,8 @@ urlpatterns = [
     path('administradores/create/', views.administradores_create_view, name='api_administradores_create'),
     path('administradores/list/', views.administradores_list_view, name='api_administradores_list'),
     path('administradores/<int:pk>/', views.administrador_detail_view, name='api_administrador_detail'),
+    
+    # Rotas para Usuarios
+    path('usuarios/', views.usuarios_org_view, name='org-usuarios-list-create'),
+    path('usuarios/<int:pk>/', views.usuario_org_detail_view, name='org-usuario-detail'),
 ]
