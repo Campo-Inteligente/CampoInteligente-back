@@ -19,7 +19,7 @@ ALLOWED_HOSTS = [
     'campointeligente.ddns.com.br'
 ]
 
-APPEND_SLASH = False
+APPEND_SLASH = True
 
 # --- Aplicações Instaladas ---
 INSTALLED_APPS = [
