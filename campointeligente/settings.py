@@ -19,6 +19,14 @@ ALLOWED_HOSTS = [
     'campointeligente.ddns.com.br'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://campointeligente.ddns.com.br:21083",
+    "https://campointeligente.ddns.com.br",
+    "http://localhost",
+    "http://127.0.0.1",
+]
+
+
 APPEND_SLASH = False
 
 # --- Aplicações Instaladas ---
