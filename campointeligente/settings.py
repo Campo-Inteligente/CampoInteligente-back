@@ -30,7 +30,8 @@ APPEND_SLASH = True
 
 # --- Aplicações Instaladas ---
 INSTALLED_APPS = [
-    'grappelli',
+    #'grappelli',
+    'jazzmin',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -138,3 +139,35 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+
+JAZZMIN_SETTINGS = {
+    "site_logo": "static/img/logo.png",  	# Caminho relativo ao diretório static
+    "site_logo_classes": "img-circle",  	# Estilo opcional
+    "site_icon": "static/img/favicon.ico",  	# Caminho para o favicon
+
+    "site_title": "API CampoI",
+    "site_header": "API CampoI",
+    "site_brand": "API CampoI",
+    "welcome_sign": "Bem-vindo ao Painel de Controle da API CampoI",
+    "copyright": "© 2025 Campo Inteligente. Todos os direitos reservados",
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "changeform_format": "horizontal_tabs",
+}
+
+
+JAZZMIN_UI_TWEAKS = {
+    #"theme": "minty",  			# Base verde claro e agradável
+    #"dark_mode_theme": "darkly",  		# Se quiser opção escura
+    #"navbar": "navbar-light",     		# Fundo claro para destacar o logo
+    #"accent": "accent-success",   		# Verde como cor de destaque
+    #"sidebar": "sidebar-light-success",  	# Verde claro na lateral
+    #"button_classes": {
+    #    "primary": "btn-success",       	# Botões com tom agro
+    #    "secondary": "btn-outline-success",
+    #},
+    #"brand_colour": "success",  		# Verde personalizado
+}
+
