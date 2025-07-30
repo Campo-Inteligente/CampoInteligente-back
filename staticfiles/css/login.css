@@ -1,103 +1,17 @@
-/* Fundo com imagem */
-body.login {
-  background: url('/static/img/wallpaper.png') center center / cover no-repeat fixed;
-  font-family: 'Segoe UI', sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
+body {
+    background: url('/static/img/wallpaper.png') no-repeat center center fixed;
+    background-size: cover;
 }
 
-/* Wrapper centralizado */
-.login-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+.login-box {
+    z-index: 2;
+    position: relative;
 }
 
-/* Painel translúcido com animação */
-.login-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  padding: 40px 30px;
-  border-radius: 12px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
-  width: 100%;
-  text-align: center;
-  animation: fadeInUp 1s ease;
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.6);
+    z-index: 1;
 }
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Logo */
-.login-logo {
-  max-width: 120px;
-  margin-bottom: 20px;
-  animation: fadeIn 1.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
-}
-
-/* Campos do formulário */
-input[type="text"],
-input[type="password"] {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  box-sizing: border-box;
-  transition: box-shadow 0.3s ease;
-}
-
-input:focus {
-  outline: none;
-  box-shadow: 0 0 8px rgba(0,123,255,0.5);
-}
-
-/* Botão */
-button[type="submit"] {
-  width: 100%;
-  padding: 12px;
-  margin-top: 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-/* Responsividade */
-@media (max-width: 480px) {
-  .login-panel {
-    padding: 30px 20px;
-    border-radius: 10px;
-  }
-
-  .login-logo {
-    max-width: 100px;
-  }
-}
-
