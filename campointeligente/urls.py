@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path, include, re_path
+from django.contrib.auth import views as auth_views
 
 # Imports de terceiros
 from rest_framework import permissions
@@ -43,6 +44,7 @@ urlpatterns = [
     path('', home),  # Rota raiz
     path('teste/', teste_view),  # Teste rápido
     path('admin/', admin.site.urls),
+    
 
     # APIs principais
     path('api/v1/chatbot/', include('chatbot.urls')),
@@ -58,7 +60,9 @@ urlpatterns = [
 
     path('api/v1/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/v1/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
 ]
+
 
 # Arquivos estáticos durante o desenvolvimento
 if settings.DEBUG:
