@@ -113,12 +113,20 @@ TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-# --- Arquivos Estáticos ---
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# --- base ---
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# WhiteNoise: serve arquivos estáticos em produção
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Arquivos estáticos
+STATIC_URL = '/static/'
+
+# Durante o desenvolvimento
+dev_static_dir = BASE_DIR / 'static'
+if dev_static_dir.exists(): # Somente se essa pasta existir
+    STATICFILES_DIRS = [ dev_static_dir ] 
+
+
+# Durante produção (collectstatic irá copiar tudo aqui)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # --- Tipo padrão de campo automático ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
