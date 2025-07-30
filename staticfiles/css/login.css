@@ -3,15 +3,38 @@ body {
     background-size: cover;
 }
 
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.6); /* camada translúcida branca por trás */
+    z-index: 1;
+}
+
+/* Envolve a caixa do login */
 .login-box {
     z-index: 2;
     position: relative;
 }
 
-body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(255, 255, 255, 0.6);
-    z-index: 1;
+/* Torna a caixa branca (AdminLTE .card) translúcida */
+.login-box .card {
+    background-color: rgba(128, 128, 128, 0.5) !important;  /* cinza translúcido */
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Opcional: borda branca em campos para legibilidade */
+.login-box input.form-control {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #ccc;
+}
+
+/* Centraliza logo */
+.login-logo picture,
+.login-logo img {
+    max-width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }

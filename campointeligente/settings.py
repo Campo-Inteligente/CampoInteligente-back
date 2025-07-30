@@ -159,7 +159,7 @@ JAZZMIN_SETTINGS = {
     "site_title": "API CampoI",
     "site_header": "API CampoI",
     "site_brand": "API CampoI",
-    "welcome_sign": "Bem-vindo ao Painel de Controle da API CampoI",
+    "welcome_sign": "Painel de Controle",
     "copyright": "© 2025 Campo Inteligente. Todos os direitos reservados",
     "show_sidebar": True,
     "navigation_expanded": True,
