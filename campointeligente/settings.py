@@ -153,9 +153,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 JAZZMIN_SETTINGS = {
-    "site_logo": "img/logo.png",  	# Caminho relativo ao diretório static
-    #"site_logo_classes": "img-circle", # Estilo opcional
-    "site_icon": "img/favicon.ico",  	# Caminho para o favicon
+    "login_logo": None,
+    #"site_logo_classes": "img-circle",     # Estilo opcional
+    "site_icon": "img/favicon.ico",  	    # Caminho para o favicon
 
     "site_title": "API CampoI",
     "site_header": "API CampoI",
