@@ -40,6 +40,17 @@ class Administrador(models.Model):
 # TABELA DE USUÁRIOS (AGRICULTORES)
 # ========================
 class Usuario(models.Model):
+    STATUS_CHOICES = [
+        ('Ativo', 'Ativo'),
+        ('Inativo', 'Inativo'),
+    ]
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='Ativo', # Define 'Ativo' como o padrão para novos usuários
+        verbose_name="Status do Usuário"
+    )
+    
     organizacao = models.ForeignKey(Organizacao, on_delete=models.CASCADE, related_name='usuarios')
     nome = models.CharField(max_length=255)
     whatsapp_id = models.CharField(max_length=50, unique=True, db_index=True)

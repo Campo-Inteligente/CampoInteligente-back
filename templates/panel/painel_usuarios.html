@@ -1,0 +1,105 @@
+{% extends "admin/base.html" %} {% load static %} 
+{% block title %}Painel de Usuários {{block.super }}{% endblock %} 
+
+{% block extrastyle %}{{ block.super }}{% endblock %} 
+
+{# O conteúdo principal da sua página vai aqui #} 
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="h2">Painel de Usuários</h1>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div class="card text-center mb-3">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Total de Usuários</h5>
+          <p class="card-text h2 text-primary">{{ total }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card text-center mb-3">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Ativos</h5>
+          <p class="card-text h2 text-success">{{ ativos }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card text-center mb-3">
+        <div class="card-body">
+          <h5 class="card-title text-muted">Inativos</h5>
+          <p class="card-text h2 text-danger">{{ inativos }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <form method="GET" class="form-inline">
+          <input
+            type="text"
+            name="localizacao"
+            placeholder="Buscar por cidade..."
+            class="form-control mr-2"
+          />
+          <button type="submit" class="btn btn-primary">Filtrar</button>
+        </form>
+        <a href="{% url 'admin:chatbot_usuario_add' %}" class="btn btn-success">+ Novo usuário</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+          <thead class="thead-light">
+            <tr>
+              <th>Nome</th>
+              <th>Telefone (WhatsApp ID)</th>
+              <th>Cidade</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in usuarios %}
+            <tr>
+              <td class="p-4 font-medium align-middle">{{ u.nome }}</td>
+              <td class="p-4 align-middle">{{ u.whatsapp_id }}</td>
+              <td class="p-4 align-middle">{{ u.cidade }}</td>
+              <td class="p-4 align-middle">
+                {% if u.status == "Ativo" %}
+                <span class="badge badge-success">Ativo</span>
+                {% else %}
+                <span class="badge badge-danger">Inativo</span>
+                {% endif %}
+              </td>
+              <td class="p-4 align-middle">
+                <a href="{% url 'admin:chatbot_usuario_change' u.id %}" class="btn btn-sm btn-info">Editar</a>
+                <a href="{% url 'admin:chatbot_usuario_delete' u.id %}" class="btn btn-sm btn-danger">Excluir</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">
+                Nenhum usuário encontrado.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

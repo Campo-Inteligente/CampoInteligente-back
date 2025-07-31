@@ -28,4 +28,12 @@ urlpatterns = [
     # Rotas para Usuarios
     path('usuarios/', views.usuarios_org_view, name='org-usuarios-list-create'),
     path('usuarios/<int:pk>/', views.usuario_org_detail_view, name='org-usuario-detail'),
+    
+    # ========================================================
+    # Rotas do Painel com Templates HTML (renderizadas pelo Django)
+    # ========================================================
+    
+    path('dashboard/usuarios/', views.painel_usuarios_view, name='painel-usuarios'),
+    path('dashboard/usuarios/<int:pk>/editar/', views.editar_usuario_view, name='editar_usuario'),
+    path('dashboard/usuarios/<int:pk>/deletar/', views.deletar_usuario_view, name='deletar_usuario'),
 ]

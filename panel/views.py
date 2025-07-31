@@ -7,6 +7,10 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.http import HttpResponseForbidden
+from django.contrib import admin
 
 from chatbot.models import Organizacao, Administrador, Usuario
 from .serializers import OrganizacaoSerializer, AdministradorCreateSerializer, AdministradorReadOnlySerializer, AdministradorUpdateSerializer, UsuarioSerializer
@@ -339,3 +343,55 @@ def usuario_org_detail_view(request, pk):
     elif request.method == 'DELETE':
         usuario.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@login_required
+def painel_usuarios_view(request):
+    """
+    View para renderizar uma página HTML com a lista de usuários
+    da organização do administrador logado.
+    """
+    try:
+        # --- CORREÇÃO AQUI: Renomeado de 'admin' para 'admin_profile' ---
+        admin_profile = request.user.administrador_profile
+        organizacao = admin_profile.organizacao
+        usuarios_base = Usuario.objects.filter(organizacao=organizacao)
+        organizacao_nome = organizacao.nome
+    except Administrador.DoesNotExist:
+        if not request.user.is_superuser:
+            return HttpResponseForbidden("Acesso negado.")
+        usuarios_base = Usuario.objects.all()
+        organizacao_nome = "Todas as Organizações (Superuser)"
+
+    filtro_cidade = request.GET.get('localizacao', '')
+    if filtro_cidade:
+        usuarios_filtrados = usuarios_base.filter(cidade__icontains=filtro_cidade)
+    else:
+        usuarios_filtrados = usuarios_base.all()
+
+    ativos = usuarios_filtrados.filter(status='Ativo').count()
+    inativos = usuarios_filtrados.filter(status='Inativo').count()
+
+    context = {
+        'usuarios': usuarios_filtrados,
+        'organizacao_nome': organizacao_nome,
+        'total': usuarios_filtrados.count(),
+        'ativos': ativos,
+        'inativos': inativos,
+    }
+
+    # Agora a chamada a 'admin.site' refere-se ao módulo correto do Django
+    context.update(admin.site.each_context(request))
+    
+    return render(request, 'panel/painel_usuarios.html', context)
+
+@login_required
+def editar_usuario_view(request, pk):
+    # Futuramente, aqui ficará a sua lógica para editar um usuário
+    from django.http import HttpResponse
+    return HttpResponse(f"Página para editar o usuário com ID: {pk}")
+
+@login_required
+def deletar_usuario_view(request, pk):
+    # Futuramente, aqui ficará a sua lógica para apagar um usuário
+    from django.http import HttpResponse
+    return HttpResponse(f"Página para apagar o usuário com ID: {pk}")

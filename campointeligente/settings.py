@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'chatbot',
+    'panel',
 ]
 
 # --- ASGI ---
@@ -116,17 +117,20 @@ USE_TZ = True
 # --- base ---
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Arquivos estáticos
+# --- Arquivos Estáticos (Static files) ---
+
+# URL para se referir aos arquivos estáticos no template.
 STATIC_URL = '/static/'
 
-# Durante o desenvolvimento
-dev_static_dir = BASE_DIR / 'static'
-if dev_static_dir.exists(): # Somente se essa pasta existir
-    STATICFILES_DIRS = [ dev_static_dir ] 
-
-
-# Durante produção (collectstatic irá copiar tudo aqui)
+# Pasta onde o comando `collectstatic` irá juntar todos os arquivos para produção.
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# --- CORREÇÃO IMPORTANTE AQUI ---
+# Lista de pastas onde o Django irá procurar por arquivos estáticos adicionais.
+# Esta linha garante que o Django encontre a sua pasta 'static' na raiz do projeto.
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 # --- Tipo padrão de campo automático ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -152,19 +156,39 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 JAZZMIN_SETTINGS = {
-    "site_logo": "img/logo.png",  	# Caminho relativo ao diretório static
+    "site_logo": "img/logocerta.png",  	# Caminho relativo ao diretório static
+    "site_logo_classes": "logo-switch",
+
     #"site_logo_classes": "img-circle", # Estilo opcional
     "site_icon": "img/favicon.ico",  	# Caminho para o favicon
 
     "site_title": "API CampoI",
-    "site_header": "API CampoI",
-    "site_brand": "API CampoI",
+    "site_header": "",
+    "site_brand": "",
     "welcome_sign": "Painel de Controle",
     "copyright": "© 2025 Campo Inteligente. Todos os direitos reservados",
     "show_sidebar": True,
     "navigation_expanded": True,
     "changeform_format": "horizontal_tabs",
     "show_ui_builder": True,
+    
+    "custom_css": "css/custom_admin.css",
+    
+    "custom_links": {
+        # O nome da app onde o link deve aparecer (pode ser qualquer app, 'chatbot' faz sentido)
+        "chatbot": [ 
+            {
+                "name": "Painel de Usuários", 
+                "url": "painel-usuarios",    # O nome do URL que você definiu em urls.py
+                "icon": "fas fa-users",      # Ícone do Font Awesome (opcional)
+                # Permissão necessária para ver este link.
+                # O formato é "nome_da_app.verbo_modelo"
+                "permissions": ["chatbot.view_usuario"] 
+            },
+        ]
+    },
+    
+    
 }
 
 
