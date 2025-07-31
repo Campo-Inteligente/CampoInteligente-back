@@ -1,4 +1,4 @@
-#atualizado em 31/07/2025 15h01
+# atualizado em 31/07/2025 15h01
 #!/bin/bash
 
 clear
@@ -33,6 +33,19 @@ else
     echo "   sudo journalctl -u campointeligente-back -n 30 --no-pager"
 fi
 
+# 🌐 Verificar e liberar porta 21083 antes de reiniciar Nginx
+echo ""
+PORT=21083
+PID=$(sudo lsof -t -i:$PORT)
+
+if [[ -n "$PID" ]]; then
+    echo "⚠️ Porta $PORT está em uso pelo processo $PID. Finalizando..."
+    sudo kill -9 $PID
+    echo "✅ Processo $PID finalizado. Porta liberada."
+else
+    echo "✅ Porta $PORT está livre."
+fi
+
 # 🌐 Reiniciar Nginx
 echo ""
 echo "📦 Reiniciando Nginx (proxy reverso)..."
@@ -52,4 +65,4 @@ fi
 
 echo ""
 echo "🎯 Finalizado! Backend reiniciado com as configurações mais recentes."
- 
+
