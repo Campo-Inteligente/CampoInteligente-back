@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path, include, re_path
 from django.contrib.auth import views as auth_views
+from django.shortcuts import redirect
 
 # Imports de terceiros
 from rest_framework import permissions
@@ -20,7 +21,48 @@ def teste_view(request):
     return HttpResponse("Funcionando!")
 
 def home(request):
-    return HttpResponse("Olá, Campo Inteligente API está rodando!")
+    #return HttpResponse("Olá, Campo Inteligente API está rodando!")
+    #return redirect('/admin/')
+    logo_url = static('img/1.png')
+    html = """
+    <html>
+        <head>
+            <meta http-equiv="refresh" content="2; url=/admin/" />
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                }
+                .container {
+                    text-align: center;
+                }
+                .container img {
+                    max-width: 80%%;
+                    height: auto;
+                    margin-bottom: 20px;
+                }
+                h2 {
+                    color: #333;
+                    font-size: 1.8em;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <img src="{logo_url}" alt="Logo">
+                <h2>BEM-VINDO À CAMPO INTELIGENTE</h2>
+            </div>
+        </body>
+    </html>
+    """
+
+    return HttpResponse(html)
 
 # Swagger / Redoc
 schema_view = get_schema_view(
@@ -40,8 +82,9 @@ schema_view = get_schema_view(
 # Todas as URLs reunidas em um único bloco
 urlpatterns = [
 
-    path('grappelli/', include('grappelli.urls')), # tema
+    #path('grappelli/', include('grappelli.urls')), # tema
     path('', home),  # Rota raiz
+    path('admin/', admin.site.urls),
     path('teste/', teste_view),  # Teste rápido
 
     # Ativar o fluxo de reset de senha do Django

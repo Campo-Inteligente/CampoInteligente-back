@@ -7,9 +7,17 @@
 {% endblock %}
 
 {% block content %}
-  {{ block.super }} 
-  <!-- <div style="text-align: center; margin-top: 10px;">
-    <a href="{% url 'admin_password_reset' %}" style="font-size: 0.9em;">🔒 Esqueceu sua senha ou nome de usuário?</a>
-  </div> /-->
-{% endblock %} 
+  <!-- Camada branca translúcida no fundo -->
+  <!-- <div class="background-overlay"></div> -->
+  <!-- Removida propositalmente para não desbotar o wallpaper -->
 
+  <!-- Caixa de login padrão do Django Admin -->
+  {{ block.super }}
+
+  <!-- Link opcional para recuperação de senha -->
+  <!--
+  <div style="text-align: center; margin-top: 10px;">
+    <a href="{% url 'admin_password_reset' %}" style="font-size: 0.9em;">🔒 Esqueceu sua senha ou nome de usuário?</a>
+  </div>
+  -->
+{% endblock %}
