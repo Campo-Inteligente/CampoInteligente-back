@@ -1,3 +1,4 @@
+#atualizado em 31/07/2025 15h01
 #!/bin/bash
 
 clear
@@ -15,21 +16,21 @@ else
     echo "⚠️ Ambiente virtual não encontrado. Pulei a coleta de estáticos."
 fi
 
-# 🚀 Reiniciar Gunicorn
+# 🚀 Reiniciar backend via systemd (Daphne)
 echo ""
-echo "🚀 Reiniciando Gunicorn (Django backend)..."
-sudo systemctl restart gunicorn
+echo "🚀 Reiniciando Daphne (Django backend)..."
+sudo systemctl restart campointeligente-back
 
 echo ""
-echo "📋 Verificando status do Gunicorn:"
-gunicorn_status=$(sudo systemctl is-active gunicorn)
+echo "📋 Verificando status do backend:"
+backend_status=$(sudo systemctl is-active campointeligente-back)
 
-if [[ "$gunicorn_status" == "active" ]]; then
-    echo "✅ Gunicorn está ativo!"
+if [[ "$backend_status" == "active" ]]; then
+    echo "✅ Backend está ativo!"
 else
-    echo "❌ Gunicorn falhou ao iniciar!"
+    echo "❌ Backend falhou ao iniciar!"
     echo "💥 Verifique os logs com:"
-    echo "   sudo journalctl -u gunicorn -n 30 --no-pager"
+    echo "   sudo journalctl -u campointeligente-back -n 30 --no-pager"
 fi
 
 # 🌐 Reiniciar Nginx
@@ -51,3 +52,4 @@ fi
 
 echo ""
 echo "🎯 Finalizado! Backend reiniciado com as configurações mais recentes."
+ 
