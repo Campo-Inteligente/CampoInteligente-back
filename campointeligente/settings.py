@@ -157,23 +157,17 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 JAZZMIN_SETTINGS = {
-<<<<<<< HEAD
     "site_logo": "img/logocerta.png",  	# Caminho relativo ao diretório static
     "site_logo_classes": "logo-switch",
 
     #"site_logo_classes": "img-circle", # Estilo opcional
-=======
-    "login_logo": "img/1.png",
-    "site_logo": "img/1.png",  	    # Caminho relativo ao diretório static
-    "site_logo_classes": "img-circle",  # Classes CSS para aplicar ao logo da barra lateral para ajustar o tamanho
->>>>>>> b5c287c640921f157fc054276fe68190babeabf7
     "site_icon": "img/favicon.ico",  	# Caminho para o favicon
 
     "site_title": "API CampoI",
     "site_header": "",
     "site_brand": "",
     "welcome_sign": "Painel de Controle",
-    "copyright": "© 2025 Campo Inteligente. Todos os direitos reservados",
+    "copyright": "Campo Inteligente. Todos os direitos reservados",
     "show_sidebar": True,
     "navigation_expanded": True,
     "changeform_format": "horizontal_tabs",

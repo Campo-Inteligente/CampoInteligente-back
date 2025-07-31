@@ -1,0 +1,71 @@
+/* FUNDO VERDE ESCURO NA SIDEBAR */
+.main-sidebar {
+    background-color: #004809 !important;
+}
+
+/* REMOVE O TEXTO "API CampoI" */
+.brand-link .brand-text,
+.brand-link.logo-switch .brand-text {
+    display: none !important;
+}
+
+/* AJUSTA A ÁREA DO LOGO */
+.brand-link,
+.brand-link.logo-switch {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 64px !important;
+    padding: 0 !important;
+}
+
+/* AJUSTA A IMAGEM DA LOGO */
+.brand-link img,
+.brand-link.logo-switch .brand-image-xl {
+    height: 38px !important;
+    width: auto !important;
+    max-height: 50px !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+     filter: none !important;
+    -webkit-filter: none !important; 
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important; 
+    border: none !important; 
+}
+
+.nav-sidebar .nav-item > .nav-link.active,
+.nav-sidebar .nav-item > .nav-link:hover {
+    background-color: #FFFFFF !important; 
+    color: #004809 !important; 
+}
+
+.nav-sidebar .nav-item > .nav-link.active i,
+.nav-sidebar .nav-item > .nav-link:hover i {
+    color: #004809 !important;
+}
+
+.btn-primary,
+.btn-success {
+    background-color: #004809 !important;
+    border-color: #004809 !important;
+}
+
+.btn-primary:hover,
+.btn-success:hover {
+    background-color: #003306 !important; 
+    border-color: #003306 !important;
+}
+
+.btn-info {
+    background-color: #4CAF50 !important;
+    border-color: #4CAF50 !important;
+}
+
+.btn-info:hover {
+    background-color: #45a049 !important; 
+    border-color: #45a049 !important;
+}
