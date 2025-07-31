@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path, include, re_path
 from django.contrib.auth import views as auth_views
+from django.shortcuts import redirect
 
 # Imports de terceiros
 from rest_framework import permissions
@@ -20,7 +21,20 @@ def teste_view(request):
     return HttpResponse("Funcionando!")
 
 def home(request):
-    return HttpResponse("Olá, Campo Inteligente API está rodando!")
+    #return HttpResponse("Olá, Campo Inteligente API está rodando!")
+    #return redirect('/admin/')
+    html = """
+    <html>
+        <head>
+            <meta http-equiv="refresh" content="2; url=/admin/" />
+        </head>
+        <body>
+            <h2>BEM VINDO Á CAMPO INTELIGEMTE</h2>
+        </body>
+    </html>
+    """
+    return HttpResponse(html)
+
 
 # Swagger / Redoc
 schema_view = get_schema_view(
@@ -40,8 +54,10 @@ schema_view = get_schema_view(
 # Todas as URLs reunidas em um único bloco
 urlpatterns = [
 
-    path('grappelli/', include('grappelli.urls')), # tema
-    path('', home),  # Rota raiz
+    #path('grappelli/', include('grappelli.urls')), # tema
+    #path('', home),  # Rota raiz
+    path('', redirect_to_admin),
+    path('admin/', admin.site.urls),
     path('teste/', teste_view),  # Teste rápido
 
     # Ativar o fluxo de reset de senha do Django
