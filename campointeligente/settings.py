@@ -153,7 +153,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 JAZZMIN_SETTINGS = {
-    "login_logo": None,
+    "login_logo": "img/1.png",
     "site_logo": "img/1.png",  	    # Caminho relativo ao diretório static
     "site_logo_classes": "img-circle",  # Classes CSS para aplicar ao logo da barra lateral para ajustar o tamanho
     "site_icon": "img/favicon.ico",  	# Caminho para o favicon
