@@ -1,30 +1,31 @@
+/* Wallpaper de fundo */
 body {
     background: url('/static/img/wallpaper.png') no-repeat center center fixed;
     background-size: cover;
 }
 
-body::before {
-    content: '';
+/* Camada branca translúcida fora da caixa */
+.background-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(255, 255, 255, 0.6); /* camada translúcida branca por trás */
+    background-color: rgba(255, 255, 255, 0.6);
     z-index: 1;
 }
 
-/* Envolve a caixa do login */
+/* Caixa de login */
 .login-box {
     z-index: 2;
     position: relative;
 }
 
-/* Torna a caixa branca (AdminLTE .card) translúcida */
+/* Card da caixa com fundo cinza translúcido */
 .login-box .card {
-    background-color: rgba(128, 128, 128, 0.5) !important;  /* cinza translúcido */
+    background-color: rgba(128, 128, 128, 0.5) !important;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Opcional: borda branca em campos para legibilidade */
+/* Campos de formulário com fundo branco translúcido */
 .login-box input.form-control {
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid #ccc;
