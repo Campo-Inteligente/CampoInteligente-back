@@ -22,10 +22,6 @@ def teste_view(request):
 
 def home(request):
     #return HttpResponse("Olá, Campo Inteligente API está rodando!")
-<<<<<<< HEAD
-    return redirect('/admin/')
-    
-=======
     #return redirect('/admin/')
     html = """
     <html>
@@ -38,8 +34,6 @@ def home(request):
     </html>
     """
     return HttpResponse(html)
-
->>>>>>> f6bef7998a40eff73b97c06669babd90194b351e
 
 # Swagger / Redoc
 schema_view = get_schema_view(
