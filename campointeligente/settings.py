@@ -154,8 +154,14 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 JAZZMIN_SETTINGS = {
     "login_logo": None,
+<<<<<<< HEAD
     #"site_logo_classes": "img-circle",     # Estilo opcional
     "site_icon": "img/favicon.ico",  	    # Caminho para o favicon
+=======
+    "site_logo": "img/logo3.png",  	# Caminho relativo ao diretório static
+    "site_logo_classes": "img-circle",  # Classes CSS para aplicar ao logo da barra lateral para ajustar o tamanho
+    "site_icon": "img/favicon.ico",  	# Caminho para o favicon
+>>>>>>> f6bef7998a40eff73b97c06669babd90194b351e
 
     "site_title": "API CampoI",
     "site_header": "API CampoI",

@@ -22,8 +22,24 @@ def teste_view(request):
 
 def home(request):
     #return HttpResponse("Olá, Campo Inteligente API está rodando!")
+<<<<<<< HEAD
     return redirect('/admin/')
     
+=======
+    #return redirect('/admin/')
+    html = """
+    <html>
+        <head>
+            <meta http-equiv="refresh" content="2; url=/admin/" />
+        </head>
+        <body>
+            <h2>BEM VINDO Á CAMPO INTELIGEMTE</h2>
+        </body>
+    </html>
+    """
+    return HttpResponse(html)
+
+>>>>>>> f6bef7998a40eff73b97c06669babd90194b351e
 
 # Swagger / Redoc
 schema_view = get_schema_view(
@@ -43,8 +59,9 @@ schema_view = get_schema_view(
 # Todas as URLs reunidas em um único bloco
 urlpatterns = [
 
-    path('grappelli/', include('grappelli.urls')), # tema
+    #path('grappelli/', include('grappelli.urls')), # tema
     path('', home),  # Rota raiz
+    path('admin/', admin.site.urls),
     path('teste/', teste_view),  # Teste rápido
 
     # Ativar o fluxo de reset de senha do Django

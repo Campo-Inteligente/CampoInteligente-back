@@ -3,20 +3,51 @@
 clear
 echo "🔄 Reiniciando Django Backend e Serviços Relacionados..."
 
-# Ativa o venv temporariamente para rodar collectstatic
-echo "📁 Coletando arquivos estáticos:"
-source /var/www/campointeligente-back/venv/bin/activate
-python manage.py collectstatic --noinput
-deactivate
+# ✅ Coleta de arquivos estáticos
+echo ""
+echo "📁 Coletando arquivos estáticos via venv:"
+if [[ -f "venv/bin/activate" ]]; then
+    source venv/bin/activate
+    python manage.py collectstatic --noinput
+    deactivate
+    echo "✅ Coleta concluída."
+else
+    echo "⚠️ Ambiente virtual não encontrado. Pulei a coleta de estáticos."
+fi
 
-# Reiniciar backend
+# 🚀 Reiniciar Gunicorn
+echo ""
 echo "🚀 Reiniciando Gunicorn (Django backend)..."
 sudo systemctl restart gunicorn
-sudo systemctl status gunicorn | grep Active
 
-# Reiniciar nginx
+echo ""
+echo "📋 Verificando status do Gunicorn:"
+gunicorn_status=$(sudo systemctl is-active gunicorn)
+
+if [[ "$gunicorn_status" == "active" ]]; then
+    echo "✅ Gunicorn está ativo!"
+else
+    echo "❌ Gunicorn falhou ao iniciar!"
+    echo "💥 Verifique os logs com:"
+    echo "   sudo journalctl -u gunicorn -n 30 --no-pager"
+fi
+
+# 🌐 Reiniciar Nginx
+echo ""
 echo "📦 Reiniciando Nginx (proxy reverso)..."
 sudo systemctl restart nginx
-sudo systemctl status nginx | grep Active
 
-echo "✅ Pronto! Django e Nginx reiniciados com sucesso."
+echo ""
+echo "📋 Verificando status do Nginx:"
+nginx_status=$(sudo systemctl is-active nginx)
+
+if [[ "$nginx_status" == "active" ]]; then
+    echo "✅ Nginx está ativo!"
+else
+    echo "❌ Nginx falhou ao iniciar!"
+    echo "💥 Verifique os logs com:"
+    echo "   sudo journalctl -u nginx -n 30 --no-pager"
+fi
+
+echo ""
+echo "🎯 Finalizado! Backend reiniciado com as configurações mais recentes."
