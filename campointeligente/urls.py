@@ -55,8 +55,7 @@ schema_view = get_schema_view(
 urlpatterns = [
 
     #path('grappelli/', include('grappelli.urls')), # tema
-    #path('', home),  # Rota raiz
-    path('', redirect_to_admin),
+    path('', home),  # Rota raiz
     path('admin/', admin.site.urls),
     path('teste/', teste_view),  # Teste rápido
 
