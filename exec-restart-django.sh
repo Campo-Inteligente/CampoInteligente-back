@@ -1,22 +1,22 @@
 #!/bin/bash
 
 clear
-echo "🔄 Reiniciando serviços do Django..."
+echo "🔄 Reiniciando Django Backend e Serviços Relacionados..."
 
-# Reiniciar Gunicorn
-echo "🚀 Gunicorn..."
+# Ativa o venv temporariamente para rodar collectstatic
+echo "📁 Coletando arquivos estáticos:"
+source /var/www/campointeligente-back/venv/bin/activate
+python manage.py collectstatic --noinput
+deactivate
+
+# Reiniciar backend
+echo "🚀 Reiniciando Gunicorn (Django backend)..."
 sudo systemctl restart gunicorn
 sudo systemctl status gunicorn | grep Active
 
-# Reiniciar Daphne
-echo "🌐 Daphne..."
-sudo systemctl restart daphne
-sudo systemctl status daphne | grep Active
-
-# Reiniciar Nginx
-echo "📦 Nginx..."
+# Reiniciar nginx
+echo "📦 Reiniciando Nginx (proxy reverso)..."
 sudo systemctl restart nginx
 sudo systemctl status nginx | grep Active
 
-echo "✅ Pronto! Todos os serviços foram reiniciados."
-
+echo "✅ Pronto! Django e Nginx reiniciados com sucesso."

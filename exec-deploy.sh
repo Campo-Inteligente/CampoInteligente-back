@@ -95,20 +95,20 @@ docker compose ps
 
 # Desativar venv atual (se houver)
 if [[ "$VIRTUAL_ENV" != "" ]]; then
-    deactivate
+#    deactivate
 fi
 
 # Criar e ativar novo ambiente virtual
 python3 -m venv venv
 if [[ -f "venv/bin/activate" ]]; then
-    source /var/www/campointeligente-back/venv/bin/activate
+#    source /var/www/campointeligente-back/venv/bin/activate
 else
-    echo "⚠️ Script de ativação não encontrado!"
+#    echo "⚠️ Script de ativação não encontrado!"
 fi
 
 echo ""
 echo "📦 Instalando dependências:"
-pip install -r requirements.txt
+# pip install -r requirements.txt
 
 echo ""
 echo "🛠️ Lembrete: ajustar banco de dados, ALLOWED_HOSTS e DEBUG = False no settings.py"
