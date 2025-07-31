@@ -3,6 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
+from django.templatetags.static import static
 from django.urls import path, include, re_path
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect
@@ -23,8 +24,14 @@ def teste_view(request):
 def home(request):
     #return HttpResponse("Olá, Campo Inteligente API está rodando!")
     #return redirect('/admin/')
-    logo_url = static('img/1.png')
-    html = """
+    
+    # Caminho relativo: /static/img/1.png
+    relative_logo_url = static('img/1.png')
+
+    # Caminho absoluto: http://campointeligente.ddns.com.br:21083/static/img/1.png
+    logo_url = request.build_absolute_uri(relative_logo_url)
+
+    html = f"""
     <html>
         <head>
             <meta http-equiv="refresh" content="2; url=/admin/" />
