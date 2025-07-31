@@ -4,13 +4,15 @@ body {
     background-size: cover;
 }
 
-/* Camada branca translúcida fora da caixa */
+/* Camada branca translúcida global — DESABILITADA para não interferir no fundo */
+/*
 .background-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(255, 255, 255, 0.6);
     z-index: 1;
 }
+*/
 
 /* Caixa de login */
 .login-box {
@@ -20,18 +22,18 @@ body {
 
 /* Card da caixa com fundo cinza translúcido */
 .login-box .card {
-    background-color: rgba(128, 128, 128, 0.5) !important;
+    background-color: rgba(128, 128, 128, 0.5) !important; /* cinza com 50% de opacidade */
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Campos de formulário com fundo branco translúcido */
+/* Campos com leve branco translúcido */
 .login-box input.form-control {
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid #ccc;
 }
 
-/* Centraliza logo */
+/* Centraliza e redimensiona a logo */
 .login-logo picture,
 .login-logo img {
     max-width: 120px;
