@@ -88,34 +88,29 @@ schema_view = get_schema_view(
 
 # Todas as URLs reunidas em um único bloco
 urlpatterns = [
+    # Página inicial e testes
+    path('', home, name='home'),
+    path('teste/', teste_view, name='teste'),
 
-    #path('grappelli/', include('grappelli.urls')), # tema
-    path('', home),  # Rota raiz
+    # Admin
     path('admin/', admin.site.urls),
-    path('teste/', teste_view),  # Teste rápido
+    path('admin/login/', auth_views.LoginView.as_view(template_name='admin/login.html'), name='admin_login'),
+    path('admin/logout/', auth_views.LogoutView.as_view(template_name='admin/logged_out.html'), name='admin_logout'),
 
-    # Ativar o fluxo de reset de senha do Django
+    # Reset de senha (admin)
     path('admin/password_reset/', auth_views.PasswordResetView.as_view(), name='admin_password_reset'),
-    path('admin/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
-    path('admin/', admin.site.urls),
+    path('admin/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='admin_password_reset_done'),
+    path('admin/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='admin_password_reset_confirm'),
+    path('admin/reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='admin_password_reset_complete'),
 
-    # APIs principais
+    # APIs
     path('api/v1/chatbot/', include('chatbot.urls')),
     path('api/v1/panel/', include('panel.urls')),
 
     # Swagger / Redoc
-
-    re_path(
-       r'^api/v1/swagger(?P<format>\.json|\.yaml)$',
-       schema_view.without_ui(cache_timeout=0),
-       name='schema-json'
-    ),
-
+    re_path(r'^api/v1/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('api/v1/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/v1/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='admin/login.html'), name='login'),
 ]
 
 

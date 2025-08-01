@@ -135,6 +135,7 @@ STATICFILES_DIRS = [
 
 # --- Tipo padrão de campo automático ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGOUT_REDIRECT_URL = '/admin/logout/'
 
 # --- Configurações Personalizadas ---
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
