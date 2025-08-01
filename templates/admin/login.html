@@ -1,3 +1,5 @@
+
+
 {% extends "admin/login.html" %}
 {% load static %}
 
@@ -11,13 +13,14 @@
   <!-- <div class="background-overlay"></div> -->
   <!-- Removida propositalmente para não desbotar o wallpaper -->
 
-  <!-- Caixa de login padrão do Django Admin -->
-  {{ block.super }}
+  <!-- Caixa de login padrão do Django Admin com texto ajustado -->
+  {{ block.super|safe|replace:"Forgotten your password or username?","Esqueceu a senha ou o usuário?" }}
 
-  <!-- Link opcional para recuperação de senha -->
+  <!-- Link opcional para recuperação de senha (removido porque já foi substituído diretamente no texto) -->
   <!--
   <div style="text-align: center; margin-top: 10px;">
     <a href="{% url 'admin_password_reset' %}" style="font-size: 0.9em;">🔒 Esqueceu sua senha ou nome de usuário?</a>
   </div>
   -->
 {% endblock %}
+
