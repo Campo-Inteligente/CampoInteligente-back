@@ -1,6 +1,4 @@
 @echo off
-rem # 1. Vá até o diretório do seu repositório local
-cd /caminho/do/seu/repositorio
 
 rem # 2. Limpe todas as mudanças locais não comitadas
 git reset --hard

@@ -54,17 +54,20 @@ schema_view = get_schema_view(
 
 # Bloco de URLs principal
 urlpatterns = [
-    # Rotas principais
+    # Página inicial e testes
     path('', home, name='home'),
-    path('admin/', admin.site.urls),
-    path('teste/', teste_view),
-    
-    # Rotas necessárias para o admin funcionar corretamente (senha esquecida)
-    path('admin/password_reset/', auth_views.PasswordResetView.as_view(), name='admin_password_reset'),
-    path('admin/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path('teste/', teste_view, name='teste'),
 
+    # Admin
+    path('admin/', admin.site.urls),
+    path('admin/login/', auth_views.LoginView.as_view(template_name='admin/login.html'), name='admin_login'),
+    path('admin/logout/', auth_views.LogoutView.as_view(template_name='admin/logged_out.html'), name='admin_logout'),
+
+    # Reset de senha (admin)
+    path('admin/password_reset/', auth_views.PasswordResetView.as_view(), name='admin_password_reset'),
+    path('admin/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='admin_password_reset_done'),
+    path('admin/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='admin_password_reset_confirm'),
+    path('admin/reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='admin_password_reset_complete'),
 
     # APIs
     path('api/v1/chatbot/', include('chatbot.urls')),
@@ -74,9 +77,6 @@ urlpatterns = [
     re_path(r'^api/v1/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('api/v1/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/v1/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
-    # Rotas de Autenticação (se precisar de um login fora do admin)
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='admin/login.html'), name='login'),
 ]
 
 # Adiciona as URLs para servir arquivos estáticos APENAS em modo de desenvolvimento (DEBUG=True)
