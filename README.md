@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 560 (AUTO-INCREMENTO)
+Versão...............: 561 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 01/08/2025 18:00:31
+Data de Atualização..: 01/08/2025 18:32:33
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -17163,7 +17163,12 @@ Descrição das tecnologias:
 ├── 📂 campointeligente
 │   └── 🗂️ middleware
 ├── 📂 chatbot
-│   └── 🗂️ migrations
+│   ├── 🗂️ migrations
+│   └── 📂 templates
+│       └── 📂 admin
+│           └── 📂 chatbot
+│               └── 📂 usuario
+│                   └── 📄 painel_usuarios_custom.html
 ├── 📄 cmd-baixar.bat
 ├── 📄 cmd-deploy.bat
 ├── 📄 cmd-enviar.bat
@@ -17373,6 +17378,7 @@ Descrição das tecnologias:
 │   │   │   ├── 📄 custom_admin.css
 │   │   │   └── 📄 login.css
 │   │   ├── 📄 favicon.ico
+│   │   ├── 📄 fundologin.png
 │   │   ├── 📂 gis
 │   │   │   ├── 📄 move_vertex_off.svg
 │   │   │   └── 📄 move_vertex_on.svg
@@ -17395,6 +17401,7 @@ Descrição das tecnologias:
 │   │   ├── 📄 logo3.png
 │   │   ├── 📄 logo4.png
 │   │   ├── 📄 logocerta.png
+│   │   ├── 📄 logologin.png
 │   │   ├── 📄 search.svg
 │   │   ├── 📄 selector-icons.svg
 │   │   ├── 📄 sorting-icons.svg
