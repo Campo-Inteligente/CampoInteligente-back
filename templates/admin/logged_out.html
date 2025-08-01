@@ -1,5 +1,19 @@
-{% extends "admin/base_site.html" %}
+{% extends "jazzmin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        /* Esconde o logo também na página de logout */
+        .logo-switch {
+            display: none !important;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-  <p>Você saiu do Painel de Controle</p>
-  <a href="{% url 'admin:login' %}">Acessar novamente</a>
+    <div class="logout-message">
+        <p>Você saiu do Painel de Controle</p>
+        <a href="{% url 'admin:login' %}">Acessar novamente</a>
+    </div>
 {% endblock %}

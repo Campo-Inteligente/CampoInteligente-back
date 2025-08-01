@@ -126,9 +126,6 @@ STATIC_URL = '/static/'
 # Pasta onde o comando `collectstatic` irá juntar todos os arquivos para produção.
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# --- CORREÇÃO IMPORTANTE AQUI ---
-# Lista de pastas onde o Django irá procurar por arquivos estáticos adicionais.
-# Esta linha garante que o Django encontre a sua pasta 'static' na raiz do projeto.
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
@@ -159,6 +156,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 JAZZMIN_SETTINGS = {
     "site_logo": "img/logocerta.png",  	# Caminho relativo ao diretório static
     "site_logo_classes": "logo-switch",
+    "login_logo": None,
 
     #"site_logo_classes": "img-circle", # Estilo opcional
     "site_icon": "img/favicon.ico",  	# Caminho para o favicon
@@ -166,7 +164,7 @@ JAZZMIN_SETTINGS = {
     "site_title": "API CampoI",
     "site_header": "",
     "site_brand": "",
-    "welcome_sign": "Painel de Controle",
+    "welcome_sign": "",
     "copyright": "Campo Inteligente. Todos os direitos reservados",
     "show_sidebar": True,
     "navigation_expanded": True,
@@ -175,21 +173,18 @@ JAZZMIN_SETTINGS = {
     
     "custom_css": "css/custom_admin.css",
     
-    "custom_links": {
-        # O nome da app onde o link deve aparecer (pode ser qualquer app, 'chatbot' faz sentido)
-        "chatbot": [ 
-            {
-                "name": "Painel de Usuários", 
-                "url": "painel-usuarios",    # O nome do URL que você definiu em urls.py
-                "icon": "fas fa-users",      # Ícone do Font Awesome (opcional)
-                # Permissão necessária para ver este link.
-                # O formato é "nome_da_app.verbo_modelo"
-                "permissions": ["chatbot.view_usuario"] 
-            },
-        ]
-    },
-    
-    
+    "icons": {
+    "auth.user": "fas fa-user",                  
+    "auth.group": "fas fa-users-cog",            
+    "chatbot.usuario": "fas fa-users",            
+    "chatbot.interacao": "fas fa-comments",      
+    "chatbot.prompt": "fas fa-robot",            
+    "chatbot.state": "fas fa-map",              
+    "chatbot.organizacao": "fas fa-building",    
+    "chatbot.administrador": "fas fa-user-shield", 
+    "chatbot.produtoestoque": "fas fa-box",    
+    "chatbot.safra": "fas fa-leaf",            
+},
 }
 
 
