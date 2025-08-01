@@ -4,8 +4,6 @@ from .models import (
     Prompt, State, ProdutoEstoque
 )
 
-# --- Registro customizado para cada modelo ---
-
 @admin.register(Organizacao)
 class OrganizacaoAdmin(admin.ModelAdmin):
     list_display = ('id', 'nome', 'cnpj', 'data_criacao')
