@@ -80,5 +80,5 @@ urlpatterns = [
 ]
 
 # Adiciona as URLs para servir arquivos estáticos APENAS em modo de desenvolvimento (DEBUG=True)
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# if settings.DEBUG:
+#    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
