@@ -16,7 +16,8 @@ ALLOWED_HOSTS = [
     'd60fa466aac5.ngrok-free.app',
     '127.0.0.1',
     'localhost',
-    'campointeligente.ddns.com.br'
+    'campointeligente.ddns.com.br',
+    '45.236.189.2',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -24,6 +25,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://campointeligente.ddns.com.br",
     "http://localhost",
     "http://127.0.0.1",
+    "http://45.236.189.2",
 ]
 # serve para evitar erros 404 quando uma URL não termina com uma barra (/).
 APPEND_SLASH = True
