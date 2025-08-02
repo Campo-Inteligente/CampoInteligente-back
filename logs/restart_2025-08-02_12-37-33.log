@@ -1,0 +1,40 @@
+
+📁 Coletando arquivos estáticos via venv:
+Found another file with the destination path 'admin/js/popup_response.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
+Found another file with the destination path 'admin/js/cancel.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
+
+0 static files copied to '/var/www/campointeligente-back/staticfiles', 296 unmodified.
+✅ Coleta concluída.
+
+🚀 Reiniciando Daphne (Django backend)...
+Job for campointeligente-back.service failed.
+See "systemctl status campointeligente-back.service" and "journalctl -xeu campointeligente-back.service" for details.
+
+📋 Verificando status do backend:
+❌ Backend falhou ao iniciar!
+💥 Verifique os logs com:
+   sudo journalctl -u campointeligente-back -n 30 --no-pager
+
+🌐 Verificando porta 21083...
+⚠️ Porta 21083 está em uso pelo processo 189388
+189411
+189412
+189413. Tentando encerramento gentil...
+COMMAND    PID         USER   FD   TYPE  DEVICE SIZE/OFF NODE NAME
+python3 189470 marcosmorais   10u  IPv4 3061310      0t0  TCP localhost:21083 (LISTEN)
+🔪 Processo ainda ativo. Forçando encerramento...
+kill: (189388): No such process
+kill: (189411): No such process
+kill: (189412): No such process
+kill: (189413): No such process
+✅ Processo 189388
+189411
+189412
+189413 finalizado à força. Porta liberada.
+
+📦 Reiniciando Nginx (proxy reverso)...
+
+📋 Verificando status do Nginx:
+✅ Nginx está ativo!
+
+🎯 Finalizado! Backend reiniciado com as configurações mais recentes.

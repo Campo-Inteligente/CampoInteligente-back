@@ -1,0 +1,30 @@
+
+📁 Coletando arquivos estáticos via venv:
+Found another file with the destination path 'admin/js/popup_response.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
+Found another file with the destination path 'admin/js/cancel.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
+
+0 static files copied to '/var/www/campointeligente-back/staticfiles', 296 unmodified.
+✅ Coleta concluída.
+
+🚀 Reiniciando Daphne (Django backend)...
+
+📋 Verificando status do backend:
+✅ Backend está ativo!
+
+🌐 Verificando porta 21083...
+⚠️ Porta 21083 está em uso pelo processo 177651
+177652
+177653
+177654. Tentando encerramento gentil...
+✅ Processo encerrado com sucesso.
+
+📦 Reiniciando Nginx (proxy reverso)...
+Job for nginx.service failed because the control process exited with error code.
+See "systemctl status nginx.service" and "journalctl -xeu nginx.service" for details.
+
+📋 Verificando status do Nginx:
+❌ Nginx falhou ao iniciar!
+💥 Verifique os logs com:
+   sudo journalctl -u nginx -n 30 --no-pager
+
+🎯 Finalizado! Backend reiniciado com as configurações mais recentes.

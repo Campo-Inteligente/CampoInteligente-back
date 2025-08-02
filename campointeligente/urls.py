@@ -21,22 +21,25 @@ from drf_yasg.views import get_schema_view
 def teste_view(request):
     return HttpResponse("Funcionando!")
 
+def homes(request):
+    return HttpResponse("<h1>Home simples sem erros</h1>")
+
+from django.http import HttpResponse
+from django.templatetags.static import static
+
 def home(request):
-    #return HttpResponse("Olá, Campo Inteligente API está rodando!")
-    #return redirect('/admin/')
-    
-    # Caminho relativo: /static/img/1.png
+    # Caminho relativo para a imagem estática
     relative_logo_url = static('img/1.png')
-
-    # Caminho absoluto: http://campointeligente.ddns.com.br:21083/static/img/1.png
+    
+    # Caminho absoluto para a imagem (URL completa)
     logo_url = request.build_absolute_uri(relative_logo_url)
-
+    
     html = f"""
     <html>
         <head>
             <meta http-equiv="refresh" content="2; url=/admin/" />
             <style>
-                body {
+                body {{
                     margin: 0;
                     padding: 0;
                     display: flex;
@@ -45,19 +48,19 @@ def home(request):
                     height: 100vh;
                     font-family: Arial, sans-serif;
                     background-color: #f4f4f4;
-                }
-                .container {
+                }}
+                .container {{
                     text-align: center;
-                }
-                .container img {
+                }}
+                .container img {{
                     max-width: 80%%;
                     height: auto;
                     margin-bottom: 20px;
-                }
-                h2 {
+                }}
+                h2 {{
                     color: #333;
                     font-size: 1.8em;
-                }
+                }}
             </style>
         </head>
         <body>
@@ -68,8 +71,9 @@ def home(request):
         </body>
     </html>
     """
-
+    
     return HttpResponse(html)
+
 
 # Swagger / Redoc
 schema_view = get_schema_view(
@@ -113,9 +117,3 @@ urlpatterns = [
     path('api/v1/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
-
-# Arquivos estáticos durante o desenvolvimento
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    # Se tiver arquivos de mídia:
-    # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
