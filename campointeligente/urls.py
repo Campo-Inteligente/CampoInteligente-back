@@ -78,7 +78,3 @@ urlpatterns = [
     path('api/v1/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/v1/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
-
-# Adiciona as URLs para servir arquivos estáticos APENAS em modo de desenvolvimento (DEBUG=True)
-# if settings.DEBUG:
-#    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
