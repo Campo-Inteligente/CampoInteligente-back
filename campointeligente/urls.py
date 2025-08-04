@@ -13,10 +13,27 @@ from rest_framework import permissions
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
-# Views simples
+# Imports locais (quando houver)
+# from . import views
+
+
+# Views simples para teste
+def teste_view(request):
+    return HttpResponse("Funcionando!")
+
+def homes(request):
+    return HttpResponse("<h1>Home simples sem erros</h1>")
+
+from django.http import HttpResponse
+from django.templatetags.static import static
+
 def home(request):
-    # Usamos o 'static_template_tag' que renomeamos
-    logo_url = request.build_absolute_uri(static_template_tag('img/1.png'))
+    # Caminho relativo para a imagem estática
+    relative_logo_url = static('img/1.png')
+    
+    # Caminho absoluto para a imagem (URL completa)
+    logo_url = request.build_absolute_uri(relative_logo_url)
+    
     html = f"""
     <html>
         <head>
@@ -25,6 +42,28 @@ def home(request):
                 body {{ display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }}
                 .container {{ text-align: center; }}
                 img {{ max-width: 80%; height: auto; margin-bottom: 20px; }}
+                body {{
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                }}
+                .container {{
+                    text-align: center;
+                }}
+                .container img {{
+                    max-width: 80%%;
+                    height: auto;
+                    margin-bottom: 20px;
+                }}
+                h2 {{
+                    color: #333;
+                    font-size: 1.8em;
+                }}
             </style>
         </head>
         <body>
@@ -35,12 +74,11 @@ def home(request):
         </body>
     </html>
     """
+    
     return HttpResponse(html)
 
-def teste_view(request):
-    return HttpResponse("Funcionando!")
 
-# Configuração do Swagger
+# Swagger / Redoc
 schema_view = get_schema_view(
    openapi.Info(
         title="API Campo Inteligente",
