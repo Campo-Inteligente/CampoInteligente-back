@@ -5,6 +5,8 @@ from openai import AsyncOpenAI
 import re
 import json
 import logging
+import asyncio
+import subprocess
 from typing import List, Dict, Any, Tuple
 
 from django.conf import settings
@@ -31,9 +33,11 @@ class ChatbotService:
             "get_user_registered_location": self._tool_wrapper_get_user_location,
             "complete_user_onboarding": self._tool_wrapper_complete_onboarding,
             "get_weather_for_current_location": self._tool_wrapper_get_weather_for_coords,
+            "search_product_suggestions": self._tool_wrapper_search_product_suggestions,
+            "get_product_prices_from_suggestion": self._tool_wrapper_get_product_prices,
         }
 
-    # --- Funções de DB e Auxiliares ---
+    # --- Funções de DB e Auxiliares (sem alterações) ---
     @database_sync_to_async
     def _get_all_states(self) -> List[State]: return list(State.objects.all())
     @database_sync_to_async
@@ -52,7 +56,7 @@ class ChatbotService:
         if not bot_response: return
         Interacao.objects.create(agricultor=user, mensagem_usuario=user_message, resposta_chatbot=bot_response)
         
-    # --- Funções de APIs Externas ---
+    # --- Funções de APIs Externas (sem alterações) ---
     async def get_weather_data(self, city: str) -> dict:
         url = "http://api.openweathermap.org/data/2.5/weather"
         params = {"q": f"{city},BR", "appid": settings.OPENWEATHER_API_KEY, "units": "metric", "lang": "pt_br"}
@@ -64,6 +68,7 @@ class ChatbotService:
                     return {"cidade": data.get('name'), "descricao": data['weather'][0]['description'], "temperatura": data['main']['temp'], "sensacao_termica": data['main']['feels_like'], "umidade": data['main']['humidity']}
             except Exception: pass
         return {"error": f"Cidade '{city}' não encontrada."}
+
     async def get_location_details_from_city(self, city: str) -> dict:
         url = "http://api.openweathermap.org/geo/1.0/direct"
         params = {"q": f"{city},BR", "limit": 1, "appid": settings.OPENWEATHER_API_KEY}
@@ -74,24 +79,66 @@ class ChatbotService:
                     return response.json()[0]
             except Exception: pass
         return {"error": f"Não foi possível encontrar detalhes para a cidade '{city}'."}
+
     async def get_weather_data_from_coords(self, lat: float, lon: float) -> dict:
-        # Implementação omitida por brevidade
         pass
 
-    # --- Wrappers de Ferramentas ---
+    async def _run_node_script(self, command: List[str]) -> Dict[str, Any]:
+        """
+        Executa um script Node.js de forma assíncrona e retorna o resultado JSON.
+        Usa um método compatível com o event loop do Windows.
+        """
+        node_service_path = settings.BASE_DIR / 'precodahora_service'
+
+        try:
+            logger.info(f"Executando comando síncrono em thread: '{' '.join(command)}' em '{node_service_path}'")
+            
+            # Usa subprocess.run (síncrono) dentro de uma thread para não bloquear o event loop
+            def run_sync():
+                return subprocess.run(
+                    command,
+                    cwd=node_service_path,
+                    capture_output=True,
+                    text=True,
+                    check=True,  # Lança exceção em caso de erro
+                    encoding='utf-8'
+                )
+
+            # Executa a função síncrona em uma thread separada
+            process = await asyncio.to_thread(run_sync)
+            
+            return json.loads(process.stdout)
+
+        except subprocess.CalledProcessError as e:
+            error_output = e.stderr
+            logger.error(f"Erro no script Node.js: {error_output}")
+            try:
+                return json.loads(error_output)
+            except json.JSONDecodeError:
+                return {"error": "Erro no script de consulta.", "details": error_output}
+        except FileNotFoundError:
+            logger.error(f"ERRO CRÍTICO: O comando 'node' não foi encontrado. Verifique se o Node.js está instalado e no PATH do sistema.")
+            return {"error": "Dependência externa (Node.js) não encontrada no servidor."}
+        except Exception as e:
+            logger.error(f"Falha ao executar subprocesso Node.js: {e.__class__.__name__}: {e}")
+            return {"error": f"Ocorreu um erro crítico no servidor ao tentar executar a consulta."}
+
+
+    async def search_suggestions(self, item: str) -> Dict[str, Any]:
+        command = ['node', 'consultar.js', 'sugestao', item]
+        return await self._run_node_script(command)
+
+    async def get_prices(self, gtin: str, latitude: float, longitude: float) -> Dict[str, Any]:
+        command = ['node', 'consultar.js', 'produto', str(gtin), str(latitude), str(longitude)]
+        return await self._run_node_script(command)
+
+    # --- Wrappers de Ferramentas (sem alterações) ---
     async def _tool_wrapper_get_weather(self, city: str, **kwargs) -> str:
         data = await self.get_weather_data(city)
-        if "error" in data:
-            return data["error"]
-        return (
-            f"O tempo em {data['cidade']} é: {data['descricao'].capitalize()}.\n"
-            f"- **Temperatura**: {data['temperatura']:.1f}°C\n"
-            f"- **Sensação térmica**: {data['sensacao_termica']:.1f}°C\n"
-            f"- **Umidade**: {data['umidade']}%"
-        )
+        if "error" in data: return data["error"]
+        return (f"O tempo em {data['cidade']} é: {data['descricao'].capitalize()}.\n- **Temperatura**: {data['temperatura']:.1f}°C\n- **Sensação térmica**: {data['sensacao_termica']:.1f}°C\n- **Umidade**: {data['umidade']}%")
     
     async def _tool_wrapper_get_weather_for_coords(self, user: Usuario, **kwargs) -> str:
-        # Implementação simplificada
         return "Para obter o clima da sua localização atual, por favor, envie-a novamente."
 
     async def _tool_wrapper_register_location(self, user: Usuario, city: str, **kwargs) -> str:
@@ -113,7 +160,62 @@ class ChatbotService:
         await self.save_user(user)
         return f"Obrigado, {user.nome}! Registei a sua localização como {user.cidade}. Como posso ajudar agora?"
 
-    # --- Processador Principal de Mensagens ---
+    async def _tool_wrapper_search_product_suggestions(self, user: Usuario, product_name: str, **kwargs) -> str:
+        result = await self.search_suggestions(product_name)
+        if result.get("codigo") != 80 or not result.get("resultado"):
+            return "Não encontrei nenhum produto com esse nome. Pode tentar descrever de outra forma?"
+        
+        suggestions = result["resultado"]
+        user.contexto['product_suggestions'] = suggestions
+        await self.save_user(user)
+
+        response_text = "Encontrei algumas opções. Qual destas você quer consultar?\n\n"
+        for i, suggestion in enumerate(suggestions[:5], 1):
+            response_text += f"{i}. {suggestion['descricao']}\n"
+        
+        response_text += "\nResponda com o número do item que você deseja."
+        return response_text
+
+    async def _tool_wrapper_get_product_prices(self, user: Usuario, option_number: int, **kwargs) -> str:
+        if not user.cidade or not user.estado:
+            return "Para buscar os preços, preciso que você cadastre sua cidade primeiro. Qual cidade você mora?"
+
+        suggestions = user.contexto.get('product_suggestions')
+        if not suggestions or not (0 < option_number <= len(suggestions)):
+            return "Opção inválida. Por favor, primeiro peça para eu pesquisar um produto."
+        
+        selected_product = suggestions[option_number - 1]
+        gtin = selected_product['gtin']
+        
+        location_details = await self.get_location_details_from_city(user.cidade)
+        if 'error' in location_details:
+             return "Não consegui obter as coordenadas da sua cidade cadastrada. Por favor, tente cadastrá-la novamente."
+        
+        latitude, longitude = location_details.get('lat'), location_details.get('lon')
+
+        result = await self.get_prices(gtin, latitude, longitude)
+
+        if result.get("codigo") != 80 or not result.get("resultado"):
+            return f"Não encontrei preços recentes para '{selected_product['descricao']}' na sua região."
+            
+        prices = result["resultado"]
+        response_text = f"Aqui estão os preços mais recentes para '{selected_product['descricao']}':\n\n"
+        
+        for price_info in prices[:3]:
+            produto = price_info['produto']
+            estabelecimento = price_info['estabelecimento']
+            response_text += (
+                f"- *Preço*: R$ {produto['precoLiquido']:.2f}\n"
+                f"- *Local*: {estabelecimento['nomeEstabelecimento']} ({estabelecimento['bairro']})\n"
+                f"- *Registrado*: {produto['intervalo']}\n\n"
+            )
+        
+        # user.contexto['product_suggestions'] = None
+        await self.save_user(user)
+        
+        return response_text
+
+    # --- Processador Principal de Mensagens (sem alterações) ---
     async def process_message(self, user_identifier: str, message_text: str, push_name: str, channel: str, location_data: dict = None) -> str:
         final_response_text = ""
         user = None
@@ -153,11 +255,30 @@ class ChatbotService:
             if user:
                 await self._log_interaction(user, message_text, final_response_text)
 
+    # --- Definição das Ferramentas (sem alterações) ---
     def _get_tool_definitions(self) -> List[Dict[str, Any]]:
         return [
             {"type": "function", "function": { "name": "complete_user_onboarding", "description": "Use esta ferramenta para finalizar o cadastro de um novo usuário APENAS depois de obter o nome completo e a cidade dele.", "parameters": {"type": "object", "properties": {"name": {"type": "string", "description": "O nome completo do usuário."}, "city": {"type": "string", "description": "A cidade de localização do usuário."}}, "required": ["name", "city"]}}},
             {"type": "function", "function": {"name": "get_weather_for_city", "description": "Obtém a previsão do tempo atual para uma cidade específica do Brasil.", "parameters": {"type": "object", "properties": {"city": {"type": "string", "description": "O nome da cidade. Ex: 'Jequié'"}},"required": ["city"]}}},
             {"type": "function", "function": {"name": "get_weather_for_current_location", "description": "Obtém o clima para a localização atual do usuário, se ele tiver compartilhado as coordenadas.", "parameters": {"type": "object", "properties": {}}}},
             {"type": "function", "function": {"name": "register_user_location", "description": "Valida e salva uma nova cidade e estado para o usuário. Use quando o usuário pedir para 'mudar', 'alterar' ou 'atualizar' sua localização.", "parameters": {"type": "object", "properties": {"city": {"type": "string", "description": "O nome da nova cidade a ser cadastrada."}}, "required": ["city"]}}},
-            {"type": "function", "function": {"name": "get_user_registered_location", "description": "Informa ao usuário qual a sua localização (cidade e estado) atualmente cadastrada no sistema.", "parameters": {"type": "object", "properties": {}}}}
+            {"type": "function", "function": {"name": "get_user_registered_location", "description": "Informa ao usuário qual a sua localização (cidade e estado) atualmente cadastrada no sistema.", "parameters": {"type": "object", "properties": {}}}},
+            {"type": "function", "function": {
+                "name": "search_product_suggestions",
+                "description": "Busca por produtos com base em um nome ou descrição. Use esta ferramenta quando o usuário perguntar o preço de algo. Retorna uma lista de opções para o usuário escolher.",
+                "parameters": {
+                    "type": "object",
+                    "properties": { "product_name": { "type": "string", "description": "O nome do produto a ser pesquisado. Ex: 'Tomate', 'Leite em pó Ninho'"}},
+                    "required": ["product_name"]
+                }
+            }},
+            {"type": "function", "function": {
+                "name": "get_product_prices_from_suggestion",
+                "description": "Busca os preços de um produto específico que foi previamente selecionado de uma lista de sugestões. Use esta ferramenta quando o usuário responder com um número para escolher um item da lista.",
+                "parameters": {
+                    "type": "object",
+                    "properties": { "option_number": { "type": "integer", "description": "O número da opção que o usuário escolheu da lista de sugestões."}},
+                    "required": ["option_number"]
+                }
+            }},
         ]
