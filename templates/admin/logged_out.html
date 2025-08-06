@@ -1,3 +1,22 @@
+<!-- {% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div class="login-box">
+    <div class="card p-4 text-center">
+      <h1>Sessão encerrada</h1>
+      <p>Obrigado por usar o sistema Campo Inteligente.</p>
+      <a href="/admin/login/" class="btn btn-primary mt-3">🔐 Voltar ao login</a>
+    </div>
+  </div>
+{% endblock %}
+/-->
+
 {% extends "jazzmin/base.html" %}
 {% load static %}
 
