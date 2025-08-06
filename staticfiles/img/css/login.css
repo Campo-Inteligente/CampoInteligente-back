@@ -1,41 +1,61 @@
-/* Wallpaper de fundo */
-body {
-    background: url('/static/img/wallpaper.png') no-repeat center center fixed;
+/*
+  Estilos para a página de login customizada
+*/
+body.login {
+    background-image: url('/static/img/fundologin.png');
     background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* A linha 'display: none' foi removida daqui */
 }
 
-/* Camada branca translúcida fora da caixa */
-.background-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(255, 255, 255, 0.6);
-    z-index: 1;
+#header {
+    display: none; /* Esconde o cabeçalho padrão do Django */
 }
 
-/* Caixa de login */
-.login-box {
-    z-index: 2;
-    position: relative;
+.login #container {
+    background: rgba(255, 255, 255, 0.9); /* Fundo do formulário branco e semi-transparente */
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Card da caixa com fundo cinza translúcido */
-.login-box .card {
-    background-color: rgba(128, 128, 128, 0.5) !important;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+.login #content {
+    padding: 20px 40px;
 }
 
-/* Campos de formulário com fundo branco translúcido */
-.login-box input.form-control {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid #ccc;
+/* Centraliza e estiliza o logo */
+.login-logo {
+    text-align: center;
+    padding: 20px 0;
 }
 
-/* Centraliza logo */
-.login-logo picture,
 .login-logo img {
-    max-width: 120px;
+    max-width: 250px;
     height: auto;
-    display: block;
-    margin: 0 auto;
+}
+
+/* Estiliza o botão de login */
+.login .submit-row input[type="submit"] {
+    width: 100%;
+    background-color: #004809; /* Cor verde da sua marca */
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+}
+
+.login .submit-row input[type="submit"]:hover {
+    background-color: #003306; /* Verde mais escuro no hover */
+}
+
+/* Link "Esqueceu a senha?" */
+.login .password-reset-link {
+    text-align: center;
+    margin-top: 15px;
+}
+
+/* Esconde o logo padrão do Jazzmin no login */
+.login .logo-switch,
+.login .brand-link {
+    display: none !important;
 }

@@ -1,17 +1,26 @@
-# atualizado em 31/07/2025 15h01
 #!/bin/bash
 
+# atualizado em 01/08/2025 19h40
 clear
 echo "🔄 Reiniciando Django Backend e Serviços Relacionados..."
+
+# --- Configurações ---
+PORT=21083
+LOGFILE="./logs/restart_$(date +%F_%H-%M-%S).log"
+mkdir -p ./logs
+exec > >(tee -a "$LOGFILE") 2>&1
 
 # ✅ Coleta de arquivos estáticos
 echo ""
 echo "📁 Coletando arquivos estáticos via venv:"
 if [[ -f "venv/bin/activate" ]]; then
     source venv/bin/activate
-    python manage.py collectstatic --noinput
+    if python manage.py collectstatic --noinput; then
+        echo "✅ Coleta concluída."
+    else
+        echo "❌ Erro na coleta de estáticos!"
+    fi
     deactivate
-    echo "✅ Coleta concluída."
 else
     echo "⚠️ Ambiente virtual não encontrado. Pulei a coleta de estáticos."
 fi
@@ -33,15 +42,22 @@ else
     echo "   sudo journalctl -u campointeligente-back -n 30 --no-pager"
 fi
 
-# 🌐 Verificar e liberar porta 21083 antes de reiniciar Nginx
+# 🌐 Verificar e liberar porta antes de reiniciar Nginx
 echo ""
-PORT=21083
+echo "🌐 Verificando porta $PORT..."
 PID=$(sudo lsof -t -i:$PORT)
 
 if [[ -n "$PID" ]]; then
-    echo "⚠️ Porta $PORT está em uso pelo processo $PID. Finalizando..."
-    sudo kill -9 $PID
-    echo "✅ Processo $PID finalizado. Porta liberada."
+    echo "⚠️ Porta $PORT está em uso pelo processo $PID. Tentando encerramento gentil..."
+    sudo kill $PID
+    sleep 2
+    if sudo lsof -i:$PORT; then
+        echo "🔪 Processo ainda ativo. Forçando encerramento..."
+        sudo kill -9 $PID
+        echo "✅ Processo $PID finalizado à força. Porta liberada."
+    else
+        echo "✅ Processo encerrado com sucesso."
+    fi
 else
     echo "✅ Porta $PORT está livre."
 fi

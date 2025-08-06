@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.views.decorators.csrf import csrf_exempt
 
 from .serializers import WebchatPayloadSerializer, WebhookPayloadSerializer, ChatbotResponseSerializer
 from .services import ChatbotService
@@ -52,7 +53,9 @@ def webchat_view(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
 @swagger_auto_schema(method='post', request_body=WebhookPayloadSerializer)
+@csrf_exempt
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])

@@ -1,26 +1,20 @@
-
-
 {% extends "admin/login.html" %}
-{% load static %}
+{% load i18n static %}
 
 {% block extrastyle %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <style>
+        /* Oculta a logo global do Jazzmin apenas nesta página */
+        .logo-switch {
+            display: none !important;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-  <!-- Camada branca translúcida no fundo -->
-  <!-- <div class="background-overlay"></div> -->
-  <!-- Removida propositalmente para não desbotar o wallpaper -->
-
-  <!-- Caixa de login padrão do Django Admin com texto ajustado -->
-  {{ block.super|safe|replace:"Forgotten your password or username?","Esqueceu a senha ou o usuário?" }}
-
-  <!-- Link opcional para recuperação de senha (removido porque já foi substituído diretamente no texto) -->
-  <!--
-  <div style="text-align: center; margin-top: 10px;">
-    <a href="{% url 'admin_password_reset' %}" style="font-size: 0.9em;">🔒 Esqueceu sua senha ou nome de usuário?</a>
-  </div>
-  -->
+    <div class="login-logo">
+        <img src="{% static 'img/logologin.png' %}" alt="Campo Inteligente Logo">
+    </div>
+    {{ block.super }}
 {% endblock %}
-

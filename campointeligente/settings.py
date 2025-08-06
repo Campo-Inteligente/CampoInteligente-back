@@ -16,7 +16,8 @@ ALLOWED_HOSTS = [
     'd60fa466aac5.ngrok-free.app',
     '127.0.0.1',
     'localhost',
-    'campointeligente.ddns.com.br'
+    'campointeligente.ddns.com.br',
+    '45.236.189.2',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -24,6 +25,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://campointeligente.ddns.com.br",
     "http://localhost",
     "http://127.0.0.1",
+    "http://45.236.189.2",
 ]
 # serve para evitar erros 404 quando uma URL não termina com uma barra (/).
 APPEND_SLASH = True
@@ -126,15 +128,14 @@ STATIC_URL = '/static/'
 # Pasta onde o comando `collectstatic` irá juntar todos os arquivos para produção.
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# --- CORREÇÃO IMPORTANTE AQUI ---
-# Lista de pastas onde o Django irá procurar por arquivos estáticos adicionais.
-# Esta linha garante que o Django encontre a sua pasta 'static' na raiz do projeto.
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
 # --- Tipo padrão de campo automático ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_REDIRECT_URL = '/admin/'
+LOGOUT_REDIRECT_URL = '/admin/logout/'
 
 # --- Configurações Personalizadas ---
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -142,6 +143,8 @@ OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
 EVOLUTION_API_KEY = os.getenv('EVOLUTION_API_KEY')
 EVOLUTION_API_URL = os.getenv('EVOLUTION_API_URL')
 EVOLUTION_INSTANCE_NAME = os.getenv('EVOLUTION_INSTANCE_NAME')
+
+PRECODOHORA_BASE_URL = 'https://precodahora.ba.gov.br'
 
 # --- CORS ---
 CORS_ALLOW_ALL_ORIGINS = True
@@ -159,6 +162,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 JAZZMIN_SETTINGS = {
     "site_logo": "img/logocerta.png",  	# Caminho relativo ao diretório static
     "site_logo_classes": "logo-switch",
+    "login_logo": None,
 
     #"site_logo_classes": "img-circle", # Estilo opcional
     "site_icon": "img/favicon.ico",  	# Caminho para o favicon
@@ -166,7 +170,7 @@ JAZZMIN_SETTINGS = {
     "site_title": "API CampoI",
     "site_header": "",
     "site_brand": "",
-    "welcome_sign": "Painel de Controle",
+    "welcome_sign": "",
     "copyright": "Campo Inteligente. Todos os direitos reservados",
     "show_sidebar": True,
     "navigation_expanded": True,
@@ -175,21 +179,18 @@ JAZZMIN_SETTINGS = {
     
     "custom_css": "css/custom_admin.css",
     
-    "custom_links": {
-        # O nome da app onde o link deve aparecer (pode ser qualquer app, 'chatbot' faz sentido)
-        "chatbot": [ 
-            {
-                "name": "Painel de Usuários", 
-                "url": "painel-usuarios",    # O nome do URL que você definiu em urls.py
-                "icon": "fas fa-users",      # Ícone do Font Awesome (opcional)
-                # Permissão necessária para ver este link.
-                # O formato é "nome_da_app.verbo_modelo"
-                "permissions": ["chatbot.view_usuario"] 
-            },
-        ]
-    },
-    
-    
+    "icons": {
+    "auth.user": "fas fa-user",                  
+    "auth.group": "fas fa-users-cog",            
+    "chatbot.usuario": "fas fa-users",            
+    "chatbot.interacao": "fas fa-comments",      
+    "chatbot.prompt": "fas fa-robot",            
+    "chatbot.state": "fas fa-map",              
+    "chatbot.organizacao": "fas fa-building",    
+    "chatbot.administrador": "fas fa-user-shield", 
+    "chatbot.produtoestoque": "fas fa-box",    
+    "chatbot.safra": "fas fa-leaf",            
+},
 }
 
 

@@ -1,17 +1,19 @@
-{% extends "admin/login.html" %}
+{% extends "jazzmin/base.html" %}
 {% load static %}
 
 {% block extrastyle %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    {{ block.super }}
+    <style>
+        /* Esconde o logo também na página de logout */
+        .logo-switch {
+            display: none !important;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-  <div class="login-box">
-    <div class="card p-4 text-center">
-      <h1>Sessão encerrada</h1>
-      <p>Obrigado por usar o sistema Campo Inteligente.</p>
-      <a href="/admin/login/" class="btn btn-primary mt-3">🔐 Voltar ao login</a>
+    <div class="logout-message">
+        <p>Você saiu do Painel de Controle</p>
+        <a href="{% url 'admin:login' %}">Acessar novamente</a>
     </div>
-  </div>
 {% endblock %}
