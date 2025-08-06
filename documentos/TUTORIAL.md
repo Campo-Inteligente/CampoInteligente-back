@@ -57,8 +57,8 @@ Este repositório contém o backend do projeto **Campo Inteligente**, desenvolvi
 ### 1. Clone o Repositório
 
 ```bash
-git clone https://github.com/giselegomes431/API_campointeligente.git
-cd API_campointeligente
+git clone https://github.com/restic36/startup-campo-inteligente-back.git
+cd startup-campo-inteligente-back
 ```
 
 ### 2. Crie um Ambiente Virtual
@@ -107,16 +107,19 @@ djangorestframework-simplejwt
 Este serviço é responsável por se comunicar com a API "Preço da Hora".
 
 a. Navegue até a pasta do serviço que já existe no projeto:
+
 ```bash
 cd precodahora_service
 ```
 
 b. Instale as dependências do Node.js:
+
 ```bash
 npm install
 ```
 
 c. Volte para a pasta raiz do projeto Django:
+
 ```bash
 cd ..
 ```
@@ -232,29 +235,37 @@ API_campointeligente/
 Agora que o modelo está visível, vamos adicionar o prompt que serve como o "cérebro" do Iagro.
 
 a. Inicie seu servidor Django:
+
 ```bash
 uvicorn campointeligente.asgi:application --reload
 ```
 
 b. Acesse o Painel de Admin:
+
 Abra seu navegador e vá para [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/). Faça login com o superusuário que você criou.
 
 c. Inicie seu servidor Django:
+
 No menu lateral, dentro da seção CHATBOT, você verá "Prompts do Chatbot". Clique nele.
 
 d. Adicione um Novo Prompt:
+
 Clique no botão "Adicionar Prompt do Chatbot" no canto superior direito.
 
 e. Preencha os Campos:
+
 Agora, preencha os dois campos exatamente como descrito abaixo:
 
 - Key:
+  
 ```bash
 system_prompt_tools
 ```
+
 (Este nome é o identificador exato que o código em services.py usa para encontrar o prompt correto.)
 
 - Text: Cole aqui o prompt completo e aprimorado que criamos.
+  
 ```bash
 Você é o Iagro, a "Assistente Virtual do Campo Inteligente", uma IA amigável, especialista e extremamente prestativa em agricultura.
 
@@ -322,11 +333,13 @@ Se nenhuma ferramenta for acionada, converse normalmente, sempre mantendo sua pe
 ```
 
 - Description:
+  
 ```bash
 A "personalidade" e as instruções principais do chatbot Iagro
 ```
 
 f. Salve o Prompt:
+
 Clique no botão "SALVAR".
 
 Pronto! Agora o seu chatbot está lendo as instruções diretamente do banco de dados. Se no futuro você quiser ajustar o comportamento, a personalidade ou as regras do Iagro, basta editar este texto no painel de administração, sem precisar mexer em nenhuma linha de código.
