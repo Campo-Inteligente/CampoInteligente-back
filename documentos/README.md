@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 569 (AUTO-INCREMENTO)
+Versão...............: 570 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 13/08/2025 08:15:30
+Data de Atualização..: 13/08/2025 08:19:57
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -17182,9 +17182,11 @@ Descrição das tecnologias:
 │   └── 📄 versao.txt
 ├── 📄 exec-backup-database.sh
 ├── 📄 exec-baixar.sh
+├── 📄 exec-bloq-equipe11.sh
 ├── 📄 exec-config_instancia.sh
 ├── 📄 exec-deploy-backend.sh
 ├── 📄 exec-deploy.sh
+├── 📄 exec-desbloq-equipe11.sh
 ├── 📄 exec-enviar.sh
 ├── 📄 exec-import-schema-local.sh
 ├── 📄 exec-restart-django.sh
