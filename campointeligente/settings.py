@@ -14,19 +14,22 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = [
     'd60fa466aac5.ngrok-free.app',
-    '127.0.0.1',
-    'localhost',
     'campointeligente.ddns.com.br',
     '45.236.189.2',
+    '192.168.10.210',
+    'localhost',
+    '127.0.0.1',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://campointeligente.ddns.com.br:21083",
-    "https://campointeligente.ddns.com.br",
-    "http://localhost",
-    "http://127.0.0.1",
-    "http://45.236.189.2",
+    'https://campointeligente.ddns.com.br',
+    'http://campointeligente.ddns.com.br:21083',
+    'http://45.236.189.2',
+    'http://192.168.10.210:8000',
+    'http://localhost',
+    'http://127.0.0.1',
 ]
+
 # serve para evitar erros 404 quando uma URL não termina com uma barra (/).
 APPEND_SLASH = True
 
