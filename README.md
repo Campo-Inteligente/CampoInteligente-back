@@ -9,9 +9,9 @@ ESTE README É ATUALIZADO AUTOMATICAMENTE A CADA COMMIT NA MAIN
 ```
 Repositório..........: BACK-END
 Sistema..............: [Campo Inteligente](https://www.campointeligente.agr.br/)
-Versão...............: 571 (AUTO-INCREMENTO)
+Versão...............: 572 (AUTO-INCREMENTO)
 URL..................: https://www.campointeligente.agr.br/
-Data de Atualização..: 14/08/2025 15:16:05
+Data de Atualização..: 14/08/2025 15:27:47
 Responsável..........: Marcos Morais
 ```
 ## 👥 Participantes
@@ -17227,7 +17227,11 @@ Descrição das tecnologias:
 │   ├── 📄 restart_2025-08-02_12-38-10.log
 │   ├── 📄 restart_2025-08-02_12-39-50.log
 │   ├── 📄 restart_2025-08-02_12-59-08.log
-│   └── 📄 restart_2025-08-02_13-00-10.log
+│   ├── 📄 restart_2025-08-02_13-00-10.log
+│   ├── 📄 restart_2025-08-14_17-37-01.log
+│   ├── 📄 restart_2025-08-14_17-37-24.log
+│   ├── 📄 restart_2025-08-14_17-44-29.log
+│   └── 📄 restart_2025-08-14_18-02-11.log
 ├── 📂 panel
 │   └── 🗂️ migrations
 ├── 📂 pgadmin
