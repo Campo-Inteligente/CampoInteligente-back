@@ -1,0 +1,22 @@
+
+📁 Coletando arquivos estáticos via venv:
+⚠️ Ambiente virtual não encontrado. Pulei a coleta de estáticos.
+
+🚀 Reiniciando Daphne (Django backend)...
+
+📋 Verificando status do backend:
+❌ Backend falhou ao iniciar!
+💥 Verifique os logs com:
+   sudo journalctl -u campointeligente-back -n 30 --no-pager
+
+🌐 Verificando porta 21083...
+⚠️ Porta 21083 está em uso pelo processo 2918809
+2918810. Tentando encerramento gentil...
+✅ Processo encerrado com sucesso.
+
+📦 Reiniciando Nginx (proxy reverso)...
+
+📋 Verificando status do Nginx:
+✅ Nginx está ativo!
+
+🎯 Finalizado! Backend reiniciado com as configurações mais recentes.
